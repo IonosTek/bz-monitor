@@ -237,15 +237,18 @@
     <div class="grid-container">
         <div class="card" style="grid-column: 1 / -1;">
     <div class="card-header">
-        <h3>REAL-TIME MUF</h3>
-        <span>NOAA CTIPe MODEL</span>
+        <h3>PROPAGATION MAP</h3>
+        <span>NOAA TEC MODEL</span>
     </div>
     <div class="card-body">
-        <div class="img-loader">Loading Map...</div>
-        <img src="https://services.swpc.noaa.gov/images/animations/ctipe/muf/latest.png" 
+        <div id="loader-muf" class="img-loader">Loading Data...</div>
+        
+        <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" 
              id="img-muf" 
-             alt="MUF Map"
-             style="object-fit: contain; width: 100%; height: 100%;">
+             alt="Propagation Map"
+             style="object-fit: contain; width: 100%; height: 100%; display: none;"
+             onload="this.style.display='block'; document.getElementById('loader-muf').style.display='none';"
+             onerror="document.getElementById('loader-muf').innerText='Data Offline';">
     </div>
 </div>
         <div class="card">

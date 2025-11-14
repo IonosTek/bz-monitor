@@ -236,12 +236,18 @@
 
     <div class="grid-container">
         <div class="card" style="grid-column: 1 / -1;">
-            <div class="card-header"><h3>REAL-TIME MUF</h3><span>PROP.KC2G.COM</span></div>
-            <div class="card-body">
-                <div class="img-loader">Loading Map...</div>
-                <img src="https://prop.kc2g.com/renders/current/muf-normal-now.svg" id="img-muf" alt="MUF Map">
-            </div>
-        </div>
+    <div class="card-header">
+        <h3>REAL-TIME MUF</h3>
+        <span>PROP.KC2G.COM</span>
+    </div>
+    <div class="card-body">
+        <div class="img-loader">Loading Map...</div>
+        <img src="https://prop.kc2g.com/renders/current/muf-3000.svg" 
+             id="img-muf" 
+             alt="MUF Map"
+             onerror="this.onerror=null; this.src='https://services.swpc.noaa.gov/images/animations/ctipe/muf/latest.png';">
+    </div>
+</div>
         <div class="card">
             <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
             <div class="card-body">

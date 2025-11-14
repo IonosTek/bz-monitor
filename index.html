@@ -3,194 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V5.0</title>
+    <title>IonosTek Monitor V6.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #0f0f13; --card-bg: #1a1a20; --text-main: #e0e0e0; --accent-green: #00ff9d; --accent-red: #ff4d4d; --accent-yellow: #ffc107; --border-color: #333; }
-        body { font-family: 'Chakra Petch', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
+        :root {
+            --bg-color: #121212; /* พื้นหลังดำด้านแบบ SWL */
+            --card-bg: #1e1e1e;   /* การ์ดสีเทาเข้ม */
+            --text-main: #ffffff;
+            --text-sub: #b0b0b0;
+            --accent-green: #4caf50;
+            --accent-red: #f44336;
+            --accent-yellow: #ffc107;
+            --accent-blue: #2196f3;
+            --border-color: #333;
+        }
+
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
         h1, h3 { margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
-        .blink { animation: blinker 1.5s linear infinite; color: red; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+        }
+        .header span { font-size: 0.8em; color: var(--accent-blue); font-weight: bold; }
+        .blink { animation: blinker 1.5s linear infinite; color: var(--accent-green); }
         @keyframes blinker { 50% { opacity: 0; } }
-        
-        /* Layout Grid */
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        
-        /* Top Stats (ปรับให้รองรับ 5 ช่อง) */
-        .stats-container { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
-        .stat-box { background: #252530; padding: 15px; border-radius: 8px; min-width: 160px; border-left: 4px solid #555; flex: 1; text-align: center; max-width: 250px; }
-        .stat-value { font-size: 2em; font-weight: bold; margin: 5px 0; }
-        .stat-label { font-size: 0.8em; color: #aaa; font-weight: bold; }
+
+        /* --- ส่วนแสดงตัวเลข (Stats Bar) --- */
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            padding: 15px 10px;
+            border-radius: 6px;
+            min-width: 140px;
+            flex: 1;
+            text-align: center;
+            border-top: 3px solid #555; /* แถบสีด้านบน */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .stat-value { font-size: 1.8em; font-weight: bold; margin: 5px 0; }
+        .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; }
         .stat-unit { font-size: 0.7em; color: #666; }
+
+        /* --- ส่วนรูปภาพ (Image Grid) --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* จัดอัตโนมัติ (กว้างขั้นต่ำ 400px) */
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 0; /* ลบ padding เพื่อให้ header ชนขอบ */
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            background-color: #2c2c2c;
+            padding: 10px 15px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header h3 { margin: 0; font-size: 1em; font-weight: 700; color: var(--text-main); }
+        .card-header span { font-size: 0.7em; color: var(--accent-blue); }
+
+        .card-body {
+            padding: 15px;
+            background: #000; /* พื้นหลังรูปสีดำ */
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            max-height: 350px; /* คุมความสูงไม่ให้ยืดเกินไป */
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .footer { text-align: center; margin-top: 40px; font-size: 0.8em; color: #555; }
+
+        /* Status Colors Logic */
+        .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; }
+        .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
+        .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; }
         
-        img { width: 100%; height: auto; border-radius: 5px; border: 1px solid #444; display: block; margin: 0 auto; }
-        .footer { text-align: center; margin-top: 40px; font-size: 0.8em; color: #666; }
-        
-        /* Status Colors */
-        .status-normal { color: var(--accent-green); border-left-color: var(--accent-green) !important; }
-        .status-warn { color: var(--accent-yellow); border-left-color: var(--accent-yellow) !important; }
-        .status-alert { color: var(--accent-red); border-left-color: var(--accent-red) !important; }
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .grid-container { grid-template-columns: 1fr; } /* มือถือให้เรียงเดี่ยว */
+            .stat-box { min-width: 45%; } /* มือถือให้เรียง 2 คอลัมน์ */
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:var(--accent-green)">MONITOR V5.0</span></h1>
-        <span>FULL SPECTRUM DASHBOARD • <span class="blink">●</span> ONLINE</span>
-        <div id="updateTime" style="font-size: 0.9em; margin-top: 5px; color: #aaa;">Initializing...</div>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V6.0</span></h1>
+        <div id="updateTime" style="font-size: 0.8em; color: #888;">Connecting to Satellites...</div>
     </div>
 
-    <div class="dashboard">
-        <div class="stats-container">
-            <div class="stat-box" id="card-dst">
-                <div class="stat-label">DST (Storm)</div>
-                <div class="stat-value" id="val-dst">--</div>
-                <div class="stat-unit">nT (Kyoto)</div>
+    <div class="stats-container">
+        <div class="stat-box" id="card-dst">
+            <div class="stat-label">Dst Index</div>
+            <div class="stat-value" id="val-dst">--</div>
+            <div class="stat-unit">nT (Kyoto)</div>
+        </div>
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt (Total)</div>
+            <div class="stat-value" id="val-bt">--</div>
+            <div class="stat-unit">nT</div>
+        </div>
+        <div class="stat-box" id="card-bz">
+            <div class="stat-label">Bz (Direction)</div>
+            <div class="stat-value" id="val-bz">--</div>
+            <div class="stat-unit">nT (South is Bad)</div>
+        </div>
+        <div class="stat-box" id="card-density">
+            <div class="stat-label">Density</div>
+            <div class="stat-value" id="val-density">--</div>
+            <div class="stat-unit">p/cm³</div>
+        </div>
+        <div class="stat-box" id="card-wind">
+            <div class="stat-label">Solar Wind</div>
+            <div class="stat-value" id="val-wind">--</div>
+            <div class="stat-unit">km/s</div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        
+        <div class="card">
+            <div class="card-header">
+                <h3>AURORA FORECAST</h3>
+                <span>NOAA OVATION</span>
             </div>
-            <div class="stat-box" id="card-bt">
-                <div class="stat-label">IMF Bt (Total)</div>
-                <div class="stat-value" id="val-bt">--</div>
-                <div class="stat-unit">nT (Strength)</div>
-            </div>
-            <div class="stat-box" id="card-bz">
-                <div class="stat-label">Bz (Direction)</div>
-                <div class="stat-value" id="val-bz">--</div>
-                <div class="stat-unit">nT (South Bad)</div>
-            </div>
-            <div class="stat-box" id="card-density">
-                <div class="stat-label">Density</div>
-                <div class="stat-value" id="val-density">--</div>
-                <div class="stat-unit">p/cm³</div>
-            </div>
-            <div class="stat-box" id="card-wind">
-                <div class="stat-label">Solar Wind</div>
-                <div class="stat-value" id="val-wind">--</div>
-                <div class="stat-unit">km/s</div>
+            <div class="card-body">
+                <img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora">
             </div>
         </div>
 
         <div class="card">
-            <h3>Aurora Forecast</h3>
-            <img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora">
+            <div class="card-header">
+                <h3>SOLAR CORONA (SDO)</h3>
+                <span>AIA 193 Å</span>
+            </div>
+            <div class="card-body">
+                <img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0193.jpg" id="img-sun" alt="Sun">
+            </div>
         </div>
+
         <div class="card">
-            <h3>HF Conditions</h3>
-            <img src="https://www.hamqsl.com/solar101vhf.php" id="img-muf" alt="HF Conditions" style="border:none;">
+            <div class="card-header">
+                <h3>X-RAY FLUX</h3>
+                <span>SOLAR FLARES</span>
+            </div>
+            <div class="card-body">
+                <img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="X-Ray">
+            </div>
         </div>
+
         <div class="card">
-            <h3>Sun Monitor</h3>
-            <img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0193.jpg" id="img-sun" alt="Sun">
+            <div class="card-header">
+                <h3>PLANETARY K-INDEX</h3>
+                <span>NOAA G-SCALE</span>
+            </div>
+            <div class="card-body">
+                <img src="https://services.swpc.noaa.gov/images/planetary-k-index.png" 
+                     id="img-geospace" 
+                     alt="Kp Index"
+                     onerror="this.src='https://services.swpc.noaa.gov/images/station-k-index.png'">
+            </div>
         </div>
-        <div class="card">
-            <h3>X-Ray Flux</h3>
-            <img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="X-Ray">
-        </div>
-        
-        <div class="card" style="grid-column: 1 / -1;">
-             <h3>Planetary K-Index (NOAA)</h3>
-             <p style="font-size:0.8em; color:#888;">ระดับความรุนแรงพายุ (G-Scale)</p>
-             <img src="https://services.swpc.noaa.gov/images/planetary-k-index.png" 
-                  id="img-geospace" 
-                  alt="Planetary K-Index"
-                  onerror="this.src='https://services.swpc.noaa.gov/images/station-k-index.png'">
-        </div>
+
     </div>
 
     <div class="footer">
-        IonosTek Monitor V5.0 • Data: NOAA / Kyoto / HamQSL
+        IonosTek Monitor V6.0 • Developed for Ham Radio Operators<br>
+        Data: NOAA SWPC, WDC Kyoto, NASA
     </div>
 
     <script>
-        // 1. Fetch Mag (Bz และ Bt)
+        // --- Script ดึงข้อมูล (เหมือนเดิม แต่เพิ่มการจัดการ Error) ---
+
         async function fetchMag() {
             try {
                 const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
-                if (!res.ok) throw new Error('Network');
+                if(!res.ok) throw new Error('Net');
                 const data = await res.json();
                 if (data && data.length > 1) {
                     const last = data[data.length - 1];
-                    
-                    // Bz is index 3
-                    const bz = parseFloat(last[3]); 
-                    updateStat('val-bz', 'card-bz', bz, 'bz');
-
-                    // Bt (Total) is index 4
-                    const bt = parseFloat(last[4]); 
-                    updateStat('val-bt', 'card-bt', bt, 'bt');
+                    updateStat('val-bz', 'card-bz', parseFloat(last[3]), 'bz');
+                    updateStat('val-bt', 'card-bt', parseFloat(last[4]), 'bt');
                 }
-            } catch (e) { console.error("Mag Error", e); }
+            } catch (e) { console.log('Mag Err'); }
         }
 
-        // 2. Fetch Plasma (Speed และ Density)
         async function fetchPlasma() {
             try {
                 const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
-                if (!res.ok) throw new Error('Network');
+                if(!res.ok) throw new Error('Net');
                 const data = await res.json();
                 if (data && data.length > 1) {
                     const last = data[data.length - 1];
-                    
-                    // Density is index 1
-                    const density = parseFloat(last[1]);
-                    updateStat('val-density', 'card-density', density, 'density');
-
-                    // Speed is index 2
-                    const speed = parseFloat(last[2]);
-                    updateStat('val-wind', 'card-wind', speed, 'wind');
+                    updateStat('val-density', 'card-density', parseFloat(last[1]), 'density');
+                    updateStat('val-wind', 'card-wind', parseFloat(last[2]), 'wind');
                 }
-            } catch (e) { console.error("Plasma Error", e); }
+            } catch (e) { console.log('Plasma Err'); }
         }
 
-        // 3. Fetch Dst
         async function fetchDst() {
             try {
                 const res = await fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json');
-                if (!res.ok) throw new Error('Network');
+                if(!res.ok) throw new Error('Net');
                 const data = await res.json();
                 if (data && data.length > 1) {
                     const last = data[data.length - 1];
-                    const dst = parseInt(last[1]); 
-                    updateStat('val-dst', 'card-dst', dst, 'dst');
+                    updateStat('val-dst', 'card-dst', parseInt(last[1]), 'dst');
                 }
-            } catch (e) { console.error("Dst Error", e); }
+            } catch (e) { console.log('Dst Err'); }
         }
 
-        // Logic การเปลี่ยนสี
         function updateStat(elemId, cardId, value, type) {
             const elem = document.getElementById(elemId);
             const card = document.getElementById(cardId);
             if (!elem || !card) return;
 
             elem.innerText = isNaN(value) ? "--" : value;
+            
+            // Reset class
             card.className = 'stat-box'; 
-
-            // เกณฑ์การเปลี่ยนสี (Thresholds)
+            
+            // Color Logic
+            let status = 'normal';
             if (type === 'dst') {
-                if (value < -50) card.classList.add('status-alert');
-                else if (value < -20) card.classList.add('status-warn');
-                else card.classList.add('status-normal');
+                if (value < -50) status = 'alert';
+                else if (value < -20) status = 'warn';
             } 
             else if (type === 'bz') {
-                if (value < -5) card.classList.add('status-alert'); // ยิ่งลบยิ่งแย่
-                else if (value < 0) card.classList.add('status-warn');
-                else card.classList.add('status-normal');
+                if (value < -5) status = 'alert';
+                else if (value < 0) status = 'warn';
             } 
             else if (type === 'wind') {
-                if (value > 600) card.classList.add('status-alert');
-                else if (value > 400) card.classList.add('status-warn');
-                else card.classList.add('status-normal');
+                if (value > 600) status = 'alert';
+                else if (value > 400) status = 'warn';
             }
             else if (type === 'density') {
-                if (value > 20) card.classList.add('status-alert'); // หนาแน่นเกิน 20 ไม่ดี
-                else if (value > 10) card.classList.add('status-warn');
-                else card.classList.add('status-normal');
+                if (value > 20) status = 'alert';
+                else if (value > 10) status = 'warn';
             }
             else if (type === 'bt') {
-                if (value > 20) card.classList.add('status-alert'); // สนามแม่เหล็กเข้มเกิน 20 คือแรง
-                else if (value > 10) card.classList.add('status-warn');
-                else card.classList.add('status-normal');
+                if (value > 20) status = 'alert';
+                else if (value > 10) status = 'warn';
             }
+
+            card.classList.add('status-' + status);
         }
 
         function updateAll() {
@@ -208,8 +302,8 @@
         }
 
         updateAll();
-        setInterval(updateAll, 60000); 
-        setInterval(refreshImages, 300000); 
+        setInterval(updateAll, 60000);
+        setInterval(refreshImages, 300000);
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V7.1</title>
+    <title>IonosTek Monitor V7.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,18 +36,16 @@
         }
         .header span { font-size: 0.8em; color: var(--accent-blue); font-weight: bold; }
 
-        /* Animation: จุดกระพริบ (เร็ว) */
+        /* Animation */
         .blink { animation: blinker 1s linear infinite; color: var(--accent-green); font-size: 1.2em; vertical-align: sub; }
         @keyframes blinker { 50% { opacity: 0; } }
-
-        /* Animation: ตัวเลขเต้น (ช้าๆ นุ่มนวล) */
         @keyframes pulse-text {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(0.98); } /* ย่อลงนิดนึงให้ดูเหมือนหายใจ */
+            50% { opacity: 0.8; transform: scale(0.98); }
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* --- Stats Bar --- */
+        /* Stats Bar */
         .stats-container {
             display: flex;
             flex-wrap: wrap;
@@ -65,21 +63,18 @@
             text-align: center;
             border-top: 3px solid #555;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
         }
 
         .stat-value { 
             font-size: 1.8em; 
             font-weight: bold; 
             margin: 5px 0; 
-            /* ใส่ Animation ให้ตัวเลข */
             animation: pulse-text 2s infinite ease-in-out;
         }
-        
         .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; }
         .stat-unit { font-size: 0.7em; color: #666; }
 
-        /* --- Image Grid --- */
+        /* Grid */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -120,13 +115,7 @@
             justify-content: center;
         }
 
-        img {
-            width: 100%;
-            height: auto;
-            max-height: 400px;
-            object-fit: contain;
-            border-radius: 4px;
-        }
+        img { width: 100%; height: auto; max-height: 400px; object-fit: contain; border-radius: 4px; }
 
         .footer { text-align: center; margin-top: 40px; font-size: 0.8em; color: #555; }
 
@@ -144,7 +133,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V7.1</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V7.2</span></h1>
         <div id="updateTime" style="font-size: 0.8em; color: #888;">
             <span class="blink">●</span> Connecting to Satellites...
         </div>
@@ -179,56 +168,46 @@
     </div>
 
     <div class="grid-container">
-        
         <div class="card">
-            <div class="card-header">
-                <h3>AURORA FORECAST</h3>
-                <span>NOAA OVATION (N)</span>
-            </div>
-            <div class="card-body">
-                <img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora">
-            </div>
+            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION (N)</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora"></div>
         </div>
-
         <div class="card">
-            <div class="card-header">
-                <h3>RADIO BLACKOUT (DRAP)</h3>
-                <span>ABSORPTION MAP</span>
-            </div>
-            <div class="card-body">
-                <img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="D-Region Absorption">
-            </div>
+            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>ABSORPTION (DRAP)</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP"></div>
         </div>
-
         <div class="card card-full">
-            <div class="card-header">
-                <h3>SPACE WEATHER OVERVIEW</h3>
-                <span>X-RAY • PROTONS • K-INDEX</span>
-            </div>
-            <div class="card-body">
-                <img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="X-Ray Overview" style="max-height: 500px;">
-            </div>
+            <div class="card-header"><h3>SPACE WEATHER OVERVIEW</h3><span>X-RAY • PROTONS • K-INDEX</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="Overview" style="max-height: 500px;"></div>
         </div>
-
     </div>
 
-    <div class="footer">
-        IonosTek Monitor V7.1 • Developed for Ham Radio Operators<br>
-        Data: NOAA SWPC, WDC Kyoto
-    </div>
+    <div class="footer">IonosTek Monitor V7.2 • Data: NOAA SWPC, WDC Kyoto</div>
 
     <script>
+        // ฟังก์ชันช่วยหา Index จากชื่อ Header (แก้ปัญหา NOAA สลับช่อง)
+        function getIndex(headerRow, keyName) {
+            return headerRow.findIndex(h => h.toLowerCase().includes(keyName));
+        }
+
         async function fetchMag() {
             try {
                 const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
                 if(!res.ok) throw new Error('Net');
                 const data = await res.json();
+                
                 if (data && data.length > 1) {
-                    const last = data[data.length - 1];
-                    updateStat('val-bz', 'card-bz', parseFloat(last[3]), 'bz');
-                    updateStat('val-bt', 'card-bt', parseFloat(last[4]), 'bt');
+                    const headers = data[0]; // แถวแรกคือหัวตาราง
+                    const last = data[data.length - 1]; // ข้อมูลล่าสุด
+
+                    // หาตำแหน่งช่องอัตโนมัติ
+                    const bzIndex = getIndex(headers, 'bz'); 
+                    const btIndex = getIndex(headers, 'bt');
+
+                    if(bzIndex !== -1) updateStat('val-bz', 'card-bz', parseFloat(last[bzIndex]), 'bz');
+                    if(btIndex !== -1) updateStat('val-bt', 'card-bt', parseFloat(last[btIndex]), 'bt');
                 }
-            } catch (e) { console.log('Mag Err'); }
+            } catch (e) { console.log('Mag Err', e); }
         }
 
         async function fetchPlasma() {
@@ -236,12 +215,18 @@
                 const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
                 if(!res.ok) throw new Error('Net');
                 const data = await res.json();
+                
                 if (data && data.length > 1) {
+                    const headers = data[0];
                     const last = data[data.length - 1];
-                    updateStat('val-density', 'card-density', parseFloat(last[1]), 'density');
-                    updateStat('val-wind', 'card-wind', parseFloat(last[2]), 'wind');
+
+                    const densityIndex = getIndex(headers, 'density');
+                    const speedIndex = getIndex(headers, 'speed');
+
+                    if(densityIndex !== -1) updateStat('val-density', 'card-density', parseFloat(last[densityIndex]), 'density');
+                    if(speedIndex !== -1) updateStat('val-wind', 'card-wind', parseFloat(last[speedIndex]), 'wind');
                 }
-            } catch (e) { console.log('Plasma Err'); }
+            } catch (e) { console.log('Plasma Err', e); }
         }
 
         async function fetchDst() {
@@ -253,7 +238,7 @@
                     const last = data[data.length - 1];
                     updateStat('val-dst', 'card-dst', parseInt(last[1]), 'dst');
                 }
-            } catch (e) { console.log('Dst Err'); }
+            } catch (e) { console.log('Dst Err', e); }
         }
 
         function updateStat(elemId, cardId, value, type) {
@@ -262,31 +247,24 @@
             if (!elem || !card) return;
 
             elem.innerText = isNaN(value) ? "--" : value;
-            
             card.className = 'stat-box'; 
             
             let status = 'normal';
             if (type === 'dst') {
-                if (value < -50) status = 'alert';
-                else if (value < -20) status = 'warn';
+                if (value < -50) status = 'alert'; else if (value < -20) status = 'warn';
             } 
             else if (type === 'bz') {
-                if (value < -5) status = 'alert';
-                else if (value < 0) status = 'warn';
+                if (value < -5) status = 'alert'; else if (value < 0) status = 'warn';
             } 
             else if (type === 'wind') {
-                if (value > 600) status = 'alert';
-                else if (value > 400) status = 'warn';
+                if (value > 600) status = 'alert'; else if (value > 400) status = 'warn';
             }
             else if (type === 'density') {
-                if (value > 20) status = 'alert';
-                else if (value > 10) status = 'warn';
+                if (value > 20) status = 'alert'; else if (value > 10) status = 'warn';
             }
             else if (type === 'bt') {
-                if (value > 20) status = 'alert';
-                else if (value > 10) status = 'warn';
+                if (value > 15) status = 'alert'; else if (value > 10) status = 'warn';
             }
-
             card.classList.add('status-' + status);
         }
 
@@ -297,11 +275,8 @@
 
         function refreshImages() {
             const images = document.querySelectorAll('img');
-            const timestamp = new Date().getTime();
-            images.forEach(img => {
-                let src = img.src.split('?')[0];
-                img.src = src + '?t=' + timestamp;
-            });
+            const ts = new Date().getTime();
+            images.forEach(img => { img.src = img.src.split('?')[0] + '?t=' + ts; });
         }
 
         updateAll();

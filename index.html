@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V4.5</title>
+    <title>IonosTek Monitor V4.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #0f0f13; --card-bg: #1a1a20; --text-main: #e0e0e0; --accent-green: #00ff9d; --accent-red: #ff4d4d; --accent-yellow: #ffc107; --border-color: #333; }
@@ -28,7 +28,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:var(--accent-green)">MONITOR V4.5</span></h1>
+        <h1>IONOSTEK <span style="color:var(--accent-green)">MONITOR V4.6</span></h1>
         <span>LIVE DASHBOARD • <span class="blink">●</span> ONLINE</span>
         <div id="updateTime" style="font-size: 0.9em; margin-top: 5px; color: #aaa;">Connecting to Satellites...</div>
     </div>
@@ -70,13 +70,14 @@
         </div>
         
         <div class="card" style="grid-column: 1 / -1;">
-             <h3>Planetary K-Index (GFZ Potsdam)</h3>
-             <img src="https://www-app3.gfz-potsdam.de/kp_index/Kp_nowcast.png" id="img-geospace" alt="Kp Index" style="background: rgba(255,255,255,0.1);">
+             <h3>Planetary K-Index (NOAA)</h3>
+             <p style="font-size:0.8em; color:#888;">ระดับความรุนแรงพายุ (G-Scale)</p>
+             <img src="https://services.swpc.noaa.gov/images/planetary-k-index.gif" id="img-geospace" alt="Planetary K-Index">
         </div>
     </div>
 
     <div class="footer">
-        IonosTek Monitor V4.5 • Data: NOAA / Kyoto / HamQSL / GFZ
+        IonosTek Monitor V4.6 • Data: NOAA / Kyoto / HamQSL
     </div>
 
     <script>

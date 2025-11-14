@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V7.4</title>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>IonosTek Monitor V7.5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --text-main: #ffffff;
             --text-sub: #b0b0b0;
-            --accent-green: #4caf50;
-            --accent-yellow: #ffc107;
-            --accent-orange: #ff9800; /* เพิ่มสีส้ม */
-            --accent-red: #f44336;
-            --accent-blue: #2196f3;
+            --accent-green: #00e676;
+            --accent-yellow: #ffea00;
+            --accent-orange: #ff9100;
+            --accent-red: #ff1744;
+            --accent-blue: #2979ff;
             --border-color: #333;
         }
 
@@ -31,165 +31,335 @@
         
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             border-bottom: 2px solid #333;
             padding-bottom: 15px;
+            position: relative;
         }
-        .header span { font-size: 0.8em; color: var(--accent-blue); font-weight: bold; }
+        .header h1 { font-weight: 700; font-size: 2em; }
+        .header span.version { 
+            color: var(--bg-color); 
+            background-color: var(--accent-green);
+            font-size: 0.4em; 
+            vertical-align: middle; 
+            padding: 2px 6px; 
+            border-radius: 4px;
+            font-weight: bold;
+        }
 
-        /* Animation */
-        .blink { animation: blinker 1s linear infinite; color: var(--accent-green); font-size: 1.2em; vertical-align: sub; }
+        /* ปรับฟอนต์เวลาให้กลมกลืน */
+        #updateTime {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 1em;
+            color: var(--accent-blue);
+            margin-top: 5px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Animation: Blinking Dot */
+        .blink { animation: blinker 1.5s linear infinite; color: var(--accent-green); margin-right: 5px; }
         @keyframes blinker { 50% { opacity: 0; } }
-        @keyframes pulse-text {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(0.98); }
-            100% { opacity: 1; transform: scale(1); }
+
+        /* Animation: Value Update Flash (ตัวเลขกระพริบเมื่ออัปเดต) */
+        @keyframes flash-update {
+            0% { color: #fff; text-shadow: 0 0 10px #fff; transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .updated-flash {
+            animation: flash-update 0.5s ease-out;
         }
 
         /* Stats Bar */
         .stats-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
             justify-content: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .stat-box {
             background: var(--card-bg);
             padding: 15px 10px;
-            border-radius: 6px;
-            min-width: 130px;
+            border-radius: 8px;
+            min-width: 140px;
             flex: 1;
             text-align: center;
-            border-top: 3px solid #555;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
+            border-top: 4px solid #555;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+            position: relative;
         }
+        .stat-box:hover { transform: translateY(-3px); }
 
         .stat-value { 
-            font-size: 1.8em; 
-            font-weight: bold; 
-            margin: 5px 0; 
-            animation: pulse-text 2s infinite ease-in-out;
+            font-size: 2em; 
+            font-weight: 700; 
+            margin: 8px 0; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
-        .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; }
-        .stat-unit { font-size: 0.7em; color: #666; }
+        
+        /* ลูกศรบอกแนวโน้ม */
+        .trend-arrow { font-size: 0.6em; opacity: 0.7; }
+        .arrow-up { color: var(--accent-red); } /* ค่าขึ้นมักไม่ดี (ลม, ความหนาแน่น) ยกเว้น Dst */
+        .arrow-down { color: var(--accent-green); }
+        
+        /* ลูกศรเฉพาะกิจสำหรับ Bz */
+        .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } /* เหนือ (ดี) */
+        .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; }   /* ใต้ (แย่) */
 
-        /* Grid */
+        .stat-label { font-size: 0.85em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-unit { font-size: 0.75em; color: #666; }
+
+        /* Grid Layout */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            max-width: 1400px;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
         .card {
             background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 0;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             display: flex;
             flex-direction: column;
+            border: 1px solid #333;
         }
 
-        .card-full { grid-column: 1 / -1; }
-
+        /* KC2G Card needs full width sometimes or standard */
         .card-header {
-            background-color: #2c2c2c;
-            padding: 10px 15px;
-            border-bottom: 1px solid #333;
+            background: linear-gradient(90deg, #2c2c2c 0%, #1e1e1e 100%);
+            padding: 12px 20px;
+            border-bottom: 1px solid #444;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .card-header h3 { margin: 0; font-size: 1em; font-weight: 700; color: var(--text-main); }
-        .card-header span { font-size: 0.7em; color: var(--accent-blue); }
+        .card-header h3 { margin: 0; font-size: 1.1em; font-weight: 600; color: #ddd; }
+        .card-header span { font-size: 0.75em; color: var(--accent-blue); background: rgba(33, 150, 243, 0.1); padding: 3px 8px; border-radius: 4px; }
 
         .card-body {
-            padding: 15px;
+            padding: 0;
             background: #000;
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 300px;
+            position: relative;
         }
 
-        img { width: 100%; height: auto; max-height: 400px; object-fit: contain; border-radius: 4px; }
-
-        .footer { text-align: center; margin-top: 40px; font-size: 0.8em; color: #555; }
-
-        /* --- Status Colors Definitions (เพิ่มสีส้ม Moderate) --- */
-        .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; text-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
-        .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; text-shadow: 0 0 5px rgba(255, 193, 7, 0.3); }
-        .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; text-shadow: 0 0 5px rgba(255, 152, 0, 0.3); }
-        .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; text-shadow: 0 0 5px rgba(244, 67, 54, 0.3); }
+        img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.5s; }
         
-        @media (max-width: 600px) {
+        /* Loader Overlay */
+        .img-loader { position: absolute; color: #555; font-size: 0.8em; z-index: 0; }
+        .card-body img { z-index: 1; position: relative; }
+
+        .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
+
+        /* --- Status Colors --- */
+        .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; text-shadow: 0 0 8px rgba(0, 230, 118, 0.2); }
+        .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; text-shadow: 0 0 8px rgba(255, 234, 0, 0.2); }
+        .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; text-shadow: 0 0 8px rgba(255, 145, 0, 0.2); }
+        .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; text-shadow: 0 0 10px rgba(255, 23, 68, 0.3); }
+        
+        @media (max-width: 768px) {
             .grid-container { grid-template-columns: 1fr; }
             .stat-box { min-width: 45%; }
+            .header h1 { font-size: 1.5em; }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V7.4</span></h1>
-        <div id="updateTime" style="font-size: 0.9em; color: #aaa; font-family: monospace;">
-            <span class="blink">●</span> Connecting...
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V7.5</span></h1>
+        <div id="updateTime">
+            <span class="blink">●</span> System Initializing...
         </div>
     </div>
 
     <div class="stats-container">
+        <div class="stat-box" id="card-bz">
+            <div class="stat-label">Bz (Polarity)</div>
+            <div class="stat-value">
+                <span id="arr-bz" class="bz-arrow-n"></span>
+                <span id="val-bz">--</span>
+            </div>
+            <div class="stat-unit">nT (GSM)</div>
+        </div>
+
         <div class="stat-box" id="card-dst">
             <div class="stat-label">Dst Index</div>
-            <div class="stat-value" id="val-dst">--</div>
+            <div class="stat-value">
+                <span id="val-dst">--</span>
+                <span id="trend-dst" class="trend-arrow"></span>
+            </div>
             <div class="stat-unit">nT (Kyoto)</div>
         </div>
-        <div class="stat-box" id="card-bz">
-            <div class="stat-label">Bz (Direction)</div>
-            <div class="stat-value" id="val-bz">--</div>
-            <div class="stat-unit">nT (South Bad)</div>
-        </div>
+
         <div class="stat-box" id="card-wind">
             <div class="stat-label">Solar Wind</div>
-            <div class="stat-value" id="val-wind">--</div>
+            <div class="stat-value">
+                <span id="val-wind">--</span>
+                <span id="trend-wind" class="trend-arrow"></span>
+            </div>
             <div class="stat-unit">km/s</div>
         </div>
+
         <div class="stat-box" id="card-density">
             <div class="stat-label">Density</div>
-            <div class="stat-value" id="val-density">--</div>
+            <div class="stat-value">
+                <span id="val-density">--</span>
+                <span id="trend-density" class="trend-arrow"></span>
+            </div>
             <div class="stat-unit">p/cm³</div>
         </div>
+
         <div class="stat-box" id="card-bt">
             <div class="stat-label">IMF Bt (Total)</div>
-            <div class="stat-value" id="val-bt">--</div>
+            <div class="stat-value">
+                <span id="val-bt">--</span>
+                <span id="trend-bt" class="trend-arrow"></span>
+            </div>
             <div class="stat-unit">nT</div>
         </div>
     </div>
 
     <div class="grid-container">
-        <div class="card">
-            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION (N)</span></div>
-            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora"></div>
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+                <h3>REAL-TIME MUF</h3>
+                <span>PROP.KC2G.COM</span>
+            </div>
+            <div class="card-body">
+                <div class="img-loader">Loading Map...</div>
+                <img src="https://prop.kc2g.com/renders/current/muf-normal-now.svg" id="img-muf" alt="MUF Map">
+            </div>
         </div>
+
         <div class="card">
-            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>ABSORPTION (DRAP)</span></div>
-            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP"></div>
+            <div class="card-header">
+                <h3>AURORA FORECAST</h3>
+                <span>NOAA OVATION</span>
+            </div>
+            <div class="card-body">
+                <img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora">
+            </div>
         </div>
-        <div class="card card-full">
-            <div class="card-header"><h3>SPACE WEATHER OVERVIEW</h3><span>X-RAY • PROTONS • K-INDEX</span></div>
-            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="Overview" style="max-height: 500px;"></div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>RADIO BLACKOUT</h3>
+                <span>D-REGION ABSORPTION</span>
+            </div>
+            <div class="card-body">
+                <img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP">
+            </div>
         </div>
     </div>
 
-    <div class="footer">IonosTek Monitor V7.4 • Data: NOAA SWPC, WDC Kyoto</div>
+    <div class="footer">
+        IonosTek Monitor V7.5 • Developed for Radio Amateurs<br>
+        Data Sources: NOAA SWPC, WDC Kyoto, KC2G
+    </div>
 
     <script>
+        // เก็บค่าเก่าไว้เปรียบเทียบหา Trend
+        let lastValues = {
+            wind: null,
+            density: null,
+            dst: null,
+            bt: null
+        };
+
         function getIndex(headerRow, keyName) {
             return headerRow.findIndex(h => h.toLowerCase().includes(keyName));
+        }
+
+        // ฟังก์ชันอัปเดต UI และ Animation
+        function updateDisplay(valId, cardId, value, type, trendId = null, arrowId = null) {
+            const valElem = document.getElementById(valId);
+            const cardElem = document.getElementById(cardId);
+            
+            if (!valElem || !cardElem) return;
+
+            // Trigger Animation (Flash Effect)
+            valElem.classList.remove('updated-flash');
+            void valElem.offsetWidth; // trigger reflow
+            valElem.classList.add('updated-flash');
+
+            valElem.innerText = isNaN(value) ? "--" : value;
+
+            // 1. Logic สีของ Card (Status Color)
+            let status = 'normal';
+            cardElem.className = 'stat-box'; // Reset class
+
+            if (type === 'dst') { 
+                if (value < -100) status = 'alert';
+                else if (value < -50) status = 'moderate';
+                else if (value < -20) status = 'warn';
+            } 
+            else if (type === 'bz') { 
+                if (value < -5) status = 'alert'; 
+                else if (value < 0) status = 'warn'; 
+            } 
+            else if (type === 'wind') { 
+                if (value > 600) status = 'alert'; 
+                else if (value > 400) status = 'warn'; 
+            }
+            else if (type === 'density') { 
+                if (value > 20) status = 'alert'; 
+                else if (value > 10) status = 'warn'; 
+            }
+            else if (type === 'bt') { 
+                if (value > 15) status = 'alert'; 
+                else if (value > 10) status = 'warn'; 
+            }
+            
+            cardElem.classList.add('status-' + status);
+
+            // 2. Logic ลูกศร Bz (Polarity Arrow)
+            if (type === 'bz' && arrowId) {
+                const arrElem = document.getElementById(arrowId);
+                if (value >= 0) {
+                    arrElem.innerHTML = '&#8593;'; // ลูกศรขึ้น
+                    arrElem.className = 'bz-arrow-n'; // สีเขียว
+                } else {
+                    arrElem.innerHTML = '&#8595;'; // ลูกศรลง
+                    arrElem.className = 'bz-arrow-s'; // สีแดง
+                }
+            }
+
+            // 3. Logic ลูกศร Trend (เทียบกับค่าเก่า)
+            if (trendId && lastValues[type] !== null) {
+                const trendElem = document.getElementById(trendId);
+                const diff = value - lastValues[type];
+                
+                if (Math.abs(diff) < 0.1) {
+                    trendElem.innerHTML = ''; // ไม่เปลี่ยนแปลงมากพอ
+                } else if (diff > 0) {
+                    trendElem.innerHTML = '&#9650;'; // สามเหลี่ยมชี้ขึ้น
+                    // สำหรับ Wind/Density ขึ้นคือแย่ (แดง)
+                    if(type === 'dst') trendElem.style.color = 'var(--accent-green)'; // Dst ขึ้นคือดี (เข้าใกล้ 0)
+                    else trendElem.style.color = 'var(--accent-red)';
+                } else {
+                    trendElem.innerHTML = '&#9660;'; // สามเหลี่ยมชี้ลง
+                    if(type === 'dst') trendElem.style.color = 'var(--accent-red)'; // Dst ลงคือแย่
+                    else trendElem.style.color = 'var(--accent-green)'; // Wind/Density ลงคือดี
+                }
+            }
+
+            // บันทึกค่าล่าสุด
+            if (type !== 'bz') lastValues[type] = value;
         }
 
         async function fetchMag() {
@@ -200,10 +370,12 @@
                 if (data && data.length > 1) {
                     const headers = data[0];
                     const last = data[data.length - 1];
+                    
                     const bzIndex = getIndex(headers, 'bz'); 
                     const btIndex = getIndex(headers, 'bt');
-                    if(bzIndex !== -1) updateStat('val-bz', 'card-bz', parseFloat(last[bzIndex]), 'bz');
-                    if(btIndex !== -1) updateStat('val-bt', 'card-bt', parseFloat(last[btIndex]), 'bt');
+                    
+                    if(bzIndex !== -1) updateDisplay('val-bz', 'card-bz', parseFloat(last[bzIndex]), 'bz', null, 'arr-bz');
+                    if(btIndex !== -1) updateDisplay('val-bt', 'card-bt', parseFloat(last[btIndex]), 'bt', 'trend-bt');
                 }
             } catch (e) { console.log('Mag Err', e); }
         }
@@ -216,10 +388,12 @@
                 if (data && data.length > 1) {
                     const headers = data[0];
                     const last = data[data.length - 1];
-                    const densityIndex = getIndex(headers, 'density');
-                    const speedIndex = getIndex(headers, 'speed');
-                    if(densityIndex !== -1) updateStat('val-density', 'card-density', parseFloat(last[densityIndex]), 'density');
-                    if(speedIndex !== -1) updateStat('val-wind', 'card-wind', parseFloat(last[speedIndex]), 'wind');
+                    
+                    const denIndex = getIndex(headers, 'density');
+                    const spdIndex = getIndex(headers, 'speed');
+                    
+                    if(denIndex !== -1) updateDisplay('val-density', 'card-density', parseFloat(last[denIndex]), 'density', 'trend-density');
+                    if(spdIndex !== -1) updateDisplay('val-wind', 'card-wind', parseFloat(last[spdIndex]), 'wind', 'trend-wind');
                 }
             } catch (e) { console.log('Plasma Err', e); }
         }
@@ -231,56 +405,44 @@
                 const data = await res.json();
                 if (data && data.length > 1) {
                     const last = data[data.length - 1];
-                    updateStat('val-dst', 'card-dst', parseInt(last[1]), 'dst');
+                    updateDisplay('val-dst', 'card-dst', parseInt(last[1]), 'dst', 'trend-dst');
                 }
             } catch (e) { console.log('Dst Err', e); }
         }
 
-        function updateStat(elemId, cardId, value, type) {
-            const elem = document.getElementById(elemId);
-            const card = document.getElementById(cardId);
-            if (!elem || !card) return;
-            elem.innerText = isNaN(value) ? "--" : value;
-            card.className = 'stat-box'; 
-            
-            let status = 'normal';
-
-            // --- เงื่อนไขการเปลี่ยนสีตาม User Request ---
-            if (type === 'dst') { 
-                if (value < -100) status = 'alert';       // แดง (Intense: < -100)
-                else if (value < -50) status = 'moderate'; // ส้ม (Moderate: -50 ถึง -100)
-                else if (value < -20) status = 'warn';     // เหลือง (Weak: -20 ถึง -50)
-                else status = 'normal';                    // เขียว (Quiet: > -20)
-            } 
-            // ค่าอื่นๆ
-            else if (type === 'bz') { if (value < -5) status = 'alert'; else if (value < 0) status = 'warn'; } 
-            else if (type === 'wind') { if (value > 600) status = 'alert'; else if (value > 400) status = 'warn'; }
-            else if (type === 'density') { if (value > 20) status = 'alert'; else if (value > 10) status = 'warn'; }
-            else if (type === 'bt') { if (value > 15) status = 'alert'; else if (value > 10) status = 'warn'; }
-
-            card.classList.add('status-' + status);
-        }
-
         function updateTime() {
             const now = new Date();
-            const utcString = now.toUTCString().replace('GMT', 'UTC');
-            document.getElementById('updateTime').innerHTML = '<span class="blink">●</span> ' + utcString;
+            // Format: 15 Nov 2025 04:20:00 UTC
+            const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'UTC', timeZoneName: 'short' };
+            const timeString = now.toLocaleString('en-GB', options);
+            
+            document.getElementById('updateTime').innerHTML = 
+                '<span class="blink">●</span> SYSTEM ACTIVE: ' + timeString;
         }
 
         function updateAll() {
-            fetchMag(); fetchPlasma(); fetchDst();
+            fetchMag(); 
+            fetchPlasma(); 
+            fetchDst();
             updateTime();
         }
 
         function refreshImages() {
             const images = document.querySelectorAll('img');
             const ts = new Date().getTime();
-            images.forEach(img => { img.src = img.src.split('?')[0] + '?t=' + ts; });
+            images.forEach(img => { 
+                // ป้องกัน Error รูปกระพริบ
+                const tempImg = new Image();
+                tempImg.src = img.src.split('?')[0] + '?t=' + ts;
+                tempImg.onload = () => { img.src = tempImg.src; };
+            });
         }
 
+        // เริ่มทำงาน
         updateAll();
-        setInterval(updateAll, 60000);
-        setInterval(refreshImages, 300000);
+        setInterval(updateAll, 60000); // อัปเดตข้อมูลทุก 1 นาที
+        setInterval(refreshImages, 300000); // อัปเดตรูปทุก 5 นาที
+        setInterval(updateTime, 1000); // อัปเดตเวลาทุกวินาทีให้ดู Realtime
     </script>
 </body>
 </html>

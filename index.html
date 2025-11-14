@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V6.2</title>
+    <title>IonosTek Monitor V7.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -49,7 +49,7 @@
             background: var(--card-bg);
             padding: 15px 10px;
             border-radius: 6px;
-            min-width: 130px; /* ปรับให้เล็กลงนิดนึงจะได้เรียงสวยในมือถือ */
+            min-width: 130px;
             flex: 1;
             text-align: center;
             border-top: 3px solid #555;
@@ -69,7 +69,6 @@
             margin: 0 auto;
         }
 
-        /* การ์ดปกติ */
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
@@ -80,10 +79,7 @@
             flex-direction: column;
         }
 
-        /* การ์ดเต็มจอ (สำหรับ X-Ray) */
-        .card-full {
-            grid-column: 1 / -1; /* สั่งให้กินพื้นที่ซ้ายสุดไปขวาสุด */
-        }
+        .card-full { grid-column: 1 / -1; }
 
         .card-header {
             background-color: #2c2c2c;
@@ -129,12 +125,11 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V6.2</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V7.0</span></h1>
         <div id="updateTime" style="font-size: 0.8em; color: #888;">Connecting to Satellites...</div>
     </div>
 
     <div class="stats-container">
-        
         <div class="stat-box" id="card-dst">
             <div class="stat-label">Dst Index</div>
             <div class="stat-value" id="val-dst">--</div>
@@ -160,7 +155,6 @@
             <div class="stat-value" id="val-bt">--</div>
             <div class="stat-unit">nT</div>
         </div>
-
     </div>
 
     <div class="grid-container">
@@ -168,7 +162,7 @@
         <div class="card">
             <div class="card-header">
                 <h3>AURORA FORECAST</h3>
-                <span>NOAA OVATION</span>
+                <span>NOAA OVATION (N)</span>
             </div>
             <div class="card-body">
                 <img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora">
@@ -177,11 +171,11 @@
 
         <div class="card">
             <div class="card-header">
-                <h3>SOLAR CORONA (SDO)</h3>
-                <span>AIA 193 Å</span>
+                <h3>RADIO BLACKOUT (DRAP)</h3>
+                <span>ABSORPTION MAP</span>
             </div>
             <div class="card-body">
-                <img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0193.jpg" id="img-sun" alt="Sun">
+                <img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="D-Region Absorption">
             </div>
         </div>
 
@@ -198,8 +192,8 @@
     </div>
 
     <div class="footer">
-        IonosTek Monitor V6.2 • Developed for Ham Radio Operators<br>
-        Data: NOAA SWPC, WDC Kyoto, NASA
+        IonosTek Monitor V7.0 • Developed for Ham Radio Operators<br>
+        Data: NOAA SWPC, WDC Kyoto
     </div>
 
     <script>

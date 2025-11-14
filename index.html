@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V6.0</title>
+    <title>IonosTek Monitor V6.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #121212; /* พื้นหลังดำด้านแบบ SWL */
-            --card-bg: #1e1e1e;   /* การ์ดสีเทาเข้ม */
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
             --text-main: #ffffff;
             --text-sub: #b0b0b0;
             --accent-green: #4caf50;
@@ -54,7 +54,7 @@
             min-width: 140px;
             flex: 1;
             text-align: center;
-            border-top: 3px solid #555; /* แถบสีด้านบน */
+            border-top: 3px solid #555;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
@@ -65,7 +65,7 @@
         /* --- ส่วนรูปภาพ (Image Grid) --- */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* จัดอัตโนมัติ (กว้างขั้นต่ำ 400px) */
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
@@ -74,7 +74,7 @@
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
-            padding: 0; /* ลบ padding เพื่อให้ header ชนขอบ */
+            padding: 0;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             display: flex;
@@ -94,7 +94,7 @@
 
         .card-body {
             padding: 15px;
-            background: #000; /* พื้นหลังรูปสีดำ */
+            background: #000;
             flex-grow: 1;
             display: flex;
             align-items: center;
@@ -104,7 +104,7 @@
         img {
             width: 100%;
             height: auto;
-            max-height: 350px; /* คุมความสูงไม่ให้ยืดเกินไป */
+            max-height: 350px;
             object-fit: contain;
             border-radius: 4px;
         }
@@ -116,46 +116,51 @@
         .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
         .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; }
         
-        /* Responsive adjustments */
         @media (max-width: 600px) {
-            .grid-container { grid-template-columns: 1fr; } /* มือถือให้เรียงเดี่ยว */
-            .stat-box { min-width: 45%; } /* มือถือให้เรียง 2 คอลัมน์ */
+            .grid-container { grid-template-columns: 1fr; }
+            .stat-box { min-width: 45%; }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V6.0</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V6.1</span></h1>
         <div id="updateTime" style="font-size: 0.8em; color: #888;">Connecting to Satellites...</div>
     </div>
 
     <div class="stats-container">
+        
         <div class="stat-box" id="card-dst">
             <div class="stat-label">Dst Index</div>
             <div class="stat-value" id="val-dst">--</div>
             <div class="stat-unit">nT (Kyoto)</div>
         </div>
-        <div class="stat-box" id="card-bt">
-            <div class="stat-label">IMF Bt (Total)</div>
-            <div class="stat-value" id="val-bt">--</div>
-            <div class="stat-unit">nT</div>
-        </div>
+
         <div class="stat-box" id="card-bz">
             <div class="stat-label">Bz (Direction)</div>
             <div class="stat-value" id="val-bz">--</div>
             <div class="stat-unit">nT (South is Bad)</div>
         </div>
-        <div class="stat-box" id="card-density">
-            <div class="stat-label">Density</div>
-            <div class="stat-value" id="val-density">--</div>
-            <div class="stat-unit">p/cm³</div>
-        </div>
+
         <div class="stat-box" id="card-wind">
             <div class="stat-label">Solar Wind</div>
             <div class="stat-value" id="val-wind">--</div>
             <div class="stat-unit">km/s</div>
         </div>
+
+        <div class="stat-box" id="card-density">
+            <div class="stat-label">Density</div>
+            <div class="stat-value" id="val-density">--</div>
+            <div class="stat-unit">p/cm³</div>
+        </div>
+
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt (Total)</div>
+            <div class="stat-value" id="val-bt">--</div>
+            <div class="stat-unit">nT</div>
+        </div>
+
     </div>
 
     <div class="grid-container">
@@ -206,13 +211,11 @@
     </div>
 
     <div class="footer">
-        IonosTek Monitor V6.0 • Developed for Ham Radio Operators<br>
+        IonosTek Monitor V6.1 • Developed for Ham Radio Operators<br>
         Data: NOAA SWPC, WDC Kyoto, NASA
     </div>
 
     <script>
-        // --- Script ดึงข้อมูล (เหมือนเดิม แต่เพิ่มการจัดการ Error) ---
-
         async function fetchMag() {
             try {
                 const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
@@ -258,10 +261,8 @@
 
             elem.innerText = isNaN(value) ? "--" : value;
             
-            // Reset class
             card.className = 'stat-box'; 
             
-            // Color Logic
             let status = 'normal';
             if (type === 'dst') {
                 if (value < -50) status = 'alert';
@@ -295,15 +296,4 @@
         function refreshImages() {
             const images = document.querySelectorAll('img');
             const timestamp = new Date().getTime();
-            images.forEach(img => {
-                let src = img.src.split('?')[0];
-                img.src = src + '?t=' + timestamp;
-            });
-        }
-
-        updateAll();
-        setInterval(updateAll, 60000);
-        setInterval(refreshImages, 300000);
-    </script>
-</body>
-</html>
+            images.

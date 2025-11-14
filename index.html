@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V7.3</title>
+    <title>IonosTek Monitor V7.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,8 +12,9 @@
             --text-main: #ffffff;
             --text-sub: #b0b0b0;
             --accent-green: #4caf50;
-            --accent-red: #f44336;
             --accent-yellow: #ffc107;
+            --accent-orange: #ff9800; /* เพิ่มสีส้ม */
+            --accent-red: #f44336;
             --accent-blue: #2196f3;
             --border-color: #333;
         }
@@ -63,6 +64,7 @@
             text-align: center;
             border-top: 3px solid #555;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
         }
 
         .stat-value { 
@@ -119,9 +121,10 @@
 
         .footer { text-align: center; margin-top: 40px; font-size: 0.8em; color: #555; }
 
-        /* Status Colors */
+        /* --- Status Colors Definitions (เพิ่มสีส้ม Moderate) --- */
         .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; text-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
         .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; text-shadow: 0 0 5px rgba(255, 193, 7, 0.3); }
+        .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; text-shadow: 0 0 5px rgba(255, 152, 0, 0.3); }
         .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; text-shadow: 0 0 5px rgba(244, 67, 54, 0.3); }
         
         @media (max-width: 600px) {
@@ -133,7 +136,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V7.3</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V7.4</span></h1>
         <div id="updateTime" style="font-size: 0.9em; color: #aaa; font-family: monospace;">
             <span class="blink">●</span> Connecting...
         </div>
@@ -182,7 +185,7 @@
         </div>
     </div>
 
-    <div class="footer">IonosTek Monitor V7.3 • Data: NOAA SWPC, WDC Kyoto</div>
+    <div class="footer">IonosTek Monitor V7.4 • Data: NOAA SWPC, WDC Kyoto</div>
 
     <script>
         function getIndex(headerRow, keyName) {
@@ -239,18 +242,27 @@
             if (!elem || !card) return;
             elem.innerText = isNaN(value) ? "--" : value;
             card.className = 'stat-box'; 
+            
             let status = 'normal';
-            if (type === 'dst') { if (value < -50) status = 'alert'; else if (value < -20) status = 'warn'; } 
+
+            // --- เงื่อนไขการเปลี่ยนสีตาม User Request ---
+            if (type === 'dst') { 
+                if (value < -100) status = 'alert';       // แดง (Intense: < -100)
+                else if (value < -50) status = 'moderate'; // ส้ม (Moderate: -50 ถึง -100)
+                else if (value < -20) status = 'warn';     // เหลือง (Weak: -20 ถึง -50)
+                else status = 'normal';                    // เขียว (Quiet: > -20)
+            } 
+            // ค่าอื่นๆ
             else if (type === 'bz') { if (value < -5) status = 'alert'; else if (value < 0) status = 'warn'; } 
             else if (type === 'wind') { if (value > 600) status = 'alert'; else if (value > 400) status = 'warn'; }
             else if (type === 'density') { if (value > 20) status = 'alert'; else if (value > 10) status = 'warn'; }
             else if (type === 'bt') { if (value > 15) status = 'alert'; else if (value > 10) status = 'warn'; }
+
             card.classList.add('status-' + status);
         }
 
         function updateTime() {
             const now = new Date();
-            // แปลงเป็นเวลา UTC
             const utcString = now.toUTCString().replace('GMT', 'UTC');
             document.getElementById('updateTime').innerHTML = '<span class="blink">●</span> ' + utcString;
         }

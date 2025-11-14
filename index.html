@@ -3,86 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DST & Bz Monitor (Kyoto Dst & Inverted Bz)</title>
+    <title>Aurora Monitor (SWL Style)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* ธีมเลียนแบบ SpaceWeatherLive (Dark/Modern) */
         body {
-            background-color: #0b1026;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 20px;
             text-align: center;
         }
-        h1 { text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        .subtitle { color: #a0a0a0; font-size: 0.9rem; margin-bottom: 30px; }
         
+        h1 { margin-bottom: 5px; letter-spacing: 1px; color: #fff; }
+        .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
+
+        /* Grid Layout */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            max-width: 1000px;
-            margin: 0 auto 40px auto;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            max-width: 1100px;
+            margin: 0 auto 30px auto;
         }
 
+        /* Card Styling */
         .card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.2s;
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        .card:hover { transform: translateY(-5px); }
-        .card h2 { font-size: 1.2rem; margin: 0 0 10px 0; color: #ccc; }
-        .value { font-size: 3rem; font-weight: bold; }
-        .unit { font-size: 1rem; color: #aaa; }
+        .card h2 { font-size: 1rem; margin: 0 0 8px 0; color: #aaa; text-transform: uppercase; }
+        .value { font-size: 2.5rem; font-weight: bold; color: #fff; }
+        .unit { font-size: 0.8rem; color: #777; display: block; margin-top: -5px; }
+        .status { font-size: 0.85rem; margin-top: 10px; font-weight: 500; }
 
         /* สีสถานะ */
-        .good-signal { color: #00ff9d; text-shadow: 0 0 15px rgba(0, 255, 157, 0.6); }
-        .bad-signal { color: #ff4d4d; opacity: 0.7; } 
-        .storm-signal { color: #ff00ff; text-shadow: 0 0 20px #ff00ff; } /* สีม่วงสำหรับพายุแรง */
+        .text-good { color: #00ff9d; }      /* เขียว */
+        .text-warn { color: #ffcc00; }      /* เหลือง */
+        .text-bad  { color: #ff4d4d; }      /* แดง */
+        .text-storm { color: #d500f9; text-shadow: 0 0 10px #d500f9; } /* ม่วง (พายุ) */
 
-        .chart-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 15px;
+        /* ส่วนแผนที่ Aurora Oval */
+        .map-container {
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            border: 1px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
         }
-        .footer { margin-top: 50px; font-size: 0.8rem; color: #555; }
+        .map-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .map-title {
+            background: #1e1e1e;
+            padding: 10px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        /* ส่วนกราฟ */
+        .chart-container {
+            max-width: 1100px;
+            height: 300px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+        
+        .footer { margin-top: 40px; font-size: 0.75rem; color: #444; }
     </style>
 </head>
 <body>
 
-    <h1>DST & Bz Monitor</h1>
-    <div class="subtitle">NOAA Solar Wind & Kyoto Dst Index</div>
+    <h1>Aurora Monitor V3</h1>
+    <div class="subtitle">Live Data from NOAA & Kyoto (Similar to SpaceWeatherLive)</div>
+
+    <div class="map-container">
+        <div class="map-title">NOAA OVATION Aurora Forecast (Northern Hemisphere)</div>
+        <img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" alt="Aurora Oval" id="aurora-map">
+    </div>
 
     <div class="dashboard-grid">
         <div class="card">
+            <h2>Hemispheric Power</h2>
+            <div id="hp-value" class="value">--</div>
+            <span class="unit">Gigawatts (GW)</span>
+            <p id="hp-status" class="status">Loading...</p>
+        </div>
+
+        <div class="card">
             <h2>-Bz (South)</h2>
             <div id="bz-value" class="value">--</div>
-            <span class="unit">nT (Polarity Switched)</span>
-            <p id="bz-status" style="font-size: 0.9rem; margin-top: 10px;">Loading...</p>
+            <span class="unit">nT (Inverted)</span>
+            <p id="bz-status" class="status">Loading...</p>
         </div>
 
         <div class="card">
-            <h2>Kyoto Dst (Real-time)</h2>
+            <h2>Kyoto Dst</h2>
             <div id="dst-value" class="value">--</div>
-            <span class="unit">nT</span>
-            <p id="dst-status" style="font-size: 0.9rem; margin-top: 10px;">Fetching via Proxy...</p>
+            <span class="unit">nT (Real-time)</span>
+            <p id="dst-status" class="status">Fetching...</p>
         </div>
 
         <div class="card">
-            <h2>Solar Wind Speed</h2>
+            <h2>Wind Speed</h2>
             <div id="speed-value" class="value">--</div>
             <span class="unit">km/s</span>
-        </div>
-
-        <div class="card">
-            <h2>Density</h2>
-            <div id="density-value" class="value">--</div>
-            <span class="unit">p/cm³</span>
         </div>
     </div>
 
@@ -91,17 +126,58 @@
     </div>
 
     <div class="footer">
-        Data: NOAA SWPC & WDC Kyoto (via AllOrigins Proxy)
+        Sources: NOAA SWPC, WDC Kyoto | Auto-refresh every 60s
     </div>
 
     <script>
-        // --- ส่วนที่ 1: ดึงข้อมูล NOAA และสลับขั้ว Bz ---
+        // --- 1. ดึงข้อมูล Hemispheric Power (HPI) ---
+        async function fetchHPI() {
+            try {
+                // NOAA ให้ไฟล์ Text เราต้องมาตัดคำเอง
+                const response = await fetch('https://services.swpc.noaa.gov/text/aurora-nowcast-hemi-power.txt');
+                const text = await response.text();
+                
+                // อ่านบรรทัดสุดท้ายที่มีข้อมูล
+                const lines = text.trim().split('\n');
+                const lastLine = lines[lines.length - 1];
+                
+                // Format: YYYY-MM-DD HH:MM   North(GW)   South(GW)
+                // แยกด้วยช่องว่าง (Regex \s+)
+                const parts = lastLine.trim().split(/\s+/);
+                
+                // ปกติ North คือ index 2
+                const northGW = parseFloat(parts[2]);
+
+                const hpElem = document.getElementById('hp-value');
+                const hpStatus = document.getElementById('hp-status');
+                
+                hpElem.innerText = northGW;
+
+                // Logic สีตาม SpaceWeatherLive
+                hpElem.className = 'value';
+                if (northGW >= 90) {
+                    hpElem.classList.add('text-storm');
+                    hpStatus.innerText = "EXTREME (G4/G5 Level)";
+                } else if (northGW >= 50) {
+                    hpElem.classList.add('text-good'); // สีเขียวสำหรับคนล่าแสง (แต่จริงๆ คือพายุ)
+                    hpStatus.innerText = "High Activity (Storm)";
+                } else if (northGW >= 20) {
+                    hpElem.classList.add('text-warn');
+                    hpStatus.innerText = "Moderate";
+                } else {
+                    hpElem.classList.add('text-bad'); // สีแดง (เงียบ)
+                    hpStatus.innerText = "Quiet";
+                }
+
+            } catch (e) { console.error("HPI Error", e); }
+        }
+
+        // --- 2. ดึงข้อมูล Solar Wind & Bz (Inverted) ---
         async function fetchSolarData() {
             try {
                 const response = await fetch('https://services.swpc.noaa.gov/products/geospace/propagated-solar-wind-1-hour.json');
                 const data = await response.json();
 
-                // หาแถวที่มีข้อมูลจริง
                 let validRow = null;
                 for (let i = data.length - 1; i > 0; i--) {
                     if (data[i][6] !== null && !isNaN(parseFloat(data[i][6]))) {
@@ -112,72 +188,50 @@
 
                 if (validRow) {
                     const speed = parseFloat(validRow[1]);
-                    const density = parseFloat(validRow[2]);
                     let rawBz = parseFloat(validRow[6]);
+                    const invertedBz = rawBz * -1; // สลับขั้ว
 
-                    // *** KEY POINT: สลับขั้ว Bz ***
-                    // ถ้า Bz จริงเป็น -10 (South/ดี) -> เราจะโชว์เป็น +10
-                    // ถ้า Bz จริงเป็น +5 (North/แย่) -> เราจะโชว์เป็น -5
-                    const invertedBz = rawBz * -1; 
-
-                    // อัปเดตหน้าจอ
                     document.getElementById('speed-value').innerText = Math.round(speed);
-                    document.getElementById('density-value').innerText = density.toFixed(1);
                     
                     const bzElem = document.getElementById('bz-value');
                     const bzStatus = document.getElementById('bz-status');
                     
-                    // ใส่เครื่องหมาย + นำหน้าถ้าเป็นบวก
                     bzElem.innerText = (invertedBz > 0 ? "+" : "") + invertedBz.toFixed(1);
                     
-                    // Logic สี (ดูจาก invertedBz ที่เป็นบวกคือดี)
-                    bzElem.className = 'value ' + (invertedBz > 0 ? 'good-signal' : 'bad-signal');
+                    bzElem.className = 'value ' + (invertedBz > 0 ? 'text-good' : 'text-bad');
                     
-                    if (invertedBz >= 10) bzStatus.innerHTML = "<span style='color:#ff00ff'>★ EXTREME!</span>"; // ม่วง
-                    else if (invertedBz >= 5) bzStatus.innerHTML = "<span style='color:#00ff9d'>★ EXCELLENT</span>"; // เขียว
-                    else if (invertedBz > 0) bzStatus.innerHTML = "<span style='color:#aaffcc'>✓ GOOD</span>";
-                    else bzStatus.innerHTML = "<span style='color:#ff4d4d'>✕ North (Bad)</span>";
+                    if (invertedBz >= 10) bzStatus.innerHTML = "<span class='text-storm'>★ EXTREME!</span>";
+                    else if (invertedBz >= 5) bzStatus.innerHTML = "<span class='text-good'>★ EXCELLENT</span>";
+                    else if (invertedBz > 0) bzStatus.innerHTML = "<span class='text-good'>✓ Good (South)</span>";
+                    else bzStatus.innerHTML = "<span class='text-bad'>✕ Bad (North)</span>";
 
                     updateChart(data);
                 }
             } catch (e) { console.error("Solar Wind Error", e); }
         }
 
-        // --- ส่วนที่ 2: ดึงข้อมูล Kyoto Dst ผ่าน Proxy ---
+        // --- 3. ดึง Kyoto Dst ---
         async function fetchKyotoDst() {
             try {
-                // คำนวณปีเดือนปัจจุบัน เพื่อสร้าง URL (เช่น 202310)
                 const now = new Date();
                 const year = now.getUTCFullYear();
                 const month = String(now.getUTCMonth() + 1).padStart(2, '0');
                 const shortYear = String(year).slice(-2);
-                
-                // URL เป้าหมาย: wdc.kugi.kyoto-u.ac.jp/dst_realtime/YYYYMM/dstYYMM.for
                 const targetUrl = `https://wdc.kugi.kyoto-u.ac.jp/dst_realtime/${year}${month}/dst${shortYear}${month}.for`;
-                
-                // ใช้ Proxy 'AllOrigins' เพื่อแก้ปัญหา CORS
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
                 const response = await fetch(proxyUrl);
                 const textData = await response.text();
-
-                // Parse ข้อมูล (ไฟล์ .for เป็น Text File แบบ Fixed Width)
-                // เราจะแยกบรรทัด แล้วหาบรรทัดสุดท้ายที่มีข้อมูล
                 const lines = textData.split('\n');
                 let latestDst = null;
 
-                // วนย้อนกลับจากล่างขึ้นบน
                 for (let i = lines.length - 1; i >= 0; i--) {
                     const line = lines[i].trim();
-                    if (line.length > 20) { // เช็คว่าเป็นบรรทัดข้อมูล
-                        // ข้อมูล Dst จะอยู่เรียงกันเป็นคอลัมน์ท้ายๆ
-                        // วิธีง่ายสุดคือ split ด้วยช่องว่าง แล้วเอาตัวเลขสุดท้ายที่ไม่ใช่ 9999
+                    if (line.length > 20) {
                         const parts = line.split(/\s+/).filter(p => p !== "");
-                        
-                        // หาค่าสุดท้ายที่เป็นตัวเลขและไม่ใช่ 9999 (ค่า Error ของ Kyoto)
                         for (let j = parts.length - 1; j >= 0; j--) {
                             const val = parseFloat(parts[j]);
-                            if (!isNaN(val) && Math.abs(val) < 999) { // 9999 คือไม่มีข้อมูล
+                            if (!isNaN(val) && Math.abs(val) < 999) {
                                 latestDst = val;
                                 break;
                             }
@@ -189,42 +243,28 @@
                 if (latestDst !== null) {
                     const dstElem = document.getElementById('dst-value');
                     const dstStatus = document.getElementById('dst-status');
-                    
                     dstElem.innerText = latestDst;
 
-                    // Logic สี Dst (ยิ่งลบเยอะ ยิ่งแรง)
                     if (latestDst <= -100) {
-                        dstElem.className = 'value storm-signal';
+                        dstElem.className = 'value text-storm';
                         dstStatus.innerText = "MAJOR STORM!";
-                        dstStatus.style.color = "#ff00ff";
                     } else if (latestDst <= -50) {
-                        dstElem.className = 'value good-signal';
+                        dstElem.className = 'value text-good'; // สำหรับนักวิทยุ Storm คือน่าตื่นเต้น? หรือแย่? ปกติ Dst ลบเยอะคือพายุแรง
                         dstStatus.innerText = "Moderate Storm";
-                    } else if (latestDst <= -20) {
-                        dstElem.className = 'value warning-signal';
-                        dstStatus.innerText = "Active";
-                        dstStatus.style.color = "#ffcc00";
                     } else {
                         dstElem.className = 'value';
-                        dstStatus.innerText = "Quiet";
-                        dstStatus.style.color = "#ccc";
+                        dstStatus.innerText = "Quiet / Active";
                     }
                 }
-
-            } catch (e) { 
-                console.error("Kyoto Dst Error", e); 
-                document.getElementById('dst-status').innerText = "Kyoto Source Offline";
-            }
+            } catch (e) { console.error("Kyoto Error", e); }
         }
 
-        // --- ส่วนที่ 3: กราฟ (ใช้ค่า Inverted Bz) ---
+        // --- 4. กราฟ Bz ---
         let myChart = null;
         function updateChart(data) {
             const cleanData = data.slice(1).filter(row => row[6] !== null && !isNaN(parseFloat(row[6]))).slice(-60);
             const labels = cleanData.map(row => row[0].substring(11, 16));
-            
-            // สลับขั้วข้อมูลในกราฟด้วย (* -1)
-            const bzData = cleanData.map(row => parseFloat(row[6]) * -1);
+            const bzData = cleanData.map(row => parseFloat(row[6]) * -1); // Inverted
 
             const ctx = document.getElementById('bzChart').getContext('2d');
             if (myChart) myChart.destroy();
@@ -234,16 +274,16 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: '-Bz (South)', // เปลี่ยนชื่อ Label
+                        label: '-Bz (South)',
                         data: bzData,
-                        borderColor: '#00ff9d', // เปลี่ยนเป็นสีเขียวหลัก
+                        borderColor: '#00ff9d',
                         borderWidth: 2,
                         pointRadius: 0,
                         tension: 0.4,
                         fill: true,
                         backgroundColor: (ctx) => {
-                            const grad = ctx.chart.ctx.createLinearGradient(0,0,0,400);
-                            grad.addColorStop(0, 'rgba(0, 255, 157, 0.5)');
+                            const grad = ctx.chart.ctx.createLinearGradient(0,0,0,300);
+                            grad.addColorStop(0, 'rgba(0, 255, 157, 0.2)');
                             grad.addColorStop(1, 'rgba(0,0,0,0)');
                             return grad;
                         }
@@ -256,26 +296,32 @@
                         x: { display: false },
                         y: { 
                             grid: { color: '#333' },
-                            ticks: { color: '#aaa' },
-                            // แนะนำเส้น 0 ตรงกลาง
-                            suggestedMin: -10,
-                            suggestedMax: 10
+                            ticks: { color: '#888' }
                         }
                     },
-                    plugins: { legend: { display: true, labels: { color: '#fff' } } }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
+        // Refresh Image เพื่อให้แผนที่ขยับ (ถ้ามีการอัปเดต)
+        function refreshImage() {
+            const img = document.getElementById('aurora-map');
+            img.src = 'https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg?' + new Date().getTime();
+        }
+
         // เริ่มทำงาน
+        fetchHPI();
         fetchSolarData();
         fetchKyotoDst();
         
-        // อัปเดตทุก 1 นาที
+        // ตั้งเวลาอัปเดต
         setInterval(() => {
+            fetchHPI();
             fetchSolarData();
-            fetchKyotoDst(); // Kyoto อาจจะอัปเดตช้ากว่า NOAA (ทุก 1 ชม.) แต่เช็คไว้ก็ดีครับ
-        }, 60000);
+            fetchKyotoDst();
+            refreshImage();
+        }, 60000); // ทุก 1 นาที
 
     </script>
 </body>

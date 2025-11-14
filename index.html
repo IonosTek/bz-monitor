@@ -3,146 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Station Monitor V4.2</title>
+    <title>IonosTek Station Monitor V4.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #0f0f13; --card-bg: #1a1a20; --text-main: #e0e0e0; --accent-green: #00ff9d; --accent-red: #ff4d4d; --accent-yellow: #ffc107; --border-color: #333; }
-        body { font-family: 'Chakra Petch', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
-        h1, h3 { margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+        :root {
+            --bg-color: #0f0f13;
+            --card-bg: #1a1a20;
+            --text-main: #e0e0e0;
+            --accent-green: #00ff9d;
+            --accent-red: #ff4d4d;
+            --accent-yellow: #ffc107;
+            --border-color: #333;
+        }
+
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2, h3 { margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+        .header span { font-size: 0.8em; color: #888; }
         .blink { animation: blinker 1.5s linear infinite; color: red; }
         @keyframes blinker { 50% { opacity: 0; } }
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; text-align: center; }
-        .stats-container { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-around; margin-bottom: 20px; }
-        .stat-box { background: #252530; padding: 20px; border-radius: 8px; min-width: 200px; border-left: 4px solid var(--accent-green); flex: 1; text-align: center; }
+
+        /* Layout Grid */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Widget Card Style */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        /* Top Stats Row (ตัวเลข) */
+        .stats-container {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: #252530;
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 200px;
+            border-left: 4px solid #555; /* สี Default */
+            flex: 1;
+            text-align: center;
+        }
         .stat-value { font-size: 2.5em; font-weight: bold; margin: 10px 0; }
         .stat-label { font-size: 0.9em; color: #aaa; }
-        img { width: 100%; height: auto; border-radius: 5px; border: 1px solid #444; }
-        .footer { text-align: center; margin-top: 40px; font-size: 0.8em; color: #666; }
+
+        /* Images */
+        img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        /* Colors for status */
         .status-normal { color: var(--accent-green); border-left-color: var(--accent-green) !important; }
-        .status-warn { color: var(--accent-yellow); border-left-color: var(--accent-yellow) !important; }
-        .status-alert { color: var(--accent-red); border-left-color: var(--accent-red) !important; }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h1>IONOSTEK <span style="color:var(--accent-green)">MONITOR V4.2</span></h1>
-        <span>LIVE SPACE WEATHER DASHBOARD • <span class="blink">●</span> ONLINE</span>
-        <div id="updateTime" style="font-size: 0.9em; margin-top: 5px; color: #aaa;">Waiting for data...</div>
-    </div>
-
-    <div class="dashboard">
-        <div class="stats-container">
-            <div class="stat-box" id="card-dst">
-                <div class="stat-label">DST INDEX (ความรุนแรงพายุ)</div>
-                <div class="stat-value" id="val-dst">--</div>
-                <div class="stat-label">nT (WDC Kyoto)</div>
-            </div>
-            <div class="stat-box" id="card-bz">
-                <div class="stat-label">Bz (ทิศทางสนามแม่เหล็ก)</div>
-                <div class="stat-value" id="val-bz">--</div>
-                <div class="stat-label">nT (South is BAD)</div>
-            </div>
-            <div class="stat-box" id="card-wind">
-                <div class="stat-label">SOLAR WIND (ความเร็วลม)</div>
-                <div class="stat-value" id="val-wind">--</div>
-                <div class="stat-label">km/s</div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Aurora Forecast (N)</h3>
-            <p style="font-size:0.8em; color:#888;">โอกาสเกิดแสงเหนือ</p>
-            <img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora Map">
-        </div>
-
-        <div class="card">
-            <h3>HF Conditions (HamQSL)</h3>
-            <p style="font-size:0.8em; color:#888;">สภาพย่าน HF และ MUF</p>
-            <img src="https://www.hamqsl.com/solar101vhf.php" id="img-muf" alt="HF Conditions">
-        </div>
-
-        <div class="card">
-            <h3>Sun Monitor (AIA 193)</h3>
-            <p style="font-size:0.8em; color:#888;">หลุมดำ = ลมสุริยะแรง</p>
-            <img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_0193.jpg" id="img-sun" alt="Sun SDO">
-        </div>
-
-        <div class="card">
-            <h3>X-Ray Flux</h3>
-            <p style="font-size:0.8em; color:#888;">กราฟวิทยุดับ (Blackout)</p>
-            <img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="X-Ray Flux">
-        </div>
-        
-        <div class="card" style="grid-column: 1 / -1;">
-             <h3>Planetary K-Index (Storm Scale)</h3>
-             <p style="font-size:0.8em; color:#888;">ความรุนแรงพายุแม่เหล็กโลก (G1-G5)</p>
-             <img src="https://services.swpc.noaa.gov/images/planetary-k-index.png" id="img-geospace" alt="K-Index Plot">
-        </div>
-
-    </div>
-
-    <div class="footer">
-        Developed by IonosTek • Data: NOAA SWPC, WDC Kyoto, HamQSL
-    </div>
-
-    <script>
-        async function fetchData() {
-            try {
-                // Fetch Wind/Bz
-                const windRes = await fetch('https://services.swpc.noaa.gov/products/geospace/propagated-solar-wind-1-hour.json');
-                const windData = await windRes.json();
-                const lastWind = windData[windData.length - 1];
-                updateStat('val-bz', 'card-bz', parseFloat(lastWind[1]), 'bz');
-                updateStat('val-wind', 'card-wind', parseFloat(lastWind[2]), 'wind');
-
-                // Fetch Dst
-                const dstRes = await fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json');
-                const dstData = await dstRes.json();
-                const lastDst = dstData[dstData.length - 1];
-                updateStat('val-dst', 'card-dst', parseInt(lastDst[1]), 'dst');
-
-                document.getElementById('updateTime').innerText = "Last Update: " + new Date().toLocaleTimeString();
-            } catch (e) { console.error(e); }
-        }
-
-        function updateStat(elemId, cardId, value, type) {
-            const elem = document.getElementById(elemId);
-            const card = document.getElementById(cardId);
-            elem.innerText = value;
-            card.className = 'stat-box';
-            if (type === 'dst') {
-                if (value < -50) card.classList.add('status-alert');
-                else if (value < -20) card.classList.add('status-warn');
-                else card.classList.add('status-normal');
-            } else if (type === 'bz') {
-                if (value < -5) card.classList.add('status-alert');
-                else if (value < 0) card.classList.add('status-warn');
-                else card.classList.add('status-normal');
-            } else if (type === 'wind') {
-                if (value > 600) card.classList.add('status-alert');
-                else if (value > 400) card.classList.add('status-warn');
-                else card.classList.add('status-normal');
-            }
-        }
-
-        function refreshImages() {
-            const images = ['img-aurora', 'img-muf', 'img-sun', 'img-xray', 'img-geospace'];
-            const timestamp = new Date().getTime();
-            images.forEach(id => {
-                const img = document.getElementById(id);
-                if(img) {
-                    let src = img.src.split('?')[0]; 
-                    img.src = src + '?t=' + timestamp;
-                }
-            });
-        }
-
-        fetchData();
-        setInterval(fetchData, 60000);
-        setInterval(refreshImages, 300000);
-    </script>
-</body>
-</html>
+        .status-warn {

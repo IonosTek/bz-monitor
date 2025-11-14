@@ -3,23 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bz Monitor (Bz Dashboard)</title>
+    <title>DST & Bz Monitor (Bz & Kp)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* การตั้งค่าพื้นฐาน (Dark Theme) */
         body {
-            background-color: #0b1026; /* สีน้ำเงินเข้มเหมือนท้องฟ้ากลางคืน */
+            background-color: #0b1026;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
             text-align: center;
         }
-
         h1 { text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
         .subtitle { color: #a0a0a0; font-size: 0.9rem; margin-bottom: 30px; }
-
-        /* Grid Layout สำหรับการ์ดข้อมูล */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -27,8 +23,6 @@
             max-width: 1000px;
             margin: 0 auto 40px auto;
         }
-
-        /* การ์ดแสดงผล */
         .card {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
@@ -37,19 +31,16 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.2s;
         }
-        
         .card:hover { transform: translateY(-5px); }
-
         .card h2 { font-size: 1.2rem; margin: 0 0 10px 0; color: #ccc; }
         .value { font-size: 3rem; font-weight: bold; }
         .unit { font-size: 1rem; color: #aaa; }
-
+        
         /* สีสถานะ */
-        .good-signal { color: #00ff9d; text-shadow: 0 0 10px #00ff9d; } /* สีเขียวสะท้อนแสง */
-        .bad-signal { color: #ff4d4d; text-shadow: 0 0 10px #ff4d4d; } /* สีแดง */
-        .neutral-signal { color: #ffffff; }
+        .good-signal { color: #00ff9d; text-shadow: 0 0 15px rgba(0, 255, 157, 0.5); }
+        .bad-signal { color: #ff4d4d; text-shadow: 0 0 15px rgba(255, 77, 77, 0.5); }
+        .warning-signal { color: #ffcc00; text-shadow: 0 0 15px rgba(255, 204, 0, 0.5); }
 
-        /* ส่วนของกราฟ */
         .chart-container {
             max-width: 1000px;
             margin: 0 auto;
@@ -57,21 +48,37 @@
             padding: 20px;
             border-radius: 15px;
         }
-
         .footer { margin-top: 50px; font-size: 0.8rem; color: #555; }
+        
+        /* ปุ่มลิงก์ไปยังเว็บเกียวโต (เผื่ออยากกดดู) */
+        .ext-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #aaa;
+            text-decoration: none;
+            border-bottom: 1px dotted #aaa;
+        }
+        .ext-link:hover { color: #fff; border-bottom-style: solid; }
     </style>
 </head>
 <body>
 
-    <h1>Bz Monitor</h1>
-    <div class="subtitle">Real-time Solar Wind Data from NOAA</div>
+    <h1>DST & Bz Monitor</h1>
+    <div class="subtitle">Real-time Data from NOAA SWPC</div>
 
     <div class="dashboard-grid">
         <div class="card">
             <h2>Bz (Interplanetary Magnetic Field)</h2>
             <div id="bz-value" class="value">--</div>
             <span class="unit">nT (Nanotesla)</span>
-            <p id="bz-status" style="font-size: 0.9rem; margin-top: 10px;">Waiting for data...</p>
+            <p id="bz-status" style="font-size: 0.9rem; margin-top: 10px;">Loading...</p>
+        </div>
+
+        <div class="card">
+            <h2>Kp Index (Planetary)</h2>
+            <div id="kp-value" class="value">--</div>
+            <span class="unit">Scale 0-9</span>
+            <p id="kp-status" style="font-size: 0.9rem; margin-top: 10px;">Loading...</p>
         </div>
 
         <div class="card">
@@ -91,95 +98,96 @@
         <canvas id="bzChart"></canvas>
     </div>
 
+    <a href="https://wdc.kugi.kyoto-u.ac.jp/dst_realtime/index.html" target="_blank" class="ext-link">
+        View Kyoto DST Index (External Site)
+    </a>
+
     <div class="footer">
-        Data Source: NOAA Space Weather Prediction Center (DSCOVR Satellite)
+        Data Source: NOAA Space Weather Prediction Center
     </div>
 
-  <script>
-        async function fetchData() {
+    <script>
+        // 1. ดึงข้อมูล Solar Wind (Bz, Speed, Density)
+        async function fetchSolarData() {
             try {
                 const response = await fetch('https://services.swpc.noaa.gov/products/geospace/propagated-solar-wind-1-hour.json');
                 const data = await response.json();
 
-                // --- จุดที่แก้ไข (FIX) ---
-                // วนลูปย้อนหลังจากแถวสุดท้าย เพื่อหาแถวที่มีข้อมูลจริงๆ (ไม่เอาค่า null)
+                // วนลูปหาแถวที่มีข้อมูลจริง (แก้ปัญหา NaN)
                 let validRow = null;
-                
-                // data.length - 1 คือแถวสุดท้าย, วนไปเรื่อยๆ จนกว่าจะเจอ index 0
                 for (let i = data.length - 1; i > 0; i--) {
-                    // เช็คว่า column ที่ 6 (Bz) ต้องไม่เป็น null และต้องเป็นตัวเลข
-                    const bzCheck = data[i][6];
-                    if (bzCheck !== null && !isNaN(parseFloat(bzCheck))) {
+                    if (data[i][6] !== null && !isNaN(parseFloat(data[i][6]))) {
                         validRow = data[i];
-                        break; // เจอแล้วหยุดหาทันที
+                        break;
                     }
                 }
 
-                if (!validRow) {
-                    throw new Error("No valid data found in the recent feed.");
+                if (validRow) {
+                    const speed = parseFloat(validRow[1]);
+                    const density = parseFloat(validRow[2]);
+                    const bz = parseFloat(validRow[6]);
+
+                    // อัปเดตหน้าจอ
+                    document.getElementById('speed-value').innerText = Math.round(speed);
+                    document.getElementById('density-value').innerText = density.toFixed(1);
+                    
+                    const bzElem = document.getElementById('bz-value');
+                    const bzStatus = document.getElementById('bz-status');
+                    bzElem.innerText = bz.toFixed(1);
+                    
+                    // Logic สีของ Bz
+                    bzElem.className = 'value ' + (bz < 0 ? 'good-signal' : 'bad-signal');
+                    if (bz <= -5) bzStatus.innerHTML = "<span style='color:#00ff9d'>★ EXCELLENT</span>";
+                    else if (bz < 0) bzStatus.innerHTML = "<span style='color:#aaffcc'>✓ GOOD</span>";
+                    else bzStatus.innerHTML = "<span style='color:#ff4d4d'>✕ POOR</span>";
+
+                    updateChart(data);
                 }
-                // -------------------------
-
-                // Mapping ข้อมูล (ใช้ validRow แทน latestData)
-                // Index 1 = speed, 2 = density, 6 = bz
-                const speed = parseFloat(validRow[1]);
-                const density = parseFloat(validRow[2]);
-                const bz = parseFloat(validRow[6]);
-
-                updateDashboard(bz, speed, density);
-                updateChart(data);
-
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('bz-value').innerText = "ERR";
-                document.getElementById('bz-status').innerText = "Data unavailable. Retrying...";
-            }
+            } catch (e) { console.error("Solar Wind Error", e); }
         }
 
-        function updateDashboard(bz, speed, density) {
-            const bzElement = document.getElementById('bz-value');
-            const bzStatus = document.getElementById('bz-status');
-            
-            // ปัดเศษทศนิยม 1 ตำแหน่งเพื่อให้ดูสะอาดตา
-            bzElement.innerText = bz.toFixed(1);
-            document.getElementById('speed-value').innerText = Math.round(speed); // ความเร็วลมปัดเป็นจำนวนเต็ม
-            document.getElementById('density-value').innerText = density.toFixed(1);
+        // 2. ดึงข้อมูล Kp Index (เพิ่มใหม่)
+        async function fetchKpIndex() {
+            try {
+                // ไฟล์ JSON ของ NOAA สำหรับ Kp Index
+                const response = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
+                const data = await response.json();
 
-            // ตรรกะสี
-            // ลบค่า class เก่าออกก่อน
-            bzElement.className = 'value';
-            if (bz < 0) {
-                bzElement.classList.add('good-signal');
-            } else {
-                bzElement.classList.add('bad-signal');
-            }
-            
-            // ข้อความสถานะ
-            if (bz <= -5) {
-                bzStatus.innerHTML = "<span style='color:#00ff9d'>★ EXCELLENT! Strong Aurora likely.</span>";
-            } else if (bz < 0) {
-                bzStatus.innerHTML = "<span style='color:#aaffcc'>✓ GOOD. Favourable conditions.</span>";
-            } else {
-                bzStatus.innerHTML = "<span style='color:#ff4d4d'>✕ POOR. Magnetic field pointing North.</span>";
-            }
+                // data แถวสุดท้ายคือล่าสุด: [time, kp, a_running, station_count]
+                const latest = data[data.length - 1];
+                const kp = parseFloat(latest[1]);
+
+                const kpElem = document.getElementById('kp-value');
+                const kpStatus = document.getElementById('kp-status');
+                
+                kpElem.innerText = kp.toFixed(1);
+
+                // Logic สีของ Kp
+                // Kp >= 5 คือพายุ (Storm) -> สีแดง/เตือน
+                // Kp >= 4 คือ Active -> สีเหลือง
+                kpElem.className = 'value';
+                if (kp >= 5) {
+                    kpElem.classList.add('good-signal'); // สำหรับนักล่าแสงเหนือ Kp สูง = ดี
+                    kpStatus.innerHTML = "<span style='color:#00ff9d'>★ STORM! (G1+)</span>";
+                } else if (kp >= 4) {
+                    kpElem.classList.add('warning-signal');
+                    kpStatus.innerHTML = "<span style='color:#ffcc00'>Active</span>";
+                } else {
+                    kpElem.classList.add('neutral-signal');
+                    kpStatus.innerHTML = "<span style='color:#ccc'>Quiet</span>";
+                }
+
+            } catch (e) { console.error("Kp Error", e); }
         }
 
         let myChart = null;
         function updateChart(data) {
-            // กรองเอาเฉพาะแถวที่มีข้อมูล Bz จริงๆ มาทำกราฟ
-            const cleanData = data.slice(1).filter(row => row[6] !== null && !isNaN(parseFloat(row[6])));
-            
-            // เอา 60 จุดล่าสุด
-            const recentData = cleanData.slice(-60); 
-            
-            const labels = recentData.map(row => row[0].substring(11, 16)); 
-            const bzData = recentData.map(row => parseFloat(row[6]));
+            const cleanData = data.slice(1).filter(row => row[6] !== null && !isNaN(parseFloat(row[6]))).slice(-60);
+            const labels = cleanData.map(row => row[0].substring(11, 16));
+            const bzData = cleanData.map(row => parseFloat(row[6]));
 
             const ctx = document.getElementById('bzChart').getContext('2d');
-
-            if (myChart) {
-                myChart.destroy();
-            }
+            if (myChart) myChart.destroy();
 
             myChart = new Chart(ctx, {
                 type: 'line',
@@ -189,37 +197,40 @@
                         label: 'Bz Trend',
                         data: bzData,
                         borderColor: '#ffffff',
-                        backgroundColor: (context) => {
-                            const ctx = context.chart.ctx;
-                            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                            gradient.addColorStop(0, 'rgba(0, 255, 157, 0.5)'); // สีเขียวจางๆ
-                            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                            return gradient;
-                        },
                         borderWidth: 2,
                         pointRadius: 0,
+                        tension: 0.4,
                         fill: true,
-                        tension: 0.4
+                        backgroundColor: (ctx) => {
+                            const grad = ctx.chart.ctx.createLinearGradient(0,0,0,400);
+                            grad.addColorStop(0, 'rgba(0, 255, 157, 0.5)');
+                            grad.addColorStop(1, 'rgba(0,0,0,0)');
+                            return grad;
+                        }
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            grid: { color: '#333' },
-                            ticks: { color: '#aaa' },
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#aaa', maxTicksLimit: 10 }
-                        }
+                        x: { display: false },
+                        y: { grid: { color: '#333' } }
                     },
                     plugins: { legend: { display: false } }
                 }
             });
         }
 
-        fetchData();
-        setInterval(fetchData, 60000);
+        // เริ่มทำงาน
+        fetchSolarData();
+        fetchKpIndex();
+        
+        // อัปเดตทุก 1 นาที
+        setInterval(() => {
+            fetchSolarData();
+            fetchKpIndex();
+        }, 60000);
+
     </script>
+</body>
+</html>

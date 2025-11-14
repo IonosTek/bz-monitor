@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V4.4 (Stable)</title>
+    <title>IonosTek Monitor V4.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #0f0f13; --card-bg: #1a1a20; --text-main: #e0e0e0; --accent-green: #00ff9d; --accent-red: #ff4d4d; --accent-yellow: #ffc107; --border-color: #333; }
@@ -18,7 +18,7 @@
         .stat-box { background: #252530; padding: 20px; border-radius: 8px; min-width: 200px; border-left: 4px solid #555; flex: 1; text-align: center; }
         .stat-value { font-size: 2.5em; font-weight: bold; margin: 10px 0; }
         .stat-label { font-size: 0.9em; color: #aaa; }
-        img { width: 100%; height: auto; border-radius: 5px; border: 1px solid #444; display: block; margin: 0 auto; } /* Fix image rendering */
+        img { width: 100%; height: auto; border-radius: 5px; border: 1px solid #444; display: block; margin: 0 auto; }
         .footer { text-align: center; margin-top: 40px; font-size: 0.8em; color: #666; }
         .status-normal { color: var(--accent-green); border-left-color: var(--accent-green) !important; }
         .status-warn { color: var(--accent-yellow); border-left-color: var(--accent-yellow) !important; }
@@ -28,9 +28,9 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:var(--accent-green)">MONITOR V4.4</span></h1>
+        <h1>IONOSTEK <span style="color:var(--accent-green)">MONITOR V4.5</span></h1>
         <span>LIVE DASHBOARD • <span class="blink">●</span> ONLINE</span>
-        <div id="updateTime" style="font-size: 0.9em; margin-top: 5px; color: #aaa;">Loading System...</div>
+        <div id="updateTime" style="font-size: 0.9em; margin-top: 5px; color: #aaa;">Connecting to Satellites...</div>
     </div>
 
     <div class="dashboard">
@@ -68,71 +68,67 @@
             <h3>X-Ray Flux</h3>
             <img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="X-Ray">
         </div>
+        
         <div class="card" style="grid-column: 1 / -1;">
-             <h3>K-Index (Storm Scale)</h3>
-             <img src="https://services.swpc.noaa.gov/images/planetary-k-index.png" id="img-geospace" alt="Kp">
+             <h3>Planetary K-Index (GFZ Potsdam)</h3>
+             <img src="https://www-app3.gfz-potsdam.de/kp_index/Kp_nowcast.png" id="img-geospace" alt="Kp Index" style="background: rgba(255,255,255,0.1);">
         </div>
     </div>
 
     <div class="footer">
-        IonosTek Monitor V4.4 • Data: NOAA / Kyoto / HamQSL
+        IonosTek Monitor V4.5 • Data: NOAA / Kyoto / HamQSL / GFZ
     </div>
 
     <script>
-        // --- Safe Fetch Functions (แยกกันทำงาน ไม่พังหมู่) ---
-
-        // 1. ดึง Bz (DSCOVR Mag)
+        // 1. Bz (DSCOVR Mag)
         async function fetchBz() {
             try {
                 const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
-                if (!res.ok) throw new Error('Network response was not ok');
+                if (!res.ok) throw new Error('Network');
                 const data = await res.json();
                 if (data && data.length > 1) {
                     const last = data[data.length - 1];
-                    const bz = parseFloat(last[3]); // Bz is index 3
+                    const bz = parseFloat(last[3]); 
                     updateStat('val-bz', 'card-bz', bz, 'bz');
                 }
-            } catch (e) { console.error("Bz Error:", e); document.getElementById('val-bz').innerText = "N/A"; }
+            } catch (e) { console.error("Bz Error", e); document.getElementById('val-bz').innerText = "N/A"; }
         }
 
-        // 2. ดึง Wind Speed (DSCOVR Plasma)
+        // 2. Wind Speed (DSCOVR Plasma)
         async function fetchWind() {
             try {
                 const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
-                if (!res.ok) throw new Error('Network response was not ok');
+                if (!res.ok) throw new Error('Network');
                 const data = await res.json();
                 if (data && data.length > 1) {
                     const last = data[data.length - 1];
-                    const speed = parseFloat(last[2]); // Speed is index 2
+                    const speed = parseFloat(last[2]);
                     updateStat('val-wind', 'card-wind', speed, 'wind');
                 }
-            } catch (e) { console.error("Wind Error:", e); document.getElementById('val-wind').innerText = "N/A"; }
+            } catch (e) { console.error("Wind Error", e); document.getElementById('val-wind').innerText = "N/A"; }
         }
 
-        // 3. ดึง Dst (Kyoto)
+        // 3. Dst (Kyoto)
         async function fetchDst() {
             try {
                 const res = await fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json');
-                if (!res.ok) throw new Error('Network response was not ok');
+                if (!res.ok) throw new Error('Network');
                 const data = await res.json();
                 if (data && data.length > 1) {
                     const last = data[data.length - 1];
-                    const dst = parseInt(last[1]); // Dst is index 1
+                    const dst = parseInt(last[1]); 
                     updateStat('val-dst', 'card-dst', dst, 'dst');
                 }
-            } catch (e) { console.error("Dst Error:", e); document.getElementById('val-dst').innerText = "N/A"; }
+            } catch (e) { console.error("Dst Error", e); document.getElementById('val-dst').innerText = "N/A"; }
         }
 
-        // ฟังก์ชันอัปเดตหน้าจอ
         function updateStat(elemId, cardId, value, type) {
             const elem = document.getElementById(elemId);
             const card = document.getElementById(cardId);
             if (!elem || !card) return;
 
             elem.innerText = isNaN(value) ? "--" : value;
-            
-            // Logic เปลี่ยนสี
-            card.className = 'stat-box'; // Reset
+            card.className = 'stat-box'; 
             if (type === 'dst') {
                 if (value < -50) card.classList.add('status-alert');
                 else if (value < -20) card.classList.add('status-warn');
@@ -148,15 +144,11 @@
             }
         }
 
-        // ฟังก์ชันหลัก
         function updateAll() {
-            fetchBz();
-            fetchWind();
-            fetchDst();
+            fetchBz(); fetchWind(); fetchDst();
             document.getElementById('updateTime').innerText = "Updated: " + new Date().toLocaleTimeString();
         }
 
-        // Refresh Images
         function refreshImages() {
             const images = document.querySelectorAll('img');
             const timestamp = new Date().getTime();
@@ -166,11 +158,9 @@
             });
         }
 
-        // Start
         updateAll();
-        setInterval(updateAll, 60000); // ทุก 1 นาที
-        setInterval(refreshImages, 300000); // ทุก 5 นาที
-
+        setInterval(updateAll, 60000); 
+        setInterval(refreshImages, 300000); 
     </script>
 </body>
 </html>

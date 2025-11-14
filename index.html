@@ -95,78 +95,90 @@
         Data Source: NOAA Space Weather Prediction Center (DSCOVR Satellite)
     </div>
 
-    <script>
-        // ฟังก์ชันหลักในการดึงข้อมูล
+  <script>
         async function fetchData() {
             try {
-                // URL ของ NOAA (JSON ไฟล์)
                 const response = await fetch('https://services.swpc.noaa.gov/products/geospace/propagated-solar-wind-1-hour.json');
                 const data = await response.json();
 
-                // NOAA ส่งข้อมูลมาเป็น Array of Arrays (แถวแรกคือ Header)
-                // ตัวอย่าง: [["time_tag","speed","density","temperature","bx","by","bz",...], ...]
+                // --- จุดที่แก้ไข (FIX) ---
+                // วนลูปย้อนหลังจากแถวสุดท้าย เพื่อหาแถวที่มีข้อมูลจริงๆ (ไม่เอาค่า null)
+                let validRow = null;
                 
-                // ดึงข้อมูลล่าสุด (แถวสุดท้ายของ Array)
-                const latestData = data[data.length - 1];
-                
-                // Mapping Index (ดูจาก Header ของไฟล์ JSON)
-                // Index 1 = speed, Index 2 = density, Index 6 = bz (ตัวเลขอาจเปลี่ยน ต้องเช็ค Header แต่โดยปกติจะเป็นแบบนี้)
-                const speed = parseFloat(latestData[1]);
-                const density = parseFloat(latestData[2]);
-                const bz = parseFloat(latestData[6]);
-                const timeTag = latestData[0];
+                // data.length - 1 คือแถวสุดท้าย, วนไปเรื่อยๆ จนกว่าจะเจอ index 0
+                for (let i = data.length - 1; i > 0; i--) {
+                    // เช็คว่า column ที่ 6 (Bz) ต้องไม่เป็น null และต้องเป็นตัวเลข
+                    const bzCheck = data[i][6];
+                    if (bzCheck !== null && !isNaN(parseFloat(bzCheck))) {
+                        validRow = data[i];
+                        break; // เจอแล้วหยุดหาทันที
+                    }
+                }
+
+                if (!validRow) {
+                    throw new Error("No valid data found in the recent feed.");
+                }
+                // -------------------------
+
+                // Mapping ข้อมูล (ใช้ validRow แทน latestData)
+                // Index 1 = speed, 2 = density, 6 = bz
+                const speed = parseFloat(validRow[1]);
+                const density = parseFloat(validRow[2]);
+                const bz = parseFloat(validRow[6]);
 
                 updateDashboard(bz, speed, density);
                 updateChart(data);
 
             } catch (error) {
-                console.error('Error fetching data:', error);
-                document.getElementById('bz-status').innerText = "Error loading data.";
+                console.error('Error:', error);
+                document.getElementById('bz-value').innerText = "ERR";
+                document.getElementById('bz-status').innerText = "Data unavailable. Retrying...";
             }
         }
 
         function updateDashboard(bz, speed, density) {
-            // อัปเดตค่าตัวเลข
             const bzElement = document.getElementById('bz-value');
             const bzStatus = document.getElementById('bz-status');
             
-            bzElement.innerText = bz;
-            document.getElementById('speed-value').innerText = speed;
-            document.getElementById('density-value').innerText = density;
+            // ปัดเศษทศนิยม 1 ตำแหน่งเพื่อให้ดูสะอาดตา
+            bzElement.innerText = bz.toFixed(1);
+            document.getElementById('speed-value').innerText = Math.round(speed); // ความเร็วลมปัดเป็นจำนวนเต็ม
+            document.getElementById('density-value').innerText = density.toFixed(1);
 
-            // ตรรกะสี (Logic)
-            // Bz ติดลบ = ดี (เขียว), Bz บวก = ไม่ดี (แดง)
-            bzElement.className = 'value ' + (bz < 0 ? 'good-signal' : 'bad-signal');
-            
-            if (bz <= -5) {
-                bzStatus.innerText = "EXCELLENT! Strong Aurora likely.";
-                bzStatus.style.color = "#00ff9d";
-            } else if (bz < 0) {
-                bzStatus.innerText = "GOOD. Favourable conditions.";
-                bzStatus.style.color = "#aaffcc";
+            // ตรรกะสี
+            // ลบค่า class เก่าออกก่อน
+            bzElement.className = 'value';
+            if (bz < 0) {
+                bzElement.classList.add('good-signal');
             } else {
-                bzStatus.innerText = "POOR. Magnetic field pointing North.";
-                bzStatus.style.color = "#ff4d4d";
+                bzElement.classList.add('bad-signal');
+            }
+            
+            // ข้อความสถานะ
+            if (bz <= -5) {
+                bzStatus.innerHTML = "<span style='color:#00ff9d'>★ EXCELLENT! Strong Aurora likely.</span>";
+            } else if (bz < 0) {
+                bzStatus.innerHTML = "<span style='color:#aaffcc'>✓ GOOD. Favourable conditions.</span>";
+            } else {
+                bzStatus.innerHTML = "<span style='color:#ff4d4d'>✕ POOR. Magnetic field pointing North.</span>";
             }
         }
 
-        // สร้างกราฟด้วย Chart.js
         let myChart = null;
         function updateChart(data) {
-            // ตัด Header ออก
-            const rows = data.slice(1);
+            // กรองเอาเฉพาะแถวที่มีข้อมูล Bz จริงๆ มาทำกราฟ
+            const cleanData = data.slice(1).filter(row => row[6] !== null && !isNaN(parseFloat(row[6])));
             
-            // เตรียมข้อมูลแกน X (เวลา) และ Y (ค่า Bz)
-            // เอาแค่ 60 จุดล่าสุด เพื่อไม่ให้กราฟแน่นเกินไป
-            const recentData = rows.slice(-60); 
+            // เอา 60 จุดล่าสุด
+            const recentData = cleanData.slice(-60); 
             
-            const labels = recentData.map(row => row[0].substring(11, 16)); // เอาเฉพาะ เวลา HH:MM
+            const labels = recentData.map(row => row[0].substring(11, 16)); 
             const bzData = recentData.map(row => parseFloat(row[6]));
 
             const ctx = document.getElementById('bzChart').getContext('2d');
 
             if (myChart) {
-                myChart.destroy(); // ลบกราฟเก่าก่อนวาดใหม่
+                myChart.destroy();
             }
 
             myChart = new Chart(ctx, {
@@ -174,43 +186,40 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Bz Trend (Last Hour)',
+                        label: 'Bz Trend',
                         data: bzData,
                         borderColor: '#ffffff',
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: (context) => {
+                            const ctx = context.chart.ctx;
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                            gradient.addColorStop(0, 'rgba(0, 255, 157, 0.5)'); // สีเขียวจางๆ
+                            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                            return gradient;
+                        },
                         borderWidth: 2,
-                        pointRadius: 0, // ซ่อนจุดเพื่อให้เส้นเรียบ
+                        pointRadius: 0,
                         fill: true,
-                        tension: 0.4 // ความโค้งของเส้น
+                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             grid: { color: '#333' },
                             ticks: { color: '#aaa' },
-                            suggestedMin: -10,
-                            suggestedMax: 10
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#aaa' }
+                            ticks: { color: '#aaa', maxTicksLimit: 10 }
                         }
                     },
-                    plugins: {
-                        legend: { display: false } // ซ่อน Legend
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        // เรียกใช้ฟังก์ชันเมื่อโหลดหน้าเว็บ
         fetchData();
-        
-        // อัปเดตข้อมูลทุกๆ 1 นาที (60000 ms)
         setInterval(fetchData, 60000);
-
     </script>
-</body>
-</html>

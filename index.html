@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V6.1</title>
+    <title>IonosTek Monitor V6.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -35,10 +35,8 @@
             padding-bottom: 15px;
         }
         .header span { font-size: 0.8em; color: var(--accent-blue); font-weight: bold; }
-        .blink { animation: blinker 1.5s linear infinite; color: var(--accent-green); }
-        @keyframes blinker { 50% { opacity: 0; } }
 
-        /* --- ส่วนแสดงตัวเลข (Stats Bar) --- */
+        /* --- Stats Bar (5 ช่อง) --- */
         .stats-container {
             display: flex;
             flex-wrap: wrap;
@@ -51,7 +49,7 @@
             background: var(--card-bg);
             padding: 15px 10px;
             border-radius: 6px;
-            min-width: 140px;
+            min-width: 130px; /* ปรับให้เล็กลงนิดนึงจะได้เรียงสวยในมือถือ */
             flex: 1;
             text-align: center;
             border-top: 3px solid #555;
@@ -62,7 +60,7 @@
         .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; }
         .stat-unit { font-size: 0.7em; color: #666; }
 
-        /* --- ส่วนรูปภาพ (Image Grid) --- */
+        /* --- Image Grid --- */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -71,6 +69,7 @@
             margin: 0 auto;
         }
 
+        /* การ์ดปกติ */
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
@@ -79,6 +78,11 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
+        }
+
+        /* การ์ดเต็มจอ (สำหรับ X-Ray) */
+        .card-full {
+            grid-column: 1 / -1; /* สั่งให้กินพื้นที่ซ้ายสุดไปขวาสุด */
         }
 
         .card-header {
@@ -104,14 +108,14 @@
         img {
             width: 100%;
             height: auto;
-            max-height: 350px;
+            max-height: 400px;
             object-fit: contain;
             border-radius: 4px;
         }
 
         .footer { text-align: center; margin-top: 40px; font-size: 0.8em; color: #555; }
 
-        /* Status Colors Logic */
+        /* Status Colors */
         .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; }
         .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
         .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; }
@@ -125,7 +129,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V6.1</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span style="color:var(--accent-green); font-size:0.6em; vertical-align: middle; border:1px solid var(--accent-green); padding:2px 5px; border-radius:4px;">V6.2</span></h1>
         <div id="updateTime" style="font-size: 0.8em; color: #888;">Connecting to Satellites...</div>
     </div>
 
@@ -136,25 +140,21 @@
             <div class="stat-value" id="val-dst">--</div>
             <div class="stat-unit">nT (Kyoto)</div>
         </div>
-
         <div class="stat-box" id="card-bz">
             <div class="stat-label">Bz (Direction)</div>
             <div class="stat-value" id="val-bz">--</div>
-            <div class="stat-unit">nT (South is Bad)</div>
+            <div class="stat-unit">nT (South Bad)</div>
         </div>
-
         <div class="stat-box" id="card-wind">
             <div class="stat-label">Solar Wind</div>
             <div class="stat-value" id="val-wind">--</div>
             <div class="stat-unit">km/s</div>
         </div>
-
         <div class="stat-box" id="card-density">
             <div class="stat-label">Density</div>
             <div class="stat-value" id="val-density">--</div>
             <div class="stat-unit">p/cm³</div>
         </div>
-
         <div class="stat-box" id="card-bt">
             <div class="stat-label">IMF Bt (Total)</div>
             <div class="stat-value" id="val-bt">--</div>
@@ -185,33 +185,20 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="card card-full">
             <div class="card-header">
-                <h3>X-RAY FLUX</h3>
-                <span>SOLAR FLARES</span>
+                <h3>SPACE WEATHER OVERVIEW</h3>
+                <span>X-RAY • PROTONS • K-INDEX</span>
             </div>
             <div class="card-body">
-                <img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="X-Ray">
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h3>PLANETARY K-INDEX</h3>
-                <span>NOAA G-SCALE</span>
-            </div>
-            <div class="card-body">
-                <img src="https://services.swpc.noaa.gov/images/planetary-k-index.png" 
-                     id="img-geospace" 
-                     alt="Kp Index"
-                     onerror="this.src='https://services.swpc.noaa.gov/images/station-k-index.png'">
+                <img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" id="img-xray" alt="X-Ray Overview" style="max-height: 500px;">
             </div>
         </div>
 
     </div>
 
     <div class="footer">
-        IonosTek Monitor V6.1 • Developed for Ham Radio Operators<br>
+        IonosTek Monitor V6.2 • Developed for Ham Radio Operators<br>
         Data: NOAA SWPC, WDC Kyoto, NASA
     </div>
 
@@ -296,4 +283,15 @@
         function refreshImages() {
             const images = document.querySelectorAll('img');
             const timestamp = new Date().getTime();
-            images.
+            images.forEach(img => {
+                let src = img.src.split('?')[0];
+                img.src = src + '?t=' + timestamp;
+            });
+        }
+
+        updateAll();
+        setInterval(updateAll, 60000);
+        setInterval(refreshImages, 300000);
+    </script>
+</body>
+</html>

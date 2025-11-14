@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+โ<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -103,7 +103,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:var(--accent-green)">MONITOR V4</span></h1>
+        <h1>IONOSTEK <span style="color:var(--accent-green)">MONITOR V4.1</span></h1>
         <span>LIVE SPACE WEATHER DASHBOARD • <span class="blink">●</span> ONLINE</span>
         <div id="updateTime" style="font-size: 0.9em; margin-top: 5px; color: #aaa;">Waiting for data...</div>
     </div>
@@ -136,7 +136,7 @@
         <div class="card">
             <h3>Real-time MUF Map</h3>
             <p style="font-size:0.8em; color:#888;">เส้นสีบอกความถี่สูงสุดที่เล่นได้ (Credit: KC2G)</p>
-            <img src="https://prop.kc2g.com/render/current/mufd-normal-now.png" id="img-muf" alt="MUF Map">
+            <img src="https://prop.kc2g.com/render/current/mufd-normal-now.png" id="img-muf" alt="MUF Map" referrerpolicy="no-referrer">
         </div>
 
         <div class="card">
@@ -148,7 +148,7 @@
         <div class="card">
             <h3>X-Ray Flux (Blackout)</h3>
             <p style="font-size:0.8em; color:#888;">กราฟพุ่งสูง = วิทยุเงียบฉับพลัน</p>
-            <img src="https://services.swpc.noaa.gov/images/gov-goes-16-xray-flux-6-hour.gif" id="img-xray" alt="X-Ray Flux">
+            <img src="https://services.swpc.noaa.gov/images/primary-x-ray-6-hour.gif" id="img-xray" alt="X-Ray Flux">
         </div>
         
         <div class="card" style="grid-column: 1 / -1;">
@@ -162,31 +162,25 @@
         Developed by IonosTek for Amateur Radio Operators<br>
         Data Sources: NOAA SWPC, WDC Kyoto, NASA SDO, KC2G
     </div>
-
+    
     <script>
-        // ฟังก์ชันดึงข้อมูล JSON
         async function fetchData() {
             try {
-                // 1. ดึง Solar Wind (Bz, Speed)
                 const windRes = await fetch('https://services.swpc.noaa.gov/products/geospace/propagated-solar-wind-1-hour.json');
                 const windData = await windRes.json();
-                const lastWind = windData[windData.length - 1]; // ข้อมูลล่าสุด
-                
+                const lastWind = windData[windData.length - 1];
                 const bz = parseFloat(lastWind[1]);
                 const speed = parseFloat(lastWind[2]);
                 
                 updateStat('val-bz', 'card-bz', bz, 'bz');
                 updateStat('val-wind', 'card-wind', speed, 'wind');
 
-                // 2. ดึง Dst Index
                 const dstRes = await fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json');
                 const dstData = await dstRes.json();
                 const lastDst = dstData[dstData.length - 1];
-                
                 const dst = parseInt(lastDst[1]);
                 updateStat('val-dst', 'card-dst', dst, 'dst');
 
-                // อัปเดตเวลา
                 const now = new Date();
                 document.getElementById('updateTime').innerText = "Last Update: " + now.toLocaleTimeString();
 
@@ -195,52 +189,41 @@
             }
         }
 
-        // ฟังก์ชันเปลี่ยนสีและการแสดงผลตัวเลข
         function updateStat(elemId, cardId, value, type) {
             const elem = document.getElementById(elemId);
             const card = document.getElementById(cardId);
-            
             elem.innerText = value;
-            
-            // Reset Class
             card.className = 'stat-box';
-
             if (type === 'dst') {
-                if (value < -50) card.classList.add('status-alert'); // แดง
-                else if (value < -20) card.classList.add('status-warn'); // เหลือง
-                else card.classList.add('status-normal'); // เขียว
+                if (value < -50) card.classList.add('status-alert');
+                else if (value < -20) card.classList.add('status-warn');
+                else card.classList.add('status-normal');
             } else if (type === 'bz') {
-                if (value < -5) card.classList.add('status-alert'); // แดง (Bz ติดลบเยอะไม่ดี)
-                else if (value < 0) card.classList.add('status-warn'); // เหลือง
-                else card.classList.add('status-normal'); // เขียว
+                if (value < -5) card.classList.add('status-alert');
+                else if (value < 0) card.classList.add('status-warn');
+                else card.classList.add('status-normal');
             } else if (type === 'wind') {
-                if (value > 600) card.classList.add('status-alert'); // ลมแรงจัด
+                if (value > 600) card.classList.add('status-alert');
                 else if (value > 400) card.classList.add('status-warn');
                 else card.classList.add('status-normal');
             }
         }
 
-        // ฟังก์ชันรีเฟรชรูปภาพ (แก้ปัญหา Browser Cache)
         function refreshImages() {
             const images = ['img-aurora', 'img-muf', 'img-sun', 'img-xray', 'img-geospace'];
             const timestamp = new Date().getTime();
-            
             images.forEach(id => {
                 const img = document.getElementById(id);
                 if(img) {
-                    // เก็บ URL เดิมแล้วเติม ?t=เวลา เพื่อบังคับโหลดใหม่
                     let src = img.src.split('?')[0]; 
                     img.src = src + '?t=' + timestamp;
                 }
             });
         }
 
-        // รันครั้งแรกทันที
         fetchData();
-
-        // ตั้งเวลาอัปเดต
-        setInterval(fetchData, 60000); // ดึงตัวเลขทุก 1 นาที
-        setInterval(refreshImages, 300000); // รีเฟรชรูปทุก 5 นาที
+        setInterval(fetchData, 60000);
+        setInterval(refreshImages, 300000);
     </script>
 </body>
 </html>

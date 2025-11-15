@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V58.1</title>
+    <title>IonosTek Monitor V59.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* --- CSS Base: V49.0 --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -24,62 +25,57 @@
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .box:hover { transform: translateY(-3px); }
-        .val { font-size: 1.8em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
-        .unit { font-size: 0.6em; color: #666; display: block; margin-top: -5px; }
+        
+        /* Font Visibility Enhancement (V60 Logic) */
+        .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .lbl { font-size: 0.8em; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .unit { font-size: 0.7em; font-weight: 500; color: #666; display: block; margin-top: -5px; }
         
         @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
 
-        .bz-state-arrow {
-            font-size: 1.2em;
-            margin-right: 5px;
-            font-weight: 900;
-        }
+        .bz-state-arrow { font-size: 1.2em; margin-right: 5px; font-weight: 900; }
 
+        /* Grid & Image Fitting Fix (V59.1) */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
-        .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; }
-        .c-body { background: #000; height: 280px; display: flex; align-items: center; justify-content: center; }
-        .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
-
-        /* Modal & Lightbox Styles */
-        .modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.95); z-index: 9999; 
-            overflow-y: auto; 
-            justify-content: center; 
+        .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
+        
+        .c-body {
+            background: #000;
+            height: 300px; /* Base Height */
+            display: flex;
             align-items: center;
+            justify-content: center;
+            padding: 0; /* Ensure no internal padding is squeezing the image */
         }
+        .card-body img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+            cursor: pointer;
+        }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; }
         .m-content { background: var(--card); width: 90%; max-width: 700px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
         
-        #lightbox { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.98); 
-            z-index: 10000; 
-            align-items: center; 
-            justify-content: center; 
-        }
+        #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
         #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
 
-        /* Colors */
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
-        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
+        
+        @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } .box { padding: 10px 2px; } .val { font-size: 1.5em; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V58.1</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V59.1</span></h1>
         <div id="status"><span class="blink">●</span> System Active</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -91,7 +87,7 @@
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-bz"><div class="lbl">Bz</div>
             <div class="val" id="v-bz-container">
-                <span id="bz-state" class="bz-state-arrow"></span>
+                <span id="bz-state" class="bz-state-arrow">--</span>
                 <span id="v-bz">--</span>
             </div>
             <span class="unit">nT</span>
@@ -112,6 +108,7 @@
         <div class="m-content">
             <span class="close" onclick="document.getElementById('guideModal').style.display='none'">&times;</span>
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
+            
             <div class="guide-sec">
                 <div class="guide-h">★ Understanding Bz (The Switch)</div>
                 <div class="guide-p">
@@ -130,16 +127,13 @@
     </div>
 
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V58.1 • Lightbox Repair</div>
+    <div class="footer">IonosTek Monitor V59.1 • Visual Integrity Fix</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
 
-        function view(src) { 
-            document.getElementById('lb-img').src = src + '?t=' + Date.now(); 
-            document.getElementById('lightbox').style.display = 'flex'; // Use flex to force visibility
-        }
+        function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
         function tick() { document.getElementById('status').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
         
         function set(id, val, diff=0) {
@@ -151,34 +145,29 @@
             
             // 1. Status Color Logic
             let s = 'c-norm';
-            // Dst Logic
             if(id=='dst') {
                 if(val < -100) s = 'c-alert';
                 else if(val < -50) s = 'c-mod';
                 else if(val < -20) s = 'c-warn';
                 else s = 'c-norm';
             }
-            // Kp Logic (G-Scale Mapping)
             else if(id=='kp') {
                 if(val >= 7) s = 'c-alert'; 
                 else if(val == 6) s = 'c-mod';
                 else if(val >= 4) s = 'c-warn';
                 else s = 'c-norm';
             }
-            // Bz Logic
             else if(id=='bz') {
                 if(val < -5) s = 'c-alert';
                 else if(val < 0) s = 'c-warn';
                 else s = 'c-norm';
                 
-                // RENDER Bz STATE ARROW (V58.0 Logic)
                 const stateEl = document.getElementById('bz-state');
                 if (stateEl) {
                     if (val >= 0) { stateEl.innerHTML = '&#8593;'; stateEl.style.color = 'var(--green)'; } 
                     else { stateEl.innerHTML = '&#8595;'; stateEl.style.color = 'var(--red)'; }
                 }
             }
-            // SFI, Wind (General)
             else if(id=='sfi') s = val>150?'c-good':(val>100?'c-norm':'c-warn');
             else if(id=='wind') s = val>700?'c-alert':(val>500?'c-warn':'c-norm');
 
@@ -252,6 +241,7 @@
                 if(curr) {
                     let sfiVal = parseInt(curr[3]), prevSfi = prev ? parseInt(prev[3]) : sfiVal;
                     set('sfi', sfiVal, sfiVal-prevSfi);
+                    
                     let ssnVal = parseInt(curr[4]), prevSsn = prev ? parseInt(prev[4]) : ssnVal;
                     set('ssn', ssnVal, ssnVal-prevSsn);
                 }
@@ -261,7 +251,7 @@
         tick(); updateAll();
         setInterval(tick, 1000);
         setInterval(updateAll, 60000);
-        setInterval(() => { document.querySelectorAll('.card-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
+        setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
     </script>
 </body>
 </html>

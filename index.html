@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V63.1</title>
+    <title>IonosTek Monitor V64.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V63.0 (Logic) + V63.1 (Image Fix) --- */
+        /* --- CSS Base: V63.1 --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -22,12 +22,9 @@
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
-        /* Stats Grid (8 Items) */
+        /* Stats Grid */
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
-        .box:hover { transform: translateY(-3px); }
-        
-        /* Font Visibility Enhancement (V60.0) */
         .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .lbl { font-size: 0.8em; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
         .unit { font-size: 0.7em; font-weight: 500; color: #666; display: block; margin-top: -5px; }
@@ -40,24 +37,25 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { overflow: hidden; background: var(--card); border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
+        .c-body { background: #000; height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 0; }
+        .card-body img { width: 100%; max-height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
+
+        /* --- MODAL FIX (V64.0) --- */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); 
+            z-index: 99999; /* Z-INDEX KILLSWITCH */
+            overflow-y: auto; 
+            align-items: center; /* Center Content */
+            justify-content: center; /* Center Content */
+        }
+        .m-content { background: var(--card); width: 90%; max-width: 700px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; z-index: 10; }
         
-        /* --- CRITICAL IMAGE FIT FIXES (V63.1) --- */
-        .c-body { 
-            background: #000; 
-            height: 280px; /* Fixed height for image container */
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 0; 
-            overflow: hidden; /* **ENSURE anything overflowing is clipped** */
-        }
-        .c-body img { 
-            width: 100%; 
-            height: 100%; /* **Make image take full height of its container** */
-            object-fit: contain; /* **Shrink image to fit while maintaining aspect ratio** */
-            cursor: pointer; 
-            /* No opacity animation needed, just load directly */
-        }
+        #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
+        #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
 
         /* Status Colors */
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
@@ -71,15 +69,14 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V63.1</span></h1>
-        <div id="status"><span class="blink">●</span> System Active (Image Fit Stability)</div>
-        <button onclick="document.getElementById('guideModal').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V64.0</span></h1>
+        <div id="status"><span class="blink">●</span> System Active</div>
+        <button onclick="openGuideModal()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
     <div class="stats">
         <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div><span class="unit">F10.7cm</span></div>
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
-        
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-bz"><div class="lbl">Bz</div>
@@ -90,7 +87,6 @@
             <span class="unit">nT</span>
         </div>
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
-        
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
     </div>
@@ -104,15 +100,13 @@
 
     <div id="guideModal" class="modal">
         <div class="m-content">
-            <span class="close" onclick="document.getElementById('guideModal').style.display='none'">&times;</span>
+            <span class="close" onclick="closeModal('guideModal')">&times;</span>
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             
             <div class="guide-sec">
                 <div class="guide-h">★ Understanding Bz (The Switch)</div>
-                <div class="guide-p">
-                    <p><span style="color:var(--green)">Bz Positive (+): "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.</p>
-                    <p><span style="color:var(--red)">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!</p>
-                </div>
+                <p><span style="color:var(--green)">Bz Positive (+): "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.</p>
+                <p><span style="color:var(--red)">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!</p>
             </div>
             <div class="guide-sec">
                 <div class="guide-h">★ Reading Values</div>
@@ -123,13 +117,16 @@
             </div>
         </div>
     </div>
-    <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V63.1 • Image Fit Stability</div>
+
+    <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
+    <div class="footer">IonosTek Monitor V64.0 • Modal Integrity Fix</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
 
+        function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
         function tick() { document.getElementById('status').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
         
@@ -142,21 +139,18 @@
             
             // 1. Status Color Logic
             let s = 'c-norm';
-            // Dst Logic
             if(id=='dst') {
                 if(val < -100) s = 'c-alert';
                 else if(val < -50) s = 'c-mod';
                 else if(val < -20) s = 'c-warn';
                 else s = 'c-norm';
             }
-            // Kp Logic (G-Scale Mapping)
             else if(id=='kp') {
                 if(val >= 7) s = 'c-alert'; 
                 else if(val == 6) s = 'c-mod';
                 else if(val >= 4) s = 'c-warn';
                 else s = 'c-norm';
             }
-            // Bz Logic
             else if(id=='bz') {
                 if(val < -5) s = 'c-alert';
                 else if(val < 0) s = 'c-warn';
@@ -168,7 +162,6 @@
                     else { stateEl.innerHTML = '&#8595;'; stateEl.style.color = 'var(--red)'; }
                 }
             }
-            // SFI, Wind (General)
             else if(id=='sfi') s = val>150?'c-good':(val>100?'c-norm':'c-warn');
             else if(id=='wind') s = val>700?'c-alert':(val>500?'c-warn':'c-norm');
 
@@ -204,9 +197,9 @@
             // Plasma
             const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
             if(plas && plas.length > 2) {
-                const l = plas[plas.length-1], p = plas[mag.length-2]; // Fixed: changed plas.length-2 to mag.length-2
+                const l = plas[plas.length-1], p = plas[plas.length-2];
                 set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
-                set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
+                set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[2]));
             }
 
             // Kp
@@ -219,7 +212,7 @@
             // Dst
             const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
             if(dst && dst.length > 2) {
-                const l = dst[dst.length-1], p = dst[dst.length-2];
+                const l = dst[dst.length-1], p = dst[d.length-2];
                 const val = parseInt(l[1]);
                 let color = (val < -50) ? 'c-alert' : (val < -20 ? 'c-warn' : 'c-norm');
                 set('dst', val, color, val-parseInt(p[1]));
@@ -252,7 +245,7 @@
         tick(); updateAll();
         setInterval(tick, 1000);
         setInterval(updateAll, 60000);
-        setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
+        setInterval(() => { document.querySelectorAll('.card-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
     </script>
 </body>
 </html>

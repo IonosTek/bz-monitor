@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V49.0</title>
+    <title>IonosTek Monitor V50.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,14 +14,14 @@
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--accent-purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
+        .version { background: var(--accent-orange); color: #000; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
         #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 8px; letter-spacing: 0.5px; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .box:hover { transform: translateY(-3px); }
         .val { font-size: 1.8em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
@@ -37,21 +37,23 @@
         .c-body { background: #000; height: 280px; display: flex; align-items: center; justify-content: center; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
-        /* Fixed Modal Scroll */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .m-content { background: var(--card); width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
+        .m-content { background: var(--card); width: 90%; max-width: 700px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
-        
         #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
         #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
 
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
-        
         .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
         
-        .hl-g { color: var(--green); } .hl-r { color: var(--red); } .hl-y { color: var(--yellow); }
+        .hl-g { color: var(--green); font-weight: bold; }
+        .hl-r { color: var(--red); font-weight: bold; }
+        .hl-y { color: var(--yellow); font-weight: bold; }
+        .guide-sec { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .guide-h { color: var(--accent-blue); font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
+        .guide-p { color: #ccc; font-size: 0.9em; line-height: 1.6; }
 
         @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } .box { padding: 10px 2px; } .val { font-size: 1.5em; } }
     </style>
@@ -59,8 +61,8 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version" style="background:var(--accent-purple)">V49.0</span></h1>
-        <div id="status"><span class="blink">●</span> System Active</div>
+        <h1>IONOSTEK <span class="version" style="background:var(--accent-orange)">V50.0</span></h1>
+        <div id="status"><span class="blink">●</span> Auto-Rotating Proxy...</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
@@ -79,12 +81,7 @@
 
     <div class="grid">
         <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body">
-            <img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" 
-                 onload="this.style.opacity=1" style="opacity:0" 
-                 onclick="view(this.src)"
-                 onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'">
-        </div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
         <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
     </div>
@@ -93,31 +90,25 @@
         <div class="m-content">
             <span class="close" onclick="document.getElementById('guide').style.display='none'">&times;</span>
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
-            
-            <div style="color:#ccc; line-height:1.6; font-size:0.9em;">
-                <h3 style="color:var(--blue); margin-top:15px;">★ Bz Logic (The Switch)</h3>
-                <ul>
-                    <li><span class="hl-g">Positive (+): "SWITCH CLOSED"</span><br>
-                    Shields UP. Earth repels solar wind. HF Quiet.</li>
-                    <li><span class="hl-r">Negative (-): "SWITCH OPEN"</span><br>
-                    Shields DOWN. Energy floods in. Storm Alert!</li>
-                </ul>
-                <p style="margin-top:10px;">
-                    <b class="hl-g">> 0 nT:</b> Stable<br>
-                    <b class="hl-y">0 to -5 nT:</b> Unsettled<br>
-                    <b class="hl-r">< -5 nT:</b> Storm Warning
-                </p>
-
-                <h3 style="color:var(--blue); margin-top:15px;">★ Dst Index</h3>
-                <p><b class="hl-g">> -20:</b> Quiet | <b class="hl-y">-20 to -50:</b> Minor | <b class="hl-r">< -50:</b> Storm</p>
-
-                <h3 style="color:var(--blue); margin-top:15px;">★ Solar & Wind</h3>
-                <p><b>SFI:</b> >100 Good<br><b>Kp:</b> >4 Storm<br><b>Wind:</b> >500 km/s Unstable</p>
+            <div class="guide-sec">
+                <div class="guide-h">★ Understanding Bz (The Switch)</div>
+                <div class="guide-p">
+                    <p><span class="hl-g">Positive (+): "SWITCH CLOSED"</span><br>Shields UP. Earth repels solar wind. HF Quiet.</p>
+                    <p><span class="hl-r">Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Energy floods in. Storm Alert!</p>
+                </div>
+            </div>
+            <div class="guide-sec">
+                <div class="guide-h">★ Reading Values</div>
+                <div class="guide-p">
+                    <b class="hl-g">Bz > 0:</b> Stable | <b class="hl-y">0 to -5:</b> Unsettled | <b class="hl-r">< -5:</b> Storm<br>
+                    <b class="hl-g">Dst > -20:</b> Quiet | <b class="hl-y">-20 to -50:</b> Minor | <b class="hl-r">< -50:</b> Storm<br>
+                    <b>SFI:</b> >100 Good | <b>Kp:</b> >4 Storm | <b>Wind:</b> >500 Unstable
+                </div>
             </div>
         </div>
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V49.0 • Bz Switch Logic</div>
+    <div class="footer">IonosTek Monitor V50.0 • Immortal Proxy Engine</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -132,42 +123,59 @@
                 el.innerText = val; 
                 document.getElementById('b-'+id).className = 'box '+s;
                 if(diff !== 0 && !isNaN(diff)) {
-                    // ARROW LOGIC:
-                    // SFI/SSN/Dst/Bz: Up (Positive change) is GOOD (Green)
-                    // Kp/Wind/Den: Up (Positive change) is BAD (Red)
-                    
-                    let c = 'var(--red)'; 
-                    if(['sfi','ssn','dst','bz'].includes(id)) {
-                         c = diff > 0 ? 'var(--green)' : 'var(--red)';
-                    } else {
-                         c = diff > 0 ? 'var(--red)' : 'var(--green)';
-                    }
-                    
+                    let c = 'var(--green)'; 
+                    if(['kp','wind','den'].includes(id)) c = diff > 0 ? 'var(--red)' : 'var(--green)';
+                    else c = diff > 0 ? 'var(--green)' : 'var(--red)'; 
                     el.innerHTML += ` <span class="trend" style="color:${c}">${diff>0?'▲':'▼'}</span>`;
                 }
             }
         }
 
+        // --- IMMORTAL PROXY ENGINE ---
         async function getData(url) {
-            try { const r = await fetch(url + '?t=' + Date.now()); if(r.ok) return await r.json(); } catch(e){}
-            try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.json(); } catch(e){ return null; }
+            const ts = url + '?t=' + Date.now();
+            const proxies = [
+                u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+                u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+                u => `https://thingproxy.freeboard.io/fetch/${u}`,
+                u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
+            ];
+
+            for (let p of proxies) {
+                try {
+                    const controller = new AbortController();
+                    const id = setTimeout(() => controller.abort(), 5000); // 5s Timeout
+                    const r = await fetch(p(ts), { signal: controller.signal });
+                    clearTimeout(id);
+                    if (r.ok) return await r.json();
+                } catch (e) { continue; }
+            }
+            return null;
         }
         
         async function getText(url) {
-            try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.text(); } catch(e){ return null; }
+            const ts = url + '?t=' + Date.now();
+            const proxies = [
+                u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+                u => `https://corsproxy.io/?${encodeURIComponent(u)}`
+            ];
+            for (let p of proxies) {
+                try {
+                    const r = await fetch(p(ts));
+                    if (r.ok) return await r.text();
+                } catch(e) { continue; }
+            }
+            return null;
         }
 
         async function updateAll() {
             const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
             if(mag && mag.length > 2) {
                 const l = mag[mag.length-1], p = mag[mag.length-2];
-                // Bz Logic: >=0 Green, <0 Yellow, <-5 Red
-                const bzVal = parseFloat(l[1]);
+                const bz = parseFloat(l[1]);
                 let bzColor = 'c-norm';
-                if(bzVal < 0) bzColor = 'c-warn';
-                if(bzVal < -5) bzColor = 'c-alert';
-                
-                set('bz', bzVal, bzColor, bzVal-parseFloat(p[1]));
+                if(bz < 0) bzColor = 'c-warn'; if(bz < -5) bzColor = 'c-alert';
+                set('bz', bz, bzColor, bz-parseFloat(p[1]));
                 set('bt', Math.round(l[2]), 'c-norm', parseFloat(l[2])-parseFloat(p[2]));
             }
 
@@ -189,8 +197,7 @@
                 const l = dst[dst.length-1], p = dst[dst.length-2];
                 const val = parseInt(l[1]);
                 let color = 'c-norm';
-                if(val < -20) color = 'c-warn';
-                if(val < -50) color = 'c-alert';
+                if(val < -20) color = 'c-warn'; if(val < -50) color = 'c-alert';
                 set('dst', val, color, val-parseInt(p[1]));
             }
 
@@ -211,7 +218,6 @@
                     let sfiVal = parseInt(curr[3]);
                     let prevSfi = prev ? parseInt(prev[3]) : sfiVal;
                     set('sfi', sfiVal, sfiVal>100?'c-norm':'c-warn', sfiVal-prevSfi);
-                    
                     let ssnVal = parseInt(curr[4]);
                     let prevSsn = prev ? parseInt(prev[4]) : ssnVal;
                     set('ssn', ssnVal, 'c-norm', ssnVal-prevSsn);

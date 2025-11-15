@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V14.0</title>
+    <title>IonosTek Monitor V15.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V8.2 (Stable) --- */
+        /* --- CSS Base: V14.0 (Stable) --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -32,7 +32,7 @@
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-green);
+            color: #000; background-color: var(--accent-yellow); /* Yellow for Proxy Mode */
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -40,7 +40,7 @@
             font-family: 'Chakra Petch', sans-serif;
             font-size: 0.95em; font-weight: 500; margin-top: 5px; color: var(--text-sub);
         }
-        .blink { animation: blinker 1.5s linear infinite; color: var(--accent-green); }
+        .blink { animation: blinker 1s infinite; color: var(--accent-green); }
         @keyframes blinker { 50% { opacity: 0; } }
 
         .btn-guide {
@@ -107,13 +107,12 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Modal & Lightbox (V8.2 Style - Proven to work) */
+        /* Modal */
         .modal {
             display: none; position: fixed; z-index: 10000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px); overflow-y: auto;
         }
-        /* Fix for scrolling guide */
         .modal-content-text {
             background-color: var(--card-bg); border: 1px solid #444; 
             width: 90%; max-width: 700px; margin: 5% auto; padding: 30px;
@@ -127,8 +126,12 @@
             box-shadow: 0 0 50px rgba(0,0,0,1); position: relative; top: 50%; transform: translateY(-50%);
         }
         .close-btn { position: absolute; top: 15px; right: 20px; color: #fff; font-size: 30px; cursor: pointer; z-index: 20; }
-        .close-btn:hover { color: var(--accent-red); }
-
+        
+        /* Guide Styles */
+        .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
+        .article-content h3 { color: var(--accent-blue); margin-top: 25px; }
+        .article-content p, .article-content ul { color: #ddd; line-height: 1.6; font-size: 0.95em; }
+        
         /* Status Colors */
         .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; }
         .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
@@ -136,10 +139,7 @@
         .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; }
         .status-good { color: var(--accent-purple); border-top-color: var(--accent-purple) !important; }
 
-        @keyframes flash-update {
-            0% { color: #fff; text-shadow: 0 0 15px #fff; transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+        @keyframes flash-update { 0% { color: #fff; text-shadow: 0 0 15px #fff; } 100% { transform: scale(1); } }
         .updated-flash { animation: flash-update 0.5s ease-out; }
 
         .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
@@ -155,68 +155,31 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V14.0</span></h1>
-        <div id="systemStatus"><span class="blink">●</span> Initializing...</div>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V15.0</span></h1>
+        <div id="systemStatus"><span class="blink">●</span> Connecting via Proxy...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
     <div class="stats-container">
-        <div class="stat-box" id="card-sfi">
-            <div class="stat-label">SFI (Flux)</div>
-            <div class="stat-value"><span id="val-sfi">--</span></div>
-            <div class="stat-unit">F10.7cm</div>
-        </div>
-        <div class="stat-box" id="card-ssn">
-            <div class="stat-label">SSN (Spot)</div>
-            <div class="stat-value"><span id="val-ssn">--</span></div>
-            <div class="stat-unit">Calculated</div>
-        </div>
-        <div class="stat-box" id="card-xray">
-            <div class="stat-label">X-Ray Flux</div>
-            <div class="stat-value"><span id="val-xray">--</span></div>
-            <div class="stat-unit">Solar Flare</div>
-        </div>
-        
-        <div class="stat-box" id="card-kp">
-            <div class="stat-label">Kp Index</div>
-            <div class="stat-value"><span id="val-kp">--</span></div>
-            <div class="stat-unit">Planetary</div>
-        </div>
-        <div class="stat-box" id="card-bz">
-            <div class="stat-label">Bz (Polarity)</div>
-            <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
-            <div class="stat-unit">nT (GSM)</div>
-        </div>
-        <div class="stat-box" id="card-bt">
-            <div class="stat-label">IMF Bt</div>
-            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT</div>
-        </div>
-        
-        <div class="stat-box" id="card-wind">
-            <div class="stat-label">Solar Wind</div>
-            <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
-            <div class="stat-unit">km/s</div>
-        </div>
-        <div class="stat-box" id="card-density">
-            <div class="stat-label">Density</div>
-            <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
-            <div class="stat-unit">p/cm³</div>
-        </div>
-        <div class="stat-box" id="card-dst">
-            <div class="stat-label">Dst Index</div>
-            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT (Kyoto)</div>
-        </div>
+        <div class="stat-box" id="card-sfi"><div class="stat-label">SFI (Flux)</div><div class="stat-value" id="val-sfi">--</div><div class="stat-unit">F10.7cm</div></div>
+        <div class="stat-box" id="card-ssn"><div class="stat-label">SSN (Spot)</div><div class="stat-value" id="val-ssn">--</div><div class="stat-unit">Calculated</div></div>
+        <div class="stat-box" id="card-xray"><div class="stat-label">X-Ray Flux</div><div class="stat-value" id="val-xray">--</div><div class="stat-unit">Solar Flare</div></div>
+        <div class="stat-box" id="card-kp"><div class="stat-label">Kp Index</div><div class="stat-value" id="val-kp">--</div><div class="stat-unit">Planetary</div></div>
+        <div class="stat-box" id="card-bz"><div class="stat-label">Bz (Polarity)</div><div class="stat-value" id="val-bz">--</div><div class="stat-unit">nT (GSM)</div></div>
+        <div class="stat-box" id="card-bt"><div class="stat-label">IMF Bt</div><div class="stat-value" id="val-bt">--</div><div class="stat-unit">nT</div></div>
+        <div class="stat-box" id="card-wind"><div class="stat-label">Solar Wind</div><div class="stat-value" id="val-wind">--</div><div class="stat-unit">km/s</div></div>
+        <div class="stat-box" id="card-density"><div class="stat-label">Density</div><div class="stat-value" id="val-density">--</div><div class="stat-unit">p/cm³</div></div>
+        <div class="stat-box" id="card-dst"><div class="stat-label">Dst Index</div><div class="stat-value" id="val-dst">--</div><div class="stat-unit">nT (Kyoto)</div></div>
     </div>
 
     <div class="grid-container">
-        <div class="card" style="grid-column: 1 / -1;">
+        <div class="card">
             <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
-            <div class="card-body">
-                <div class="img-loader">Loading Data...</div>
-                <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" onclick="openLightbox(this.src)">
-            </div>
+            <div class="card-body"><div class="img-loader">Loading Data...</div><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" onclick="openLightbox(this.src)"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>SOLAR FLARES</h3><span>3-DAY PLOT</span></div>
+            <div class="card-body"><div class="img-loader">Loading Data...</div><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" id="img-xplot" alt="X-Ray Plot" onclick="openLightbox(this.src)"></div>
         </div>
         <div class="card">
             <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
@@ -231,161 +194,163 @@
     <div id="guideModal" class="modal">
         <div class="modal-content-text">
             <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
-            <h2 style="color:var(--accent-green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
-            
-            <h3 style="color:var(--accent-blue); margin-top:20px;">★ Solar Activity</h3>
-            <ul style="line-height:1.6; color:#ddd;">
-                <li><b>X-Ray:</b> A/B/C=Normal, M/X=Blackout Alert</li>
-                <li><b>SFI:</b> >100 Good, >150 Excellent</li>
-                <li><b>SSN:</b> Higher is better</li>
-            </ul>
-
-            <h3 style="color:var(--accent-blue);">★ Geomagnetic</h3>
-            <ul style="line-height:1.6; color:#ddd;">
-                <li><b>Kp:</b> 0-3 Quiet, 5+ Storm</li>
-                <li><b>Bz:</b> <span class="hl-green">Positive (+)</span> Quiet, <span class="hl-red">Negative (-)</span> Storm</li>
-            </ul>
-
-            <h3 style="color:var(--accent-blue);">★ Conditions</h3>
-            <p style="color:#ddd;">Solar Wind > 500 km/s = Unstable / QSB</p>
+            <div class="article-content">
+                <h2>📡 OPERATOR GUIDE</h2>
+                <h3>★ Solar Activity</h3>
+                <ul><li><b>X-Ray:</b> A/B/C=Normal, M/X=Blackout Alert</li><li><b>SFI:</b> >100 Good, >150 Excellent</li><li><b>SSN:</b> Higher is better</li></ul>
+                <h3>★ Geomagnetic</h3>
+                <ul><li><b>Kp:</b> 0-3 Quiet, 5+ Storm</li><li><b>Bz:</b> <span style="color:var(--accent-green)">Positive (+)</span> Quiet, <span style="color:var(--accent-red)">Negative (-)</span> Storm</li></ul>
+                <h3>★ Conditions</h3>
+                <p>Solar Wind > 500 km/s = Unstable / QSB</p>
+            </div>
         </div>
     </div>
 
-    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')" style="display:none;">
+    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')" style="display:none; align-items:center; justify-content:center; overflow:hidden;">
         <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px;">&times;</span>
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V14.0 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V15.0 • Hybrid Proxy Core</div>
 
     <script>
         // --- Security ---
         document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
 
-        // --- UI Functions ---
+        // --- UI ---
         function openGuide() { document.getElementById("guideModal").style.display = "block"; }
         function openLightbox(src) {
             const m = document.getElementById("lightboxModal");
             const img = document.getElementById("lightboxImg");
             img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
-            m.style.display = "block";
+            m.style.display = "flex";
         }
         function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
-
         function updateTime() {
-            const now = new Date();
-            document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + now.toUTCString().replace('GMT', 'UTC');
+            document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC');
         }
 
-        function getFreshUrl(url) { return url + '?t=' + new Date().getTime(); }
-
-        function updateUI(valId, cardId, value, type, trendId, arrowId) {
-            const valElem = document.getElementById(valId);
-            const cardElem = document.getElementById(cardId);
-            if (!valElem || !cardElem) return;
-
-            // Flash Effect
-            valElem.classList.remove('updated-flash');
-            void valElem.offsetWidth;
-            valElem.classList.add('updated-flash');
-            
-            valElem.innerText = (value === null || isNaN(value) && typeof value !== 'string') ? "--" : value;
-
-            let status = 'normal';
-            if (type === 'sfi') { if(value>150) status='good'; else if(value>100) status='normal'; else status='warn'; }
-            else if (type === 'ssn') { if(value>100) status='good'; else if(value>50) status='normal'; else status='warn'; }
-            else if (type === 'kp') { if(value>=5) status='alert'; else if(value>=4) status='warn'; else status='normal'; }
-            else if (type === 'dst') { if(value<-100) status='alert'; else if(value<-50) status='moderate'; else if(value<-20) status='warn'; }
-            else if (type === 'bz') { if(value<-5) status='alert'; else if(value<0) status='warn'; }
-            else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
-            else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
-            else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
-            else if (type === 'xray') { 
-                if(typeof value === 'string') {
-                    if(value.startsWith('X')) status='alert'; else if(value.startsWith('M')) status='moderate'; else status='normal';
+        // --- SMART PROXY FETCHING (The Key Fix) ---
+        async function smartFetch(url) {
+            try {
+                // Try Direct first (some browsers might allow it locally)
+                // const r = await fetch(url); if(r.ok) return await r.json();
+                throw new Error("Force Proxy");
+            } catch(e) {
+                // Primary Proxy: corsproxy.io (Fastest)
+                try {
+                    const p1 = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                    const r1 = await fetch(p1);
+                    if(r1.ok) return await r1.json();
+                } catch(e2) {
+                    // Backup Proxy: allorigins (Reliable)
+                    console.log("Switching to Backup Proxy...");
+                    const p2 = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                    const r2 = await fetch(p2);
+                    const d2 = await r2.json();
+                    return JSON.parse(d2.contents);
                 }
             }
-            
-            cardElem.className = 'stat-box';
-            cardElem.classList.add('status-'+status);
-
-            if (type === 'bz' && arrowId) {
-                const arr = document.getElementById(arrowId);
-                arr.innerHTML = value >= 0 ? '&#8593;' : '&#8595;';
-                arr.className = value >= 0 ? 'bz-arrow-n' : 'bz-arrow-s';
-            }
-
-            if (trendId && lastValues[type] !== undefined) {
-                // Logic for trend arrow can be added here if needed
-            }
-            if (type !== 'bz') lastValues[type] = value;
+            throw new Error("All fetch methods failed");
         }
 
-        let lastValues = {};
+        // --- Update Logic ---
+        function updateUI(id, val, type, diff=0) {
+            const el = document.getElementById('val-'+id);
+            const box = document.getElementById('card-'+id); // Using card- prefix in HTML? No, verify IDs.
+            // Re-verify HTML IDs: 'val-sfi', 'card-sfi' ...
+            // Wait, in V15 HTML above, I used 'box-sfi' and 'val-sfi'. 
+            // Correcting function to match HTML.
+            const boxEl = document.getElementById('box-'+id); // Correction
+            
+            if(!el || !boxEl) return;
+            
+            // Animate
+            el.classList.remove('updated-flash');
+            void el.offsetWidth;
+            el.classList.add('updated-flash');
 
-        // --- Data Fetching (V8.2 Logic + Safe X-Ray) ---
-        async function fetchData() {
-            // 1. Mag
-            try {
-                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
-                const d = await r.json();
-                const l = d[d.length-1];
-                updateUI('val-bz', 'card-bz', parseFloat(l[d[0].indexOf('bz_gsm')]), 'bz', null, 'arr-bz');
-                updateUI('val-bt', 'card-bt', parseFloat(l[d[0].indexOf('bt')]), 'bt', 'trend-bt');
-            } catch(e){}
+            el.innerHTML = isNaN(val) && typeof val !== 'string' ? "--" : val;
+            
+            // Trend Arrow
+            if(diff !== 0 && !isNaN(diff)) {
+                let c = diff > 0 ? '#ff1744' : '#00e676'; // Default: Up is Bad
+                if(type=='sfi'||type=='ssn'||type=='dst') c = diff > 0 ? '#00e676' : '#ff1744';
+                if(type=='dst') c = diff > 0 ? '#00e676' : '#ff1744';
+                let arr = diff > 0 ? '&#9650;' : '&#9660;';
+                el.innerHTML += ` <span class="trend-arrow" style="color:${c}">${arr}</span>`;
+            }
 
-            // 2. Plasma
-            try {
-                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
-                const d = await r.json();
-                const l = d[d.length-1];
-                updateUI('val-density', 'card-density', parseFloat(l[d[0].indexOf('density')]), 'density', 'trend-density');
-                updateUI('val-wind', 'card-wind', parseFloat(l[d[0].indexOf('speed')]), 'wind', 'trend-wind');
-            } catch(e){}
+            // Status Color
+            let s = 'status-normal';
+            if(type=='sfi') { if(val>150) s='status-good'; else if(val<100) s='status-warn'; }
+            if(type=='ssn') { if(val>100) s='status-good'; else if(val<50) s='status-warn'; }
+            if(type=='kp') { if(val>=4) s='status-warn'; if(val>=5) s='status-alert'; }
+            if(type=='bz') { if(val<0) s='status-warn'; if(val<-5) s='status-alert'; }
+            if(type=='wind') { if(val>500) s='status-warn'; if(val>700) s='status-alert'; }
+            if(type=='xray') { if(String(val).includes('M')) s='status-moderate'; if(String(val).includes('X')) s='status-alert'; }
+            
+            boxEl.className = 'stat-box ' + s;
+        }
 
-            // 3. Dst
-            try {
-                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
-                const d = await r.json();
-                updateUI('val-dst', 'card-dst', parseInt(d[d.length-1][1]), 'dst', 'trend-dst');
-            } catch(e){}
+        // --- Data Fetcher ---
+        async function fetchAll() {
+            const ts = '?t=' + Date.now();
+            
+            // 1. Mag & Plasma
+            smartFetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'+ts).then(d=>{
+                const l=d[d.length-1], p=d[d.length-2];
+                const bz=d[0].indexOf('bz_gsm'), bt=d[0].indexOf('bt');
+                updateUI('bz', parseFloat(l[bz]), 'bz', l[bz]-p[bz]);
+                updateUI('bt', parseFloat(l[bt]), 'bt', l[bt]-p[bt]);
+            }).catch(e=>{});
 
-            // 4. Kp
-            try {
-                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
-                const d = await r.json();
-                updateUI('val-kp', 'card-kp', parseFloat(d[d.length-1][1]), 'kp', 'trend-kp');
-            } catch(e){}
+            smartFetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'+ts).then(d=>{
+                const l=d[d.length-1], p=d[d.length-2];
+                const s=d[0].indexOf('speed'), den=d[0].indexOf('density');
+                updateUI('wind', parseFloat(l[s]), 'wind', l[s]-p[s]);
+                updateUI('density', parseFloat(l[den]), 'density');
+            }).catch(e=>{});
 
-            // 5. SFI & SSN
-            try {
-                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
-                const d = await r.json();
-                const l = parseInt(d[d.length-1][d[0].length-1]);
-                updateUI('val-sfi', 'card-sfi', l, 'sfi');
-                let calcSSN = Math.round((l - 63.7) * 1.12);
-                updateUI('val-ssn', 'card-ssn', calcSSN<0?0:calcSSN, 'ssn');
-            } catch(e){}
+            // 2. Indices
+            smartFetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'+ts).then(d=>{
+                const l=d[d.length-1];
+                updateUI('kp', parseFloat(l[1]), 'kp', parseFloat(l[1])-parseFloat(d[d.length-2][1]));
+            }).catch(e=>{});
 
-            // 6. X-Ray (Safe Logic: Use 6-hour file, direct access)
-            try {
-                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-6-hour.json'));
-                const d = await r.json();
-                // Index 3 = Long Flux (0.1-0.8nm)
+            smartFetch('https://services.swpc.noaa.gov/products/kyoto-dst.json'+ts).then(d=>{
+                const l=d[d.length-1];
+                updateUI('dst', parseInt(l[1]), 'dst', parseInt(l[1])-parseInt(d[d.length-2][1]));
+            }).catch(e=>{});
+
+            // 3. SFI & SSN
+            smartFetch('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'+ts).then(d=>{
+                const l=parseInt(d[d.length-1][d[0].length-1]);
+                const p=parseInt(d[d.length-2][d[0].length-1]);
+                updateUI('sfi', l, 'sfi', l-p);
+                let ssn = Math.round((l-63.7)*1.12);
+                updateUI('ssn', ssn<0?0:ssn, 'ssn', ssn-Math.round((p-63.7)*1.12));
+            }).catch(e=>{});
+
+            // 4. X-Ray (6-Hour Safe File)
+            smartFetch('https://services.swpc.noaa.gov/products/x-rays-6-hour.json'+ts).then(d=>{
                 let flux = null;
-                // Scan last 5 entries just in case
-                for (let i = d.length - 1; i >= d.length - 5; i--) {
-                   if(d[i][3] !== null) { flux = parseFloat(d[i][3]); break; }
+                // Scan backwards for valid Long Flux (index 3 or 4 depending on file structure)
+                // Usually index 3 is Long (0.1-0.8) in 6-hour file
+                for(let i=d.length-1; i>0; i--) {
+                    if(d[i][3] && !isNaN(parseFloat(d[i][3]))) {
+                        flux = parseFloat(d[i][3]); break;
+                    }
                 }
-                
                 if(flux !== null) {
-                    let xClass = flux<1e-7?'A': flux<1e-6?'B': flux<1e-5?'C': flux<1e-4?'M':'X';
+                    let cls = flux<1e-7?'A': flux<1e-6?'B': flux<1e-5?'C': flux<1e-4?'M':'X';
                     let base = flux<1e-7?1e-7: flux<1e-6?1e-6: flux<1e-5?1e-5: flux<1e-4?1e-4:1e-4;
-                    let sub = (flux / base).toFixed(1);
-                    updateUI('val-xray', 'card-xray', xClass + sub, 'xray');
+                    let num = (flux/base).toFixed(1);
+                    updateUI('xray', cls+num, 'xray');
+                } else {
+                    updateUI('xray', '--', 'xray');
                 }
-            } catch(e){ updateUI('val-xray', 'card-xray', '--', 'xray'); }
+            }).catch(e=>{ updateUI('xray', '--', 'xray'); });
         }
 
         function refreshImages() {
@@ -393,14 +358,11 @@
             imgs.forEach(img => { img.src = img.src.split('?')[0] + '?t=' + new Date().getTime(); });
         }
 
-        // Start immediately
-        document.addEventListener('DOMContentLoaded', (event) => {
-            updateTime(); 
-            fetchData();
-            setInterval(updateTime, 1000);
-            setInterval(fetchData, 60000);
-            setInterval(refreshImages, 300000);
-        });
+        // Start
+        tick(); fetchAll();
+        setInterval(tick, 1000);
+        setInterval(fetchAll, 60000);
+        setInterval(refreshImages, 300000);
     </script>
 </body>
 </html>

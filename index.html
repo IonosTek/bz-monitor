@@ -3,146 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V23.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>IonosTek Monitor V24.0 (Diagnostic)</title>
     <style>
-        :root {
-            --bg: #050505; --card: #111; --text: #e0e0e0; --sub: #888;
-            --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff;
+        body { background: #111; color: #fff; font-family: monospace; padding: 20px; }
+        h1 { text-align: center; color: #00e676; }
+        
+        /* Layout */
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .box { background: #222; border: 1px solid #444; padding: 15px; text-align: center; border-radius: 5px; }
+        .label { color: #888; font-size: 0.8em; }
+        .value { font-size: 1.5em; font-weight: bold; margin-top: 5px; }
+        
+        /* Debug Box */
+        #debug-log { 
+            margin-top: 20px; padding: 10px; background: #000; 
+            border: 1px solid #ff1744; color: #ff1744; font-size: 0.8em; 
+            height: 150px; overflow-y: scroll; white-space: pre-wrap;
         }
-        body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; user-select: none; }
-        
-        .header { text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        .header h1 { margin: 0; font-weight: 700; letter-spacing: 2px; }
-        .ver { background: var(--orange); color: #000; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
-        #status { font-size: 0.8em; color: var(--sub); margin-top: 5px; font-family: monospace; }
-        .blink { animation: blinker 1s infinite; color: var(--green); }
-        @keyframes blinker { 50% { opacity: 0; } }
-        
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        .box { background: var(--card); padding: 10px; border-radius: 5px; text-align: center; border-top: 3px solid #333; transition: 0.3s; }
-        .val { font-size: 1.6em; font-weight: bold; margin: 5px 0; }
-        .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; }
-        
-        .imgs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
-        .img-card { background: var(--card); border: 1px solid #333; border-radius: 5px; overflow: hidden; }
-        .img-head { background: #222; padding: 5px 10px; font-size: 0.8em; font-weight: bold; color: #ccc; }
-        .img-body { height: 250px; background: #000; display: flex; align-items: center; justify-content: center; }
-        .img-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; }
-        #lb-img { display: block; margin: 5vh auto; max-height: 90vh; max-width: 95%; border: 2px solid #333; }
-        
-        .c-green { border-top-color: var(--green) !important; color: var(--green); }
-        .c-yellow { border-top-color: var(--yellow) !important; color: var(--yellow); }
-        .c-red { border-top-color: var(--red) !important; color: var(--red); }
+        .log-ok { color: #00e676; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>IONOSTEK <span class="ver">V23.0</span></h1>
-    <div id="status"><span class="blink">●</span> Connecting...</div>
-</div>
+    <h1>IONOSTEK V24.0 (DIAGNOSTIC)</h1>
 
-<div class="stats">
-    <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div></div>
-    <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div></div>
-    <div class="box" id="b-xray"><div class="lbl">X-Ray</div><div class="val" id="v-xray">--</div></div>
-    <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div></div>
-    <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div></div>
-    <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div></div>
-    <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div></div>
-    <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div></div>
-    <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div></div>
-</div>
+    <div class="container">
+        <div class="box"><div class="label">Solar Flux (SFI)</div><div class="value" id="v-sfi">--</div></div>
+        <div class="box"><div class="label">Sunspot (SSN)</div><div class="value" id="v-ssn">--</div></div>
+        <div class="box"><div class="label">Solar Wind</div><div class="value" id="v-wind">--</div></div>
+        <div class="box"><div class="label">Bz (Polarity)</div><div class="value" id="v-bz">--</div></div>
+        <div class="box"><div class="label">Kp Index</div><div class="value" id="v-kp">--</div></div>
+        <div class="box"><div class="label">X-Ray</div><div class="value" id="v-xray">--</div></div>
+    </div>
 
-<div class="imgs">
-    <div class="img-card"><div class="img-head">PROPAGATION</div><div class="img-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="full(this.src)"></div></div>
-    <div class="img-card"><div class="img-head">X-RAY PLOT</div><div class="img-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="full(this.src)"></div></div>
-    <div class="img-card"><div class="img-head">AURORA</div><div class="img-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="full(this.src)"></div></div>
-    <div class="img-card"><div class="img-head">BLACKOUT</div><div class="img-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="full(this.src)"></div></div>
-</div>
+    <h3>SYSTEM LOG (ส่งข้อความในนี้มาให้ผมถ้ายังไม่ทำงาน)</h3>
+    <div id="debug-log">System Started... Waiting for data...</div>
 
-<div id="lb" class="modal" onclick="this.style.display='none'"><img id="lb-img"></div>
-
-<script>
-    function full(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lb').style.display = 'block'; }
-    function set(id, val, c='c-green') { 
-        const el = document.getElementById('v-'+id);
-        if(el) { el.innerText = val; document.getElementById('b-'+id).className = 'box '+c; }
-    }
-
-    // --- Multi-Gateway Fetcher ---
-    async function fetchMulti(url) {
-        const proxies = [
-            `https://corsproxy.io/?${encodeURIComponent(url)}`, 
-            `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-            `https://thingproxy.freeboard.io/fetch/${url}`
-        ];
-        for (let p of proxies) {
-            try {
-                const r = await fetch(p + '&t=' + Date.now());
-                if (r.ok) return await r.json();
-            } catch(e) { continue; }
+    <script>
+        function log(msg, type='err') {
+            const d = document.getElementById('debug-log');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'ok' ? '#00e676' : '#ff1744';
+            d.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
+            d.scrollTop = d.scrollHeight;
         }
-        throw new Error("Fail");
-    }
 
-    async function updateData() {
-        document.getElementById('status').innerHTML = '<span class="blink">●</span> Updating...';
-        
-        // 1. Mag & Plasma
-        fetchMulti('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json').then(d => {
-            const l = d[d.length-1];
-            const bz = parseFloat(l[1]), bt = parseFloat(l[2]);
-            set('bz', bz, bz<0?'c-yellow':(bz<-5?'c-red':'c-green'));
-            set('bt', bt, bt>10?'c-yellow':'c-green');
-        }).catch(()=>{});
-
-        fetchMulti('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json').then(d => {
-            const l = d[d.length-1];
-            const spd = parseFloat(l[2]), den = parseFloat(l[1]);
-            set('wind', Math.round(spd), spd>500?'c-yellow':'c-green');
-            set('den', Math.round(den));
-        }).catch(()=>{});
-
-        // 2. Kp & Dst
-        fetchMulti('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json').then(d => {
-            const kp = parseFloat(d[d.length-1][1]);
-            set('kp', kp, kp>=4?'c-red':'c-green');
-        }).catch(()=>{});
-
-        fetchMulti('https://services.swpc.noaa.gov/products/kyoto-dst.json').then(d => {
-            const dst = parseInt(d[d.length-1][1]);
-            set('dst', dst, dst<-50?'c-red':'c-green');
-        }).catch(()=>{});
-
-        // 3. SFI, SSN, X-Ray
-        fetchMulti('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json').then(d => {
-            const l = parseInt(d[d.length-1][2]);
-            set('sfi', l, l>100?'c-green':'c-yellow');
-            set('ssn', Math.round((l-63.7)*1.12), 'c-green');
-        }).catch(()=>{});
-
-        fetchMulti('https://services.swpc.noaa.gov/products/x-rays-6-hour.json').then(d => {
-            for(let i=d.length-1; i>0; i--) {
-                if(d[i][3]) {
-                    let v = parseFloat(d[i][3]);
-                    let c = v<1e-5?'C':(v<1e-4?'M':'X');
-                    if(v<1e-6) c='B'; if(v<1e-7) c='A';
-                    set('xray', c, (c=='M'||c=='X')?'c-red':'c-green');
-                    break;
-                }
+        function update(id, val) {
+            const el = document.getElementById('v-'+id);
+            if(el) {
+                el.innerText = val;
+                el.style.color = '#00e676';
             }
-        }).catch(()=>{});
+        }
 
-        setTimeout(() => document.getElementById('status').innerText = 'System Online', 2000);
-    }
+        // --- Core Fetcher ---
+        async function fetchData() {
+            log("Starting Fetch Sequence...", "ok");
 
-    updateData();
-    setInterval(updateData, 60000);
-    setInterval(() => { document.querySelectorAll('.img-body img').forEach(i => i.src = i.src.split('?')[0] + '?t=' + Date.now()); }, 300000);
-</script>
+            const proxy = "https://api.allorigins.win/get?url=";
+            const ts = "&t=" + Date.now();
+
+            // 1. Test Solar Wind (JSON)
+            try {
+                const url = "https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json";
+                log("Fetching Mag...");
+                const res = await fetch(proxy + encodeURIComponent(url) + ts);
+                const data = await res.json(); // AllOrigins returns JSON wrapper
+                
+                if (data.contents) {
+                    const innerData = JSON.parse(data.contents); // Parse inner NOAA JSON
+                    const last = innerData[innerData.length - 1];
+                    // Index 1 = Bz, Index 2 = Bt (usually)
+                    update('bz', last[1] + " nT");
+                    log("Mag Data OK", "ok");
+                } else {
+                    throw new Error("No contents in proxy response");
+                }
+            } catch(e) {
+                log("Mag Error: " + e.message);
+            }
+
+            // 2. Test Plasma (JSON)
+            try {
+                const url = "https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json";
+                log("Fetching Plasma...");
+                const res = await fetch(proxy + encodeURIComponent(url) + ts);
+                const data = await res.json();
+                const innerData = JSON.parse(data.contents);
+                const last = innerData[innerData.length - 1];
+                // Index 1 = Density, Index 2 = Speed
+                update('wind', last[2] + " km/s");
+                log("Plasma Data OK", "ok");
+            } catch(e) {
+                log("Plasma Error: " + e.message);
+            }
+
+            // 3. Test SFI (Text File)
+            try {
+                const url = "https://services.swpc.noaa.gov/text/daily-solar-indices.txt";
+                log("Fetching Text SFI...");
+                const res = await fetch(proxy + encodeURIComponent(url) + ts);
+                const data = await res.json();
+                const text = data.contents;
+                const lines = text.trim().split('\n');
+                
+                // Loop from bottom to find data
+                let found = false;
+                for(let i=lines.length-1; i>=0; i--) {
+                    if(lines[i].match(/^\d{4}/)) { // Starts with year
+                        const parts = lines[i].trim().split(/\s+/);
+                        update('sfi', parts[3]);
+                        update('ssn', parts[4]);
+                        found = true;
+                        log("SFI/SSN OK", "ok");
+                        break;
+                    }
+                }
+                if(!found) log("SFI pattern not found");
+            } catch(e) {
+                log("SFI Error: " + e.message);
+            }
+            
+            // 4. Test Kp (JSON)
+             try {
+                const url = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json";
+                const res = await fetch(proxy + encodeURIComponent(url) + ts);
+                const data = await res.json();
+                const inner = JSON.parse(data.contents);
+                const last = inner[inner.length-1];
+                update('kp', last[1]);
+                log("Kp Data OK", "ok");
+             } catch(e) { log("Kp Error: " + e.message); }
+
+            // 5. X-Ray (6-hour JSON)
+            try {
+                const url = "https://services.swpc.noaa.gov/products/x-rays-6-hour.json";
+                const res = await fetch(proxy + encodeURIComponent(url) + ts);
+                const data = await res.json();
+                const inner = JSON.parse(data.contents);
+                // Find valid flux
+                let flux = "N/A";
+                for(let i=inner.length-1; i>0; i--) {
+                    if(inner[i][3]) { flux = inner[i][3]; break; }
+                }
+                update('xray', flux);
+                log("X-Ray OK", "ok");
+            } catch(e) { log("X-Ray Error: " + e.message); }
+        }
+
+        // Run once on load
+        fetchData();
+    </script>
 </body>
 </html>

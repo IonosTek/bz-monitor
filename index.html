@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V13.0</title>
+    <title>IonosTek Monitor V13.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- Theme: High Performance Dark --- */
@@ -17,6 +17,7 @@
             --accent-orange: #ff9100;
             --accent-red: #ff1744;
             --accent-blue: #2979ff;
+            --accent-purple: #d500f9;
         }
 
         body {
@@ -32,7 +33,7 @@
         /* Header */
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; text-transform: uppercase; }
-        .version { background-color: var(--accent-blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; }
+        .version { background-color: var(--accent-purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; }
         
         #systemStatus { font-size: 0.9em; color: var(--text-sub); margin-top: 5px; font-family: monospace; }
         .blink { animation: blinker 1s infinite; color: var(--accent-green); }
@@ -62,11 +63,7 @@
 
         /* Arrows */
         .trend-arrow { font-size: 0.6em; font-weight: bold; margin-left: 4px; }
-        .up { color: var(--accent-red); } /* Bad if up (usually) */
-        .down { color: var(--accent-green); } /* Good if down */
-        .good-up { color: var(--accent-green); } /* SFI/SSN up is good */
-        .bad-down { color: var(--accent-red); } /* SFI/SSN down is bad */
-
+        
         /* Image Grid */
         .grid-container {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
@@ -139,8 +136,8 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version">V13.0</span></h1>
-        <div id="systemStatus">System Ready</div>
+        <h1>IONOSTEK <span class="version">V13.1</span></h1>
+        <div id="systemStatus">Initializing Hybrid Link...</div>
         <button onclick="document.getElementById('guideModal').style.display='block'" class="btn-guide">📘 Operator Guide</button>
     </div>
 
@@ -212,7 +209,7 @@
         <img id="lb-img">
     </div>
 
-    <div class="footer">IonosTek Monitor V13.0 • Speed Edition</div>
+    <div class="footer">IonosTek Monitor V13.1 • Hybrid Core</div>
 
     <script>
         // --- Security ---
@@ -229,13 +226,12 @@
             const box = document.getElementById('box-'+id);
             if(!el) return;
             
-            // Reset animation
             el.innerHTML = val;
             if(diff !== 0 && !isNaN(diff)) {
                 let arr = diff>0 ? '&#9650;' : '&#9660;';
                 let c = (diff>0) ? 'var(--accent-red)' : 'var(--accent-green)';
                 if(type=='sfi'||type=='ssn'||type=='dst') c = (diff>0) ? 'var(--accent-green)' : 'var(--accent-red)';
-                if(type=='dst') c = (diff>0) ? 'var(--accent-green)' : 'var(--accent-red)'; // Dst closer to 0 is good
+                if(type=='dst') c = (diff>0) ? 'var(--accent-green)' : 'var(--accent-red)'; 
                 
                 el.innerHTML += ` <span class="trend-arrow" style="color:${c}">${arr}</span>`;
             }
@@ -256,58 +252,67 @@
             document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + now.toUTCString().replace('GMT','UTC');
         }
 
-        // --- High Speed Fetching (Parallel) ---
+        // --- HYBRID FETCHING (Direct -> Proxy Fallback) ---
+        
+        async function safeFetch(url) {
+            try {
+                // Attempt 1: Direct
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Direct Failed");
+                return await res.json();
+            } catch (e) {
+                console.log("Direct fetch failed, switching to Proxy for: " + url);
+                // Attempt 2: Proxy (corsproxy.io is usually fast)
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+                const res2 = await fetch(proxyUrl);
+                return await res2.json();
+            }
+        }
+
         async function fetchAll() {
             const ts = '?t=' + Date.now();
             
             // 1. Mag & Plasma
-            fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'+ts)
-                .then(r=>r.json()).then(d=>{
-                    const l=d[d.length-1], p=d[d.length-2];
-                    const bz=d[0].indexOf('bz_gsm'), bt=d[0].indexOf('bt');
-                    updateUI('bz', parseFloat(l[bz]), 'bz', l[bz]-p[bz]);
-                    updateUI('bt', parseFloat(l[bt]), 'bt', l[bt]-p[bt]);
-                }).catch(e=>{});
+            safeFetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'+ts).then(d=>{
+                const l=d[d.length-1], p=d[d.length-2];
+                const bz=d[0].indexOf('bz_gsm'), bt=d[0].indexOf('bt');
+                updateUI('bz', parseFloat(l[bz]), 'bz', l[bz]-p[bz]);
+                updateUI('bt', parseFloat(l[bt]), 'bt', l[bt]-p[bt]);
+            }).catch(e=>{});
 
-            fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'+ts)
-                .then(r=>r.json()).then(d=>{
-                    const l=d[d.length-1], p=d[d.length-2];
-                    const s=d[0].indexOf('speed'), den=d[0].indexOf('density');
-                    updateUI('wind', parseFloat(l[s]), 'wind', l[s]-p[s]);
-                    updateUI('den', parseFloat(l[den]), 'den');
-                }).catch(e=>{});
+            safeFetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'+ts).then(d=>{
+                const l=d[d.length-1], p=d[d.length-2];
+                const s=d[0].indexOf('speed'), den=d[0].indexOf('density');
+                updateUI('wind', parseFloat(l[s]), 'wind', l[s]-p[s]);
+                updateUI('den', parseFloat(l[den]), 'den');
+            }).catch(e=>{});
 
             // 2. Indices
-            fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'+ts)
-                .then(r=>r.json()).then(d=>{
-                    const l=d[d.length-1];
-                    updateUI('kp', parseFloat(l[1]), 'kp', parseFloat(l[1])-parseFloat(d[d.length-2][1]));
-                }).catch(e=>{});
+            safeFetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'+ts).then(d=>{
+                const l=d[d.length-1];
+                updateUI('kp', parseFloat(l[1]), 'kp', parseFloat(l[1])-parseFloat(d[d.length-2][1]));
+            }).catch(e=>{});
 
-            fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json'+ts)
-                .then(r=>r.json()).then(d=>{
-                    const l=d[d.length-1];
-                    updateUI('dst', parseInt(l[1]), 'dst', parseInt(l[1])-parseInt(d[d.length-2][1]));
-                }).catch(e=>{});
+            safeFetch('https://services.swpc.noaa.gov/products/kyoto-dst.json'+ts).then(d=>{
+                const l=d[d.length-1];
+                updateUI('dst', parseInt(l[1]), 'dst', parseInt(l[1])-parseInt(d[d.length-2][1]));
+            }).catch(e=>{});
 
             // 3. SFI & SSN
-            fetch('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'+ts)
-                .then(r=>r.json()).then(d=>{
-                    const l=parseInt(d[d.length-1][d[0].length-1]);
-                    const p=parseInt(d[d.length-2][d[0].length-1]);
-                    updateUI('sfi', l, 'sfi', l-p);
-                    // Calc SSN
-                    let ssn = Math.round((l-63.7)*1.12);
-                    let p_ssn = Math.round((p-63.7)*1.12);
-                    updateUI('ssn', ssn<0?0:ssn, 'ssn', ssn-p_ssn);
-                }).catch(e=>{});
+            safeFetch('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'+ts).then(d=>{
+                const l=parseInt(d[d.length-1][d[0].length-1]);
+                const p=parseInt(d[d.length-2][d[0].length-1]);
+                updateUI('sfi', l, 'sfi', l-p);
+                // Calc SSN
+                let ssn = Math.round((l-63.7)*1.12);
+                let p_ssn = Math.round((p-63.7)*1.12);
+                updateUI('ssn', ssn<0?0:ssn, 'ssn', ssn-p_ssn);
+            }).catch(e=>{});
 
             // 4. X-Ray (3-Step Fallback)
             const tryXray = async (url, index) => {
-                const r = await fetch(url+ts);
-                const d = await r.json();
+                const d = await safeFetch(url+ts);
                 let flux = null;
-                // Deep Scan
                 for(let i=d.length-1; i>0; i--) {
                     if(d[i][index] && !isNaN(parseFloat(d[i][index]))) {
                         flux = parseFloat(d[i][index]); break;
@@ -317,10 +322,9 @@
                 throw new Error("No data");
             };
 
-            // Try 5-min -> 6-hour -> 3-day
-            tryXray('https://services.swpc.noaa.gov/products/x-rays-5-minute.json', 3) // Index 3 for 5-min
-                .catch(() => tryXray('https://services.swpc.noaa.gov/products/x-rays-6-hour.json', 3)) // Index 3 for 6-hr
-                .catch(() => tryXray('https://services.swpc.noaa.gov/products/x-rays-3-day.json', 3)) // Index 3 for 3-day
+            tryXray('https://services.swpc.noaa.gov/products/x-rays-5-minute.json', 3)
+                .catch(() => tryXray('https://services.swpc.noaa.gov/products/x-rays-6-hour.json', 3))
+                .catch(() => tryXray('https://services.swpc.noaa.gov/products/x-rays-3-day.json', 3))
                 .then(flux => {
                     let cls = flux<1e-7?'A': flux<1e-6?'B': flux<1e-5?'C': flux<1e-4?'M':'X';
                     let base = flux<1e-7?1e-7: flux<1e-6?1e-6: flux<1e-5?1e-5: flux<1e-4?1e-4:1e-4;

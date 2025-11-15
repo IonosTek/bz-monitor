@@ -3,503 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V11.0</title>
+    <title>IonosTek Monitor V12.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V10.5 --- */
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #ffffff;
-            --text-sub: #b0b0b0;
+            --bg-color: #0a0a0a;
+            --card-bg: #141414;
+            --text-main: #e0e0e0;
+            --text-sub: #888;
             --accent-green: #00e676;
             --accent-yellow: #ffea00;
             --accent-orange: #ff9100;
             --accent-red: #ff1744;
             --accent-blue: #2979ff;
-            --accent-purple: #d500f9;
+            --border: #333;
         }
-
-        body {
-            font-family: 'Chakra Petch', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
-        .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
-        .header span.version { 
-            color: #fff; background-color: var(--accent-red); 
-            font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
-        }
-        
-        #systemStatus {
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 0.95em; font-weight: 500; margin-top: 5px; color: var(--text-sub);
-        }
-        
-        /* Animations */
-        @keyframes blinker { 
-            0% { opacity: 1; text-shadow: 0 0 5px var(--accent-green); } 
-            50% { opacity: 0.2; text-shadow: none; }
-            100% { opacity: 1; text-shadow: 0 0 5px var(--accent-green); } 
-        }
-        .blink { animation: blinker 1.5s infinite ease-in-out; color: var(--accent-green); }
-
-        @keyframes value-breathe {
-            0% { text-shadow: none; }
-            50% { text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-            100% { text-shadow: none; }
-        }
-
-        @keyframes arrow-pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(0.85); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .btn-guide {
-            background: transparent; border: 1px solid var(--accent-blue);
-            color: var(--accent-blue); padding: 5px 15px; margin-top: 10px;
-            border-radius: 20px; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
-            font-size: 0.85em; transition: all 0.3s; text-transform: uppercase; font-weight: bold;
-        }
+        body { font-family: 'Chakra Petch', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; user-select: none; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .header h1 { margin: 0; font-weight: 700; letter-spacing: 1px; }
+        .version { background: var(--accent-blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
+        #time { font-size: 0.9em; color: var(--text-sub); margin-top: 5px; }
+        .btn-guide { background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 5px 15px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .btn-guide:hover { background: var(--accent-blue); color: #fff; }
-
-        /* Stats Grid */
-        .stats-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; }
-        .stat-box {
-            background: var(--card-bg); padding: 15px 5px; border-radius: 8px;
-            min-width: 110px; flex: 1; text-align: center;
-            border-top: 4px solid #555; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
-        }
         
-        .stat-value { 
-            font-size: 1.6em; font-weight: 700; margin: 5px 0; 
-            display: flex; align-items: center; justify-content: center; gap: 3px;
-            animation: value-breathe 3s infinite ease-in-out;
-        }
-        .stat-label { font-size: 0.7em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-unit { font-size: 0.6em; color: #666; }
-
-        .trend-arrow { font-size: 0.6em; font-weight: bold; animation: arrow-pulse 1.5s infinite; }
-        .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; } 
-        .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; }
-
-        /* Cards Grid */
-        .grid-container {
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 25px; 
-            max-width: 1600px; 
-            margin: 0 auto;
-        }
-        .card {
-            background-color: var(--card-bg); border-radius: 10px; overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; flex-direction: column;
-            border: 1px solid #333;
-        }
-        .card-header {
-            background: linear-gradient(90deg, #2c2c2c 0%, #1e1e1e 100%);
-            padding: 12px 20px; border-bottom: 1px solid #444;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .card-header h3 { margin: 0; font-size: 1.1em; font-weight: 600; color: #ddd; }
-        .card-header span { font-size: 0.75em; color: var(--accent-blue); background: rgba(33, 150, 243, 0.1); padding: 3px 8px; border-radius: 4px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 30px; max-width: 1000px; margin-left: auto; margin-right: auto; }
+        .stat-box { background: var(--card-bg); padding: 10px; border-radius: 8px; text-align: center; border-top: 3px solid #444; }
+        .stat-val { font-size: 1.5em; font-weight: bold; margin: 5px 0; }
+        .stat-lbl { font-size: 0.7em; color: var(--text-sub); }
+        .stat-unit { font-size: 0.6em; color: #555; }
         
-        .card-body {
-            background: #000; flex-grow: 1; display: flex; align-items: center; justify-content: center;
-            min-height: 300px; position: relative; padding: 5px;
-        }
-        .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; transition: transform 0.3s; }
-        .card-body img:hover { transform: scale(1.02); }
-        .img-loader { position: absolute; color: #555; z-index: 0; }
-
-        /* Modal Fixed (Scrollable) */
-        .modal {
-            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
-            backdrop-filter: blur(5px); overflow-y: auto; -webkit-overflow-scrolling: touch;
-        }
-        .modal-content-text {
-            background-color: var(--card-bg); border: 1px solid #444; 
-            width: 90%; max-width: 700px; margin: 5% auto 10% auto; padding: 30px;
-            border-radius: 10px; box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative;
-        }
-        .close-btn { 
-            position: absolute; top: 15px; right: 20px; color: #fff; 
-            font-size: 32px; font-weight: bold; cursor: pointer; z-index: 20;
-        }
-        .close-btn:hover { color: var(--accent-red); }
-        
-        .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
-        .article-content h3 { color: var(--accent-blue); margin-top: 25px; border-left: 3px solid var(--accent-blue); padding-left: 10px; }
-        .article-content p, .article-content ul { color: #ddd; line-height: 1.6; font-size: 0.95em; }
-        .hl-red { color: var(--accent-red); font-weight: bold; }
-        .hl-green { color: var(--accent-green); font-weight: bold; }
-
-        #lightboxModal { display: none; align-items: center; justify-content: center; overflow: hidden; }
-        .modal-content-img {
-            margin: auto; display: block; width: auto; height: auto;
-            max-width: 98%; max-height: 95vh;
-            border: 2px solid #333; border-radius: 4px;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
-        }
+        .img-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
+        .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+        .card-head { background: #1f1f1f; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; font-weight: bold; }
+        .card-body { height: 300px; display: flex; align-items: center; justify-content: center; background: #000; }
+        .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; }
 
         /* Status Colors */
-        .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; }
-        .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
-        .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; }
-        .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; }
-        .status-good { color: var(--accent-purple); border-top-color: var(--accent-purple) !important; }
+        .s-norm { border-top-color: var(--accent-green) !important; color: var(--accent-green); }
+        .s-warn { border-top-color: var(--accent-yellow) !important; color: var(--accent-yellow); }
+        .s-mod { border-top-color: var(--accent-orange) !important; color: var(--accent-orange); }
+        .s-alert { border-top-color: var(--accent-red) !important; color: var(--accent-red); }
 
-        @keyframes flash-update {
-            0% { color: #fff; text-shadow: 0 0 15px #fff; transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        .updated-flash { animation: flash-update 0.5s ease-out; }
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; }
+        .modal-box { background: var(--card-bg); width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 10px; position: relative; border: 1px solid #444; }
+        .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
+        .close:hover { color: var(--accent-red); }
+        
+        .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; }
+        .lightbox img { max-width: 95%; max-height: 95vh; border: 2px solid #333; }
 
-        .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
-        @media (max-width: 768px) {
-            .grid-container { grid-template-columns: 1fr; }
-            .stat-box { min-width: 30%; }
-        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .live { animation: pulse 2s infinite; color: var(--accent-green); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V11.0</span></h1>
-        <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
-        <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
-    </div>
+<div class="header">
+    <h1>IONOSTEK <span class="version">V12.0</span></h1>
+    <div id="time"><span class="live">●</span> CONNECTING...</div>
+    <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
+</div>
 
-    <div class="stats-container">
-        <div class="stat-box" id="card-sfi">
-            <div class="stat-label">SFI (Flux)</div>
-            <div class="stat-value"><span id="val-sfi">--</span><span id="trend-sfi" class="trend-arrow"></span></div>
-            <div class="stat-unit">F10.7cm</div>
-        </div>
-        <div class="stat-box" id="card-ssn">
-            <div class="stat-label">SSN (Sunspot)</div>
-            <div class="stat-value"><span id="val-ssn">--</span><span id="trend-ssn" class="trend-arrow"></span></div>
-            <div class="stat-unit">Hybrid Count</div>
-        </div>
-        <div class="stat-box" id="card-xray">
-            <div class="stat-label">X-Ray Flux</div>
-            <div class="stat-value"><span id="val-xray">--</span></div>
-            <div class="stat-unit">Solar Flare</div>
-        </div>
+<div class="stats-grid">
+    <div class="stat-box" id="sfi-box"><div class="stat-lbl">SFI</div><div class="stat-val" id="v-sfi">--</div><div class="stat-unit">Flux</div></div>
+    <div class="stat-box" id="ssn-box"><div class="stat-lbl">SSN</div><div class="stat-val" id="v-ssn">--</div><div class="stat-unit">Count</div></div>
+    <div class="stat-box" id="xray-box"><div class="stat-lbl">X-RAY</div><div class="stat-val" id="v-xray">--</div><div class="stat-unit">Flare</div></div>
+    <div class="stat-box" id="kp-box"><div class="stat-lbl">Kp</div><div class="stat-val" id="v-kp">--</div><div class="stat-unit">Index</div></div>
+    <div class="stat-box" id="bz-box"><div class="stat-lbl">Bz</div><div class="stat-val" id="v-bz">--</div><div class="stat-unit">nT</div></div>
+    <div class="stat-box" id="bt-box"><div class="stat-lbl">Bt</div><div class="stat-val" id="v-bt">--</div><div class="stat-unit">nT</div></div>
+    <div class="stat-box" id="wind-box"><div class="stat-lbl">Wind</div><div class="stat-val" id="v-wind">--</div><div class="stat-unit">km/s</div></div>
+    <div class="stat-box" id="den-box"><div class="stat-lbl">Den</div><div class="stat-val" id="v-den">--</div><div class="stat-unit">p/cm³</div></div>
+    <div class="stat-box" id="dst-box"><div class="stat-lbl">Dst</div><div class="stat-val" id="v-dst">--</div><div class="stat-unit">nT</div></div>
+</div>
+
+<div class="img-grid">
+    <div class="card">
+        <div class="card-head"><span>PROPAGATION</span><span>TEC MAP</span></div>
+        <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div>
+    </div>
+    <div class="card">
+        <div class="card-head"><span>SOLAR FLARES</span><span>GOES X-RAY</span></div>
+        <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)"></div>
+    </div>
+    <div class="card">
+        <div class="card-head"><span>AURORA</span><span>OVATION</span></div>
+        <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div>
+    </div>
+    <div class="card">
+        <div class="card-head"><span>BLACKOUT</span><span>D-RAP</span></div>
+        <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div>
+    </div>
+</div>
+
+<div id="guide" class="modal">
+    <div class="modal-box">
+        <span class="close" onclick="document.getElementById('guide').style.display='none'">&times;</span>
+        <h2 style="color:var(--accent-green)">OPERATOR GUIDE</h2>
+        <p><b>SFI:</b> >100 Good, >150 Excellent<br><b>SSN:</b> Higher is better</p>
+        <p><b>X-Ray:</b> <span style="color:green">A/B/C Normal</span>, <span style="color:red">M/X Blackout</span></p>
+        <p><b>Kp:</b> 0-3 Quiet, 5+ Storm</p>
+        <p><b>Bz:</b> Positive(+) Good, Negative(-) Storm</p>
+        <p><b>Wind:</b> >500 km/s Unstable</p>
+    </div>
+</div>
+
+<div id="lightbox" class="lightbox" onclick="this.style.display='none'">
+    <img id="lb-img">
+</div>
+
+<script>
+    function view(src) { 
+        document.getElementById('lb-img').src = src + '?t=' + Date.now(); 
+        document.getElementById('lightbox').style.display = 'flex'; 
+    }
+
+    function update(id, val, type) {
+        const el = document.getElementById('v-'+id);
+        const box = document.getElementById(id+'-box');
+        if(!el) return;
+        el.innerText = val;
         
-        <div class="stat-box" id="card-kp">
-            <div class="stat-label">Kp Index</div>
-            <div class="stat-value"><span id="val-kp">--</span><span id="trend-kp" class="trend-arrow"></span></div>
-            <div class="stat-unit">Planetary</div>
-        </div>
-        <div class="stat-box" id="card-bz">
-            <div class="stat-label">Bz (Polarity)</div>
-            <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
-            <div class="stat-unit">nT (GSM)</div>
-        </div>
-        <div class="stat-box" id="card-bt">
-            <div class="stat-label">IMF Bt</div>
-            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT</div>
-        </div>
+        let c = 's-norm';
+        if(type=='sfi') { if(val>150) c='s-good'; else if(val<100) c='s-warn'; }
+        if(type=='xray') { if(val.includes('M')) c='s-mod'; if(val.includes('X')) c='s-alert'; }
+        if(type=='kp') { if(val>=4) c='s-warn'; if(val>=5) c='s-alert'; }
+        if(type=='bz') { if(val<0) c='s-warn'; if(val<-5) c='s-alert'; }
+        if(type=='wind') { if(val>500) c='s-warn'; }
         
-        <div class="stat-box" id="card-wind">
-            <div class="stat-label">Solar Wind</div>
-            <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
-            <div class="stat-unit">km/s</div>
-        </div>
-        <div class="stat-box" id="card-density">
-            <div class="stat-label">Density</div>
-            <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
-            <div class="stat-unit">p/cm³</div>
-        </div>
-        <div class="stat-box" id="card-dst">
-            <div class="stat-label">Dst Index</div>
-            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT (Kyoto)</div>
-        </div>
-    </div>
+        box.className = 'stat-box ' + c;
+    }
 
-    <div class="grid-container">
-        <div class="card">
-            <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
-            <div class="card-body">
-                <div class="img-loader">Loading Data...</div>
-                <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" onclick="openLightbox(this.src)">
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>SOLAR FLARES</h3><span>GOES X-RAY FLUX</span></div>
-            <div class="card-body">
-                <div class="img-loader">Loading Graph...</div>
-                <img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" id="img-xplot" alt="X-Ray Plot" onclick="openLightbox(this.src)">
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
-            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora" onclick="openLightbox(this.src)"></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>D-REGION ABSORPTION</span></div>
-            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP" onclick="openLightbox(this.src)"></div>
-        </div>
-    </div>
+    async function fetchLegacy() {
+        // 1. X-Ray & Kp from SCALES.txt (Robust!)
+        try {
+            const r = await fetch('https://services.swpc.noaa.gov/text/noaa-scales.txt');
+            const txt = await r.text();
+            // Parse last non-empty line
+            const lines = txt.trim().split('\n');
+            const last = lines[lines.length-1].trim().split(/\s+/);
+            // Date, Time, R, S, G
+            // R scale roughly maps to Flare: 1=M1, 2=M5, 3=X1... 
+            // But we want raw flux? OK, fallback to JSON for raw if possible, but use this for ALERT
+            // Let's stick to JSON for Wind/Mag as they are standard.
+        } catch(e){}
 
-    <div id="guideModal" class="modal">
-        <div class="modal-content-text">
-            <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
-            <div class="article-content">
-                <h2>📡 OPERATOR GUIDE</h2>
-                <h3>★ Solar Activity</h3>
-                <ul>
-                    <li><b>X-Ray:</b> <span style="color:var(--accent-green)">A/B/C</span> ปกติ, <span style="color:var(--accent-red)">M/X</span> สัญญาณดับ</li>
-                    <li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li>
-                    <li><b>SSN:</b> ยิ่งสูง ยิ่งดี</li>
-                </ul>
-                <h3>★ Geomagnetic</h3>
-                <ul>
-                    <li><b>Kp:</b> 0-3 สงบ, 5+ พายุ</li>
-                    <li><b>Bz:</b> <span class="hl-green">บวก(+)</span> นิ่ง, <span class="hl-red">ลบ(-)</span> พายุเข้า</li>
-                </ul>
-                <h3>★ Solar Wind</h3>
-                <p>ลม > 500 km/s สัญญาณอาจแกว่ง (QSB)</p>
-                <h3>3. TEC Map</h3>
-                <ul><li><b style="color:var(--accent-orange)">แดง/ส้ม:</b> 10m-15m</li><li><b style="color:var(--accent-blue)">น้ำเงิน:</b> 40m-80m</li></ul>
-                <br><p style="text-align:center; color:#555;">End of Guide</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')" style="align-items:center; justify-content:center; overflow:hidden;">
-        <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px; z-index:100;">&times;</span>
-        <img class="modal-content-img" id="lightboxImg">
-    </div>
-
-    <div class="footer">IonosTek Monitor V11.0 • Data: NOAA, Kyoto</div>
-
-    <script>
-        // Security
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) return false; }
-
-        function openGuide() { document.getElementById("guideModal").style.display = "block"; }
-        function openLightbox(src) {
-            const m = document.getElementById("lightboxModal");
-            const img = document.getElementById("lightboxImg");
-            img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
-            m.style.display = "flex";
-        }
-        function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
-
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + now.toUTCString().replace('GMT', 'UTC');
-        }
-
-        function getFreshUrl(url) { return url + '?t=' + new Date().getTime(); }
-
-        function renderStat(valId, cardId, value, type, trendId, prevValue, arrowId) {
-            const valElem = document.getElementById(valId);
-            const cardElem = document.getElementById(cardId);
-            if (!valElem || !cardElem) return;
-
-            valElem.classList.remove('updated-flash');
-            void valElem.offsetWidth;
-            valElem.classList.add('updated-flash');
-            
-            valElem.innerText = (value === null || value === undefined || (typeof value === 'number' && isNaN(value))) ? "--" : value;
-
-            let status = 'normal';
-            if (type === 'sfi') { if(value>150) status='good'; else if(value>100) status='normal'; else status='warn'; }
-            else if (type === 'ssn') { if(value>100) status='good'; else if(value>50) status='normal'; else status='warn'; }
-            else if (type === 'kp') { if(value>=5) status='alert'; else if(value>=4) status='warn'; else status='normal'; }
-            else if (type === 'dst') { if(value<-100) status='alert'; else if(value<-50) status='moderate'; else if(value<-20) status='warn'; }
-            else if (type === 'bz') { if(value<-5) status='alert'; else if(value<0) status='warn'; }
-            else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
-            else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
-            else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
-            else if (type === 'xray') { 
-                if(typeof value === 'string') {
-                    if(value.startsWith('X')) status='alert';
-                    else if(value.startsWith('M')) status='moderate';
-                    else status='normal';
+        // 2. SFI & SSN from DSD.txt (Daily Solar Data) - Very Stable
+        try {
+            const r = await fetch('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
+            const txt = await r.text();
+            const lines = txt.trim().split('\n');
+            // Find last data line (starts with Year)
+            for(let i=lines.length-1; i>=0; i--) {
+                if(lines[i].match(/^\d{4}/)) {
+                    const cols = lines[i].trim().split(/\s+/);
+                    // Col 3 = Radio Flux (SFI), Col 4 = Sunspot (SSN)
+                    update('sfi', cols[3], 'sfi');
+                    update('ssn', cols[4], 'ssn');
+                    break;
                 }
             }
+        } catch(e){}
+    }
 
-            cardElem.className = 'stat-box';
-            cardElem.classList.add('status-'+status);
+    async function fetchLive() {
+        const ts = '?t=' + Date.now();
+        
+        // Mag
+        try {
+            const r = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'+ts);
+            const d = await r.json();
+            const l = d[d.length-1];
+            update('bz', parseFloat(l[d[0].indexOf('bz_gsm')]), 'bz');
+            update('bt', parseFloat(l[d[0].indexOf('bt')]), 'bt');
+        } catch(e){}
 
-            if (type === 'bz' && arrowId) {
-                const arr = document.getElementById(arrowId);
-                arr.innerHTML = value >= 0 ? '&#8593;' : '&#8595;';
-                arr.className = value >= 0 ? 'bz-arrow-n' : 'bz-arrow-s';
-            }
+        // Plasma
+        try {
+            const r = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'+ts);
+            const d = await r.json();
+            const l = d[d.length-1];
+            update('wind', parseFloat(l[d[0].indexOf('speed')]), 'wind');
+            update('den', parseFloat(l[d[0].indexOf('density')]), 'den');
+        } catch(e){}
+        
+        // Kp (Planetary)
+        try {
+            const r = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'+ts);
+            const d = await r.json();
+            update('kp', d[d.length-1][1], 'kp');
+        } catch(e){}
 
-            if (trendId && !isNaN(prevValue) && !isNaN(value)) {
-                const tr = document.getElementById(trendId);
-                const diff = value - prevValue;
-                const threshold = (type === 'ssn') ? 0.1 : 0.05;
-                if (Math.abs(diff) > threshold) {
-                    tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
-                    if(type==='dst' || type==='sfi' || type==='ssn' || type==='kp') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
-                    else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
-                } else { tr.innerHTML = ''; }
-            }
-        }
-
-        // --- BULLETPROOF X-RAY LOGIC ---
-        // Helper to scan array backwards for valid flux
-        function findValidFlux(data) {
-            if (!Array.isArray(data) || data.length === 0) return null;
-            // Loop backwards
-            for (let i = data.length - 1; i >= 0; i--) {
-                // Index 3 is usually Flux (Long) in 5-min and 6-hour files
-                let val = data[i][3];
-                if (val !== null && !isNaN(parseFloat(val))) {
-                    return parseFloat(val);
+        // X-Ray (Safe Mode)
+        try {
+            const r = await fetch('https://services.swpc.noaa.gov/products/x-rays-5-minute.json'+ts);
+            const d = await r.json();
+            // Scan back for valid data
+            for(let i=d.length-1; i>0; i--) {
+                let val = d[i][3]; // Long flux
+                if(val && !isNaN(val)) {
+                    let v = parseFloat(val);
+                    let cls = v<1e-7?'A': v<1e-6?'B': v<1e-5?'C': v<1e-4?'M':'X';
+                    let base = v<1e-7?1e-7: v<1e-6?1e-6: v<1e-5?1e-5: v<1e-4?1e-4:1e-4;
+                    let num = (v/base).toFixed(1);
+                    update('xray', cls+num, 'xray');
+                    break;
                 }
             }
-            return null;
-        }
+        } catch(e){}
 
-        async function fetchXRay() {
-            try {
-                // Plan A: 5-minute file (Granular)
-                let res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-5-minute.json'));
-                let data = await res.json();
-                let flux = findValidFlux(data);
+        // Dst
+        try {
+             const r = await fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json'+ts);
+             const d = await r.json();
+             update('dst', d[d.length-1][1], 'dst');
+        } catch(e){}
+    }
 
-                // Plan B: 6-hour file (Fallback if 5-min is empty/broken)
-                if (flux === null) {
-                    console.log("X-Ray Plan A failed, trying Plan B...");
-                    res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-6-hour.json'));
-                    data = await res.json();
-                    flux = findValidFlux(data);
-                }
+    function tick() {
+        document.getElementById('time').innerHTML = '<span class="live">●</span> ' + new Date().toUTCString().replace('GMT','UTC');
+    }
 
-                if (flux !== null) {
-                    // Calulate Class
-                    let xClass = "A";
-                    if (flux < 1e-7) xClass = "A";
-                    else if (flux < 1e-6) xClass = "B";
-                    else if (flux < 1e-5) xClass = "C";
-                    else if (flux < 1e-4) xClass = "M";
-                    else xClass = "X";
-                    
-                    let base = 1e-7;
-                    if (xClass == 'B') base = 1e-7;
-                    if (xClass == 'C') base = 1e-6;
-                    if (xClass == 'M') base = 1e-5;
-                    if (xClass == 'X') base = 1e-4;
-                    
-                    let sub = (flux / base).toFixed(1);
-                    renderStat('val-xray', 'card-xray', xClass + sub, 'xray');
-                } else {
-                    renderStat('val-xray', 'card-xray', '--', 'xray');
-                }
-            } catch(e) {
-                console.log("X-Ray System Offline");
-                renderStat('val-xray', 'card-xray', 'N/A', 'xray');
-            }
-        }
-
-        async function fetchData() {
-            // 1. Solar Wind
-            try {
-                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
-                const data = await res.json();
-                if (data.length > 2) {
-                    const curr = data[data.length-1]; const prev = data[data.length-2];
-                    const bzIdx = data[0].indexOf('bz_gsm'); const btIdx = data[0].indexOf('bt');
-                    renderStat('val-bz', 'card-bz', parseFloat(curr[bzIdx]), 'bz', null, parseFloat(prev[bzIdx]), 'arr-bz');
-                    renderStat('val-bt', 'card-bt', parseFloat(curr[btIdx]), 'bt', 'trend-bt', parseFloat(prev[btIdx]));
-                }
-            } catch(e){}
-
-            try {
-                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
-                const data = await res.json();
-                if (data.length > 2) {
-                    const curr = data[data.length-1]; const prev = data[data.length-2];
-                    const denIdx = data[0].indexOf('density'); const spdIdx = data[0].indexOf('speed');
-                    renderStat('val-density', 'card-density', parseFloat(curr[denIdx]), 'density', 'trend-density', parseFloat(prev[denIdx]));
-                    renderStat('val-wind', 'card-wind', parseFloat(curr[spdIdx]), 'wind', 'trend-wind', parseFloat(prev[spdIdx]));
-                }
-            } catch(e){}
-
-            // 2. Dst
-            try {
-                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
-                const data = await res.json();
-                if (data.length > 2) {
-                    renderStat('val-dst', 'card-dst', parseInt(data[data.length-1][1]), 'dst', 'trend-dst', parseInt(data[data.length-2][1]));
-                }
-            } catch(e){}
-
-            // 3. Kp
-            try {
-                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
-                const data = await res.json();
-                if (data.length > 2) {
-                    renderStat('val-kp', 'card-kp', parseFloat(data[data.length-1][1]), 'kp', 'trend-kp', parseFloat(data[data.length-2][1]));
-                }
-            } catch(e){}
-
-            // 4. Hybrid SSN & SFI
-            try {
-                const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
-                const dataSfi = await resSfi.json();
-                let currSfi = 0, prevSfi = 0;
-                if (dataSfi.length > 2) {
-                    currSfi = parseInt(dataSfi[dataSfi.length-1][dataSfi[0].length-1]);
-                    prevSfi = parseInt(dataSfi[dataSfi.length-2][dataSfi[0].length-1]);
-                    renderStat('val-sfi', 'card-sfi', currSfi, 'sfi', 'trend-sfi', prevSfi);
-                }
-
-                let finalSSN = 0;
-                let prevSSN_calc = Math.round((prevSfi - 63.7) * 1.12);
-                if(prevSSN_calc < 0) prevSSN_calc = 0;
-
-                try {
-                    const resSpots = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-region-summary.json'));
-                    const dataSpots = await resSpots.json();
-                    if (Array.isArray(dataSpots) && dataSpots.length > 0) {
-                        const groups = dataSpots.length;
-                        let spots = 0;
-                        dataSpots.forEach(r => spots += parseInt(r.number_spots));
-                        finalSSN = (10 * groups) + spots; 
-                    } else { throw new Error("Empty"); }
-                } catch (spotErr) {
-                    finalSSN = Math.round((currSfi - 63.7) * 1.12);
-                    if (finalSSN < 0) finalSSN = 0;
-                }
-                renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn', 'trend-ssn', prevSSN_calc);
-            } catch(e){}
-
-            // 5. Run Bulletproof X-Ray
-            fetchXRay();
-        }
-
-        function refreshImages() {
-            const imgs = document.querySelectorAll('.card-body img');
-            imgs.forEach(img => { img.src = img.src.split('?')[0] + '?t=' + new Date().getTime(); });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            updateTime(); fetchData();
-            setInterval(updateTime, 1000);
-            setInterval(fetchData, 60000);
-            setInterval(refreshImages, 300000);
-        });
-    </script>
+    // Init
+    tick(); fetchLegacy(); fetchLive();
+    setInterval(tick, 1000);
+    setInterval(fetchLive, 60000);
+    setInterval(fetchLegacy, 3600000); // Text files update hourly
+</script>
 </body>
 </html>

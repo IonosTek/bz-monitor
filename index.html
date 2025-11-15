@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V10.4</title>
+    <title>IonosTek Monitor V10.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- CSS Base --- */
@@ -26,14 +26,14 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            user-select: none; /* Security */
+            user-select: none;
             -webkit-user-select: none;
         }
 
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-green); 
+            color: #000; background-color: var(--accent-orange); 
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -91,10 +91,13 @@
         .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; } 
         .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; }
 
-        /* Cards Grid */
+        /* Cards Grid (Modified for 4 cards) */
         .grid-container {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 25px; max-width: 1600px; margin: 0 auto;
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* ปรับขนาดให้พอดี 2x2 */
+            gap: 25px; 
+            max-width: 1600px; 
+            margin: 0 auto;
         }
         .card {
             background-color: var(--card-bg); border-radius: 10px; overflow: hidden;
@@ -111,64 +114,37 @@
         
         .card-body {
             background: #000; flex-grow: 1; display: flex; align-items: center; justify-content: center;
-            min-height: 350px; position: relative; padding: 5px;
+            min-height: 300px; position: relative; padding: 5px;
         }
         .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; transition: transform 0.3s; }
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* --- Modal Fixed V10.4 (Scroll Friendly) --- */
+        /* Modal Fixed V10.4 */
         .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 10000; 
-            left: 0; 
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0,0,0,0.95);
-            backdrop-filter: blur(5px); 
-            overflow-y: auto; /* ให้ตัว Modal เองเลื่อนได้ */
-            -webkit-overflow-scrolling: touch;
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
+            backdrop-filter: blur(5px); overflow-y: auto; -webkit-overflow-scrolling: touch;
         }
-        
         .modal-content-text {
-            background-color: var(--card-bg); 
-            border: 1px solid #444; 
-            width: 90%; 
-            max-width: 700px; 
-            margin: 5% auto 10% auto; /* เว้นระยะบนล่าง */
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
-            position: relative;
+            background-color: var(--card-bg); border: 1px solid #444; 
+            width: 90%; max-width: 700px; margin: 5% auto 10% auto; padding: 30px;
+            border-radius: 10px; box-shadow: 0 0 50px rgba(0,0,0,0.8); position: relative;
         }
-
         .close-btn { 
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            color: #fff; 
-            font-size: 32px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            z-index: 20;
+            position: absolute; top: 15px; right: 20px; color: #fff; 
+            font-size: 32px; font-weight: bold; cursor: pointer; z-index: 20;
         }
         .close-btn:hover { color: var(--accent-red); }
         
-        /* Guide Styles */
         .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
         .article-content h3 { color: var(--accent-blue); margin-top: 25px; border-left: 3px solid var(--accent-blue); padding-left: 10px; }
         .article-content p, .article-content ul { color: #ddd; line-height: 1.6; font-size: 0.95em; }
         .hl-red { color: var(--accent-red); font-weight: bold; }
         .hl-green { color: var(--accent-green); font-weight: bold; }
 
-        /* Lightbox Centering */
         #lightboxModal {
-            display: none; /* Override default flex for lightbox specific */
-            align-items: center;
-            justify-content: center;
-            overflow: hidden; /* Lock scroll for image */
+            display: none; align-items: center; justify-content: center; overflow: hidden;
         }
         .modal-content-img {
             margin: auto; display: block; width: auto; height: auto;
@@ -200,7 +176,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.4</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.5</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -256,11 +232,18 @@
     </div>
 
     <div class="grid-container">
-        <div class="card" style="grid-column: 1 / -1;">
+        <div class="card">
             <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
             <div class="card-body">
                 <div class="img-loader">Loading Data...</div>
                 <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" onclick="openLightbox(this.src)">
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>SOLAR FLARES</h3><span>GOES X-RAY FLUX</span></div>
+            <div class="card-body">
+                <div class="img-loader">Loading Graph...</div>
+                <img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" id="img-xplot" alt="X-Ray Plot" onclick="openLightbox(this.src)">
             </div>
         </div>
         <div class="card">
@@ -303,21 +286,19 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V10.4 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V10.5 • Data: NOAA, Kyoto</div>
 
     <script>
         // Security
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) return false; }
 
-        function openGuide() { 
-            document.getElementById("guideModal").style.display = "block"; 
-        }
+        function openGuide() { document.getElementById("guideModal").style.display = "block"; }
         function openLightbox(src) {
             const m = document.getElementById("lightboxModal");
             const img = document.getElementById("lightboxImg");
             img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
-            m.style.display = "flex"; // Lightbox needs flex to center
+            m.style.display = "flex";
         }
         function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
 
@@ -378,6 +359,7 @@
         }
 
         async function fetchData() {
+            // 1. Solar Wind
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
                 const data = await res.json();
@@ -400,6 +382,7 @@
                 }
             } catch(e){}
 
+            // 2. Dst
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
                 const data = await res.json();
@@ -408,6 +391,7 @@
                 }
             } catch(e){}
 
+            // 3. Kp
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
                 const data = await res.json();
@@ -416,6 +400,7 @@
                 }
             } catch(e){}
 
+            // 4. Hybrid SSN & SFI
             try {
                 const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
                 const dataSfi = await resSfi.json();
@@ -446,18 +431,22 @@
                 renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn', 'trend-ssn', prevSSN_calc);
             } catch(e){}
 
-            // --- X-Ray Flux (FIX: Use 5-minute file for stability) ---
+            // 5. X-Ray Flux (V10.5 Fix: Use Index 3 and Auto-Scan)
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-5-minute.json'));
                 const data = await res.json();
                 if (data.length > 0) {
                     let flux = null;
-                    // Loop backwards until valid data found
+                    // Scan backwards for valid flux (Long wave often at index 3 or 4)
+                    // We try to match column 'flux' (Long)
+                    // In 5-minute JSON: [time, satellite, flux(short), flux(long)]
+                    // So valid flux is at index 3.
+                    
                     for (let i = data.length - 1; i > 0; i--) {
                         let row = data[i];
-                        // Index 4 is flux long (0.1-0.8)
-                        if (row[4] !== null && !isNaN(parseFloat(row[4]))) {
-                            flux = parseFloat(row[4]);
+                        let val = row[3]; // Try index 3 (Long)
+                        if (val !== null && !isNaN(parseFloat(val))) {
+                            flux = parseFloat(val);
                             break;
                         }
                     }

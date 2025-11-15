@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V8.4</title>
+    <title>IonosTek Monitor V8.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- CSS Base: V8.2 --- */
@@ -36,7 +36,7 @@
         }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #fff; background-color: var(--accent-purple);
+            color: #fff; background-color: var(--accent-blue);
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; 
             border-radius: 4px; font-weight: bold;
         }
@@ -62,18 +62,20 @@
         }
         .stat-box {
             background: var(--card-bg); padding: 15px 10px; border-radius: 8px;
-            min-width: 130px; flex: 1; text-align: center;
+            min-width: 120px; /* ปรับขนาดให้เล็กลงนิดเพื่อให้พอดี 9 ค่า */
+            flex: 1; text-align: center;
             border-top: 4px solid #555; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: transform 0.2s;
         }
         .stat-box:hover { transform: translateY(-3px); }
         
         .stat-value { 
-            font-size: 2em; font-weight: 700; margin: 8px 0; 
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-size: 1.8em; /* ลดขนาดฟอนต์เล็กน้อย */
+            font-weight: 700; margin: 8px 0; 
+            display: flex; align-items: center; justify-content: center; gap: 5px;
         }
-        .stat-label { font-size: 0.85em; color: var(--text-sub); text-transform: uppercase; }
-        .stat-unit { font-size: 0.75em; color: #666; }
+        .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-unit { font-size: 0.65em; color: #666; }
 
         .trend-arrow { font-size: 0.6em; font-weight: bold; }
         .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } 
@@ -158,21 +160,31 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.4</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.5</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Initializing...</div>
         <button onclick="openGuide()" class="btn-guide">📘 How to Read</button>
     </div>
 
     <div class="stats-container">
         <div class="stat-box" id="card-sfi">
-            <div class="stat-label">Solar Flux (SFI)</div>
+            <div class="stat-label">SFI (Solar Flux)</div>
             <div class="stat-value"><span id="val-sfi">--</span></div>
             <div class="stat-unit">F10.7cm</div>
         </div>
         <div class="stat-box" id="card-ssn">
-            <div class="stat-label">Sunspot (Est. SSN)</div>
+            <div class="stat-label">SSN (Sunspot)</div>
             <div class="stat-value"><span id="val-ssn">--</span></div>
-            <div class="stat-unit">Calculated from SFI</div>
+            <div class="stat-unit">Calculated</div>
+        </div>
+        <div class="stat-box" id="card-kp">
+            <div class="stat-label">Kp Index</div>
+            <div class="stat-value"><span id="val-kp">--</span></div>
+            <div class="stat-unit">Planetary</div>
+        </div>
+        <div class="stat-box" id="card-a">
+            <div class="stat-label">A-Index</div>
+            <div class="stat-value"><span id="val-a">--</span></div>
+            <div class="stat-unit">Daily Avg</div>
         </div>
         
         <div class="stat-box" id="card-bz">
@@ -187,4 +199,214 @@
         </div>
         <div class="stat-box" id="card-wind">
             <div class="stat-label">Solar Wind</div>
-            <div class="stat-
+            <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
+            <div class="stat-unit">km/s</div>
+        </div>
+        <div class="stat-box" id="card-density">
+            <div class="stat-label">Density</div>
+            <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
+            <div class="stat-unit">p/cm³</div>
+        </div>
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt</div>
+            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT</div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
+            <div class="card-body">
+                <div class="img-loader">Loading Data...</div>
+                <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" onclick="openLightbox(this.src)">
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora" onclick="openLightbox(this.src)"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>D-REGION ABSORPTION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP" onclick="openLightbox(this.src)"></div>
+        </div>
+    </div>
+
+    <div id="guideModal" class="modal">
+        <div class="modal-content-text">
+            <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
+            <div class="article-content">
+                <h2>📡 คู่มือนักวิทยุ: อ่านค่าอวกาศฉบับ IonosTek</h2>
+                
+                <h3>★ SFI & SSN (พลังงานจากดวงอาทิตย์)</h3>
+                <p>ตัวบ่งชี้ว่า "ย่านความถี่สูง" จะเปิดหรือไม่:</p>
+                <ul>
+                    <li><b>SFI:</b> >100 ดี, >150 เยี่ยม (10m-12m เปิด)</li>
+                    <li><b>SSN:</b> ยิ่งเยอะ ยิ่งสะท้อนคลื่นดี</li>
+                </ul>
+
+                <h3>★ Kp & A-Index (ความปั่นป่วนสนามแม่เหล็ก)</h3>
+                <ul>
+                    <li><b>Kp Index (0-9):</b> บอกพายุ "ตอนนี้"<br>
+                        - <span style="color:var(--accent-green)">Kp < 3:</span> สงบ (Quiet)<br>
+                        - <span style="color:var(--accent-yellow)">Kp = 4:</span> ปั่นป่วน (Active)<br>
+                        - <span style="color:var(--accent-red)">Kp > 5:</span> พายุ (Storm) ระวัง HF ร่วง
+                    </li>
+                    <li><b>A-Index:</b> ค่าเฉลี่ยความปั่นป่วน "รายวัน" ( < 15 ดีมาก)</li>
+                </ul>
+
+                <h3>1. Bz (Polarity)</h3>
+                <ul>
+                    <li><span class="hl-green">↑ Bz บวก:</span> ประตูปิด สัญญาณนิ่ง</li>
+                    <li><span class="hl-red">↓ Bz ลบ:</span> ประตูเปิด พายุเข้า (6m ดี)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')">
+        <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px;">&times;</span>
+        <img class="modal-content-img" id="lightboxImg">
+    </div>
+
+    <div class="footer">IonosTek Monitor V8.5 • Data Sources: NOAA, Kyoto</div>
+
+    <script>
+        let lastValues = { wind: null, density: null, dst: null, bt: null };
+
+        function openGuide() { document.getElementById("guideModal").style.display = "block"; }
+        function openLightbox(src) {
+            const modal = document.getElementById("lightboxModal");
+            const img = document.getElementById("lightboxImg");
+            img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
+            modal.style.display = "block";
+        }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+
+        function updateTime() {
+            const now = new Date();
+            const utcString = now.toUTCString().replace('GMT', 'UTC');
+            document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + utcString;
+        }
+
+        function getFreshUrl(url) { return url + '?t=' + new Date().getTime(); }
+
+        function updateUI(valId, cardId, value, type, trendId, arrowId) {
+            const valElem = document.getElementById(valId);
+            const cardElem = document.getElementById(cardId);
+            if (!valElem || !cardElem) return;
+
+            valElem.classList.remove('updated-flash');
+            void valElem.offsetWidth;
+            valElem.classList.add('updated-flash');
+            valElem.innerText = isNaN(value) ? "--" : value;
+
+            let status = 'normal';
+            
+            // Logic
+            if (type === 'sfi') { if(value>150) status='good'; else if(value>100) status='normal'; else status='warn'; }
+            else if (type === 'ssn') { if(value>100) status='good'; else if(value>50) status='normal'; else status='warn'; }
+            else if (type === 'kp') { if(value>=5) status='alert'; else if(value>=4) status='warn'; else status='normal'; } // Kp Logic
+            else if (type === 'a_idx') { if(value>=20) status='alert'; else if(value>=15) status='warn'; else status='normal'; } // A Logic
+            else if (type === 'dst') { if(value<-100) status='alert'; else if(value<-50) status='moderate'; else if(value<-20) status='warn'; }
+            else if (type === 'bz') { if(value<-5) status='alert'; else if(value<0) status='warn'; }
+            else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
+            else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
+            else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
+            
+            cardElem.className = 'stat-box';
+            cardElem.classList.add('status-'+status);
+
+            if (type === 'bz' && arrowId) {
+                const arr = document.getElementById(arrowId);
+                arr.innerHTML = value >= 0 ? '&#8593;' : '&#8595;';
+                arr.className = value >= 0 ? 'bz-arrow-n' : 'bz-arrow-s';
+            }
+
+            if (trendId && lastValues[type] !== null) {
+                const tr = document.getElementById(trendId);
+                const diff = value - lastValues[type];
+                if (Math.abs(diff) > 0.1) {
+                    tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
+                    if (type==='dst') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                    else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
+                }
+            }
+            if (type !== 'bz') lastValues[type] = value;
+        }
+
+        async function fetchData() {
+            try {
+                // 1. Mag
+                const resMag = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
+                const dataMag = await resMag.json();
+                const lastMag = dataMag[dataMag.length - 1];
+                updateUI('val-bz', 'card-bz', parseFloat(lastMag[dataMag[0].indexOf('bz_gsm')]), 'bz', null, 'arr-bz');
+                updateUI('val-bt', 'card-bt', parseFloat(lastMag[dataMag[0].indexOf('bt')]), 'bt', 'trend-bt');
+
+                // 2. Plasma
+                const resPlas = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
+                const dataPlas = await resPlas.json();
+                const lastPlas = dataPlas[dataPlas.length - 1];
+                updateUI('val-density', 'card-density', parseFloat(lastPlas[dataPlas[0].indexOf('density')]), 'density', 'trend-density');
+                updateUI('val-wind', 'card-wind', parseFloat(lastPlas[dataPlas[0].indexOf('speed')]), 'wind', 'trend-wind');
+
+                // 3. Dst
+                const resDst = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
+                const dataDst = await resDst.json();
+                const lastDst = dataDst[dataDst.length - 1];
+                updateUI('val-dst', 'card-dst', parseInt(lastDst[1]), 'dst', 'trend-dst');
+
+                // 4. SFI, SSN, Kp, A-Index (ใช้ไฟล์ noaa-planetary-k-index.json สำหรับ Kp)
+                const resKp = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
+                const dataKp = await resKp.json();
+                if (dataKp.length > 1) {
+                    const lastKpRow = dataKp[dataKp.length - 1];
+                    // Kp Index (Column 1 usually)
+                    updateUI('val-kp', 'card-kp', parseFloat(lastKpRow[1]), 'kp');
+                    
+                    // A-Index (ต้องดึงจากแหล่งอื่น หรือใช้ค่าประมาณจาก Kp)
+                    // เพื่อความแม่นยำ ใช้ไฟล์ 10cm Flux สำหรับ SFI ก่อน
+                }
+
+                const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
+                const dataSfi = await resSfi.json();
+                if(dataSfi.length > 1) {
+                    const lastSfiVal = parseInt(dataSfi[dataSfi.length - 1][dataSfi[0].length - 1]);
+                    updateUI('val-sfi', 'card-sfi', lastSfiVal, 'sfi');
+                    let calcSSN = Math.round((lastSfiVal - 63.7) * 1.12);
+                    if (calcSSN < 0) calcSSN = 0;
+                    updateUI('val-ssn', 'card-ssn', calcSSN, 'ssn');
+                }
+
+                // A-Index (ดึงจาก daily solar data)
+                const resA = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-geophysical-event-reports.json')); 
+                // เนื่องจากไฟล์ A-Index หายากและซับซ้อน เราจะใช้ค่าประมาณจาก Kp ล่าสุด หรือดึงไฟล์ txt
+                // เพื่อความเสถียร ผมจะใช้ค่าจำลอง A-Index จาก Kp (Approx) ถ้าดึงไม่ได้
+                // หรือใช้ D-RAP data แทน
+                // *แก้ปัญหา: ใช้ไฟล์ radio-communication-dashboard.json รวมมิตร*
+                const resDash = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-scales.json'));
+                // หมายเหตุ: ไฟล์ที่รวม A-Index ง่ายๆ หายาก ขอใช้ไฟล์ 3-day forecast แทน
+                 const resForecast = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json'));
+                 // เอาเป็นว่าใช้ Kp เป็นหลักก่อน ส่วน A-Index ขอเว้นไว้รอ Source ที่แม่นยำ หรือคำนวณจาก Kp เฉลี่ย
+                 // (แก้ไข: ใส่ค่า -- ไว้ก่อนถ้าหา A ไม่เจอ เพื่อไม่ให้ error)
+                 updateUI('val-a', 'card-a', '--', 'a_idx'); 
+
+            } catch (e) { console.error(e); }
+        }
+
+        function refreshImages() {
+            const imgs = document.querySelectorAll('.card-body img');
+            imgs.forEach(img => { img.src = img.src.split('?')[0] + '?t=' + new Date().getTime(); });
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            updateTime(); 
+            fetchData();
+            setInterval(updateTime, 1000);
+            setInterval(fetchData, 60000);
+            setInterval(refreshImages, 300000);
+        });
+    </script>
+</body>
+</html>

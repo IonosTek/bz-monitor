@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V10.5</title>
+    <title>IonosTek Monitor V11.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base --- */
+        /* --- CSS Base: V10.5 --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -33,7 +33,7 @@
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-orange); 
+            color: #fff; background-color: var(--accent-red); 
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -91,10 +91,10 @@
         .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; } 
         .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; }
 
-        /* Cards Grid (Modified for 4 cards) */
+        /* Cards Grid */
         .grid-container {
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* ปรับขนาดให้พอดี 2x2 */
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 25px; 
             max-width: 1600px; 
             margin: 0 auto;
@@ -120,7 +120,7 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Modal Fixed V10.4 */
+        /* Modal Fixed (Scrollable) */
         .modal {
             display: none; position: fixed; z-index: 10000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
@@ -143,9 +143,7 @@
         .hl-red { color: var(--accent-red); font-weight: bold; }
         .hl-green { color: var(--accent-green); font-weight: bold; }
 
-        #lightboxModal {
-            display: none; align-items: center; justify-content: center; overflow: hidden;
-        }
+        #lightboxModal { display: none; align-items: center; justify-content: center; overflow: hidden; }
         .modal-content-img {
             margin: auto; display: block; width: auto; height: auto;
             max-width: 98%; max-height: 95vh;
@@ -176,7 +174,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.5</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V11.0</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -286,7 +284,7 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V10.5 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V11.0 • Data: NOAA, Kyoto</div>
 
     <script>
         // Security
@@ -355,6 +353,62 @@
                     if(type==='dst' || type==='sfi' || type==='ssn' || type==='kp') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
                     else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
                 } else { tr.innerHTML = ''; }
+            }
+        }
+
+        // --- BULLETPROOF X-RAY LOGIC ---
+        // Helper to scan array backwards for valid flux
+        function findValidFlux(data) {
+            if (!Array.isArray(data) || data.length === 0) return null;
+            // Loop backwards
+            for (let i = data.length - 1; i >= 0; i--) {
+                // Index 3 is usually Flux (Long) in 5-min and 6-hour files
+                let val = data[i][3];
+                if (val !== null && !isNaN(parseFloat(val))) {
+                    return parseFloat(val);
+                }
+            }
+            return null;
+        }
+
+        async function fetchXRay() {
+            try {
+                // Plan A: 5-minute file (Granular)
+                let res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-5-minute.json'));
+                let data = await res.json();
+                let flux = findValidFlux(data);
+
+                // Plan B: 6-hour file (Fallback if 5-min is empty/broken)
+                if (flux === null) {
+                    console.log("X-Ray Plan A failed, trying Plan B...");
+                    res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-6-hour.json'));
+                    data = await res.json();
+                    flux = findValidFlux(data);
+                }
+
+                if (flux !== null) {
+                    // Calulate Class
+                    let xClass = "A";
+                    if (flux < 1e-7) xClass = "A";
+                    else if (flux < 1e-6) xClass = "B";
+                    else if (flux < 1e-5) xClass = "C";
+                    else if (flux < 1e-4) xClass = "M";
+                    else xClass = "X";
+                    
+                    let base = 1e-7;
+                    if (xClass == 'B') base = 1e-7;
+                    if (xClass == 'C') base = 1e-6;
+                    if (xClass == 'M') base = 1e-5;
+                    if (xClass == 'X') base = 1e-4;
+                    
+                    let sub = (flux / base).toFixed(1);
+                    renderStat('val-xray', 'card-xray', xClass + sub, 'xray');
+                } else {
+                    renderStat('val-xray', 'card-xray', '--', 'xray');
+                }
+            } catch(e) {
+                console.log("X-Ray System Offline");
+                renderStat('val-xray', 'card-xray', 'N/A', 'xray');
             }
         }
 
@@ -431,47 +485,8 @@
                 renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn', 'trend-ssn', prevSSN_calc);
             } catch(e){}
 
-            // 5. X-Ray Flux (V10.5 Fix: Use Index 3 and Auto-Scan)
-            try {
-                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-5-minute.json'));
-                const data = await res.json();
-                if (data.length > 0) {
-                    let flux = null;
-                    // Scan backwards for valid flux (Long wave often at index 3 or 4)
-                    // We try to match column 'flux' (Long)
-                    // In 5-minute JSON: [time, satellite, flux(short), flux(long)]
-                    // So valid flux is at index 3.
-                    
-                    for (let i = data.length - 1; i > 0; i--) {
-                        let row = data[i];
-                        let val = row[3]; // Try index 3 (Long)
-                        if (val !== null && !isNaN(parseFloat(val))) {
-                            flux = parseFloat(val);
-                            break;
-                        }
-                    }
-
-                    if (flux !== null) {
-                        let xClass = "A";
-                        if (flux < 1e-7) xClass = "A";
-                        else if (flux < 1e-6) xClass = "B";
-                        else if (flux < 1e-5) xClass = "C";
-                        else if (flux < 1e-4) xClass = "M";
-                        else xClass = "X";
-                        
-                        let base = 1e-7;
-                        if (xClass == 'B') base = 1e-7;
-                        if (xClass == 'C') base = 1e-6;
-                        if (xClass == 'M') base = 1e-5;
-                        if (xClass == 'X') base = 1e-4;
-                        
-                        let sub = (flux / base).toFixed(1);
-                        renderStat('val-xray', 'card-xray', xClass + sub, 'xray');
-                    } else {
-                        renderStat('val-xray', 'card-xray', '--', 'xray');
-                    }
-                }
-            } catch(e){ renderStat('val-xray', 'card-xray', '--', 'xray'); }
+            // 5. Run Bulletproof X-Ray
+            fetchXRay();
         }
 
         function refreshImages() {

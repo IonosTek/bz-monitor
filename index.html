@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V9.3</title>
+    <title>IonosTek Monitor V9.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base --- */
+        /* --- CSS Base: V9.x --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -32,7 +32,7 @@
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-green); 
+            color: #000; background-color: var(--accent-orange); 
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -172,7 +172,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.3</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.4</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -186,7 +186,7 @@
         <div class="stat-box" id="card-ssn">
             <div class="stat-label">SSN (Sunspot)</div>
             <div class="stat-value"><span id="val-ssn">--</span></div>
-            <div class="stat-unit">NOAA Count (R)</div>
+            <div class="stat-unit">Hybrid Count</div>
         </div>
         <div class="stat-box" id="card-kp">
             <div class="stat-label">Kp Index</div>
@@ -248,7 +248,7 @@
                 <div class="article-content">
                     <h2>📡 OPERATOR GUIDE</h2>
                     <h3>★ SFI & SSN</h3>
-                    <ul><li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li><li><b>SSN:</b> นับจุดจริงจาก NOAA</li></ul>
+                    <ul><li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li><li><b>SSN:</b> ยิ่งสูง ยิ่งสะท้อนดี (Hybrid Data)</li></ul>
                     <h3>★ Kp Index</h3>
                     <ul><li><span style="color:var(--accent-green)">Kp 0-3:</span> สงบ</li><li><span style="color:var(--accent-red)">Kp 5+:</span> พายุ</li></ul>
                     <h3>1. Bz (Polarity)</h3>
@@ -267,7 +267,7 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V9.3 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V9.4 • Data: NOAA, Kyoto</div>
 
     <script>
         function openGuide() { 
@@ -364,34 +364,6 @@
                 }
             } catch(e){}
 
-            // SFI & SSN (NEW: Using Real Counting for SSN)
-            try {
-                // 1. SFI
-                const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
-                const dataSfi = await resSfi.json();
-                if (dataSfi.length > 2) {
-                    const currSfi = parseInt(dataSfi[dataSfi.length-1][dataSfi[0].length-1]);
-                    const prevSfi = parseInt(dataSfi[dataSfi.length-2][dataSfi[0].length-1]);
-                    renderStat('val-sfi', 'card-sfi', currSfi, 'sfi', 'trend-sfi', prevSfi);
-                }
-
-                // 2. SSN (REAL COUNT from Region Summary)
-                const resSpots = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-region-summary.json'));
-                const dataSpots = await resSpots.json();
-                let realSSN = 0;
-                if (Array.isArray(dataSpots) && dataSpots.length > 0) {
-                    const groups = dataSpots.length; // Count regions
-                    let spots = 0;
-                    dataSpots.forEach(r => spots += parseInt(r.number_spots));
-                    realSSN = (10 * groups) + spots; // Wolf Formula
-                }
-                renderStat('val-ssn', 'card-ssn', realSSN, 'ssn');
-
-            } catch(e){ 
-                // Fallback if Spot file is empty (early UTC)
-                console.log("Spot fail, calc from SFI not implemented to avoid confusion");
-            }
-
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
                 const data = await res.json();
@@ -402,6 +374,44 @@
                     renderStat('val-kp', 'card-kp', currKp, 'kp', 'trend-kp', prevKp);
                 }
             } catch(e){}
+
+            // --- Hybrid SSN/SFI Logic ---
+            try {
+                // 1. Fetch SFI First (Use as Base)
+                const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
+                const dataSfi = await resSfi.json();
+                let currSfi = 0;
+                
+                if (dataSfi.length > 2) {
+                    currSfi = parseInt(dataSfi[dataSfi.length-1][dataSfi[0].length-1]);
+                    const prevSfi = parseInt(dataSfi[dataSfi.length-2][dataSfi[0].length-1]);
+                    renderStat('val-sfi', 'card-sfi', currSfi, 'sfi', 'trend-sfi', prevSfi);
+                }
+
+                // 2. Attempt to Fetch Real SSN
+                let finalSSN = 0;
+                try {
+                    const resSpots = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-region-summary.json'));
+                    const dataSpots = await resSpots.json();
+                    if (Array.isArray(dataSpots) && dataSpots.length > 0) {
+                        const groups = dataSpots.length;
+                        let spots = 0;
+                        dataSpots.forEach(r => spots += parseInt(r.number_spots));
+                        finalSSN = (10 * groups) + spots; // Wolf Formula
+                    } else {
+                        // Empty array or issue? -> Use Fallback
+                        throw new Error("Empty Spot Data");
+                    }
+                } catch (spotErr) {
+                    // 3. Fallback: Calculate from SFI
+                    console.log("Switching to Hybrid SSN Calculation");
+                    finalSSN = Math.round((currSfi - 63.7) * 1.12);
+                    if (finalSSN < 0) finalSSN = 0;
+                }
+                
+                renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn');
+
+            } catch(e){ console.log("SFI/SSN Core Error"); }
         }
 
         function refreshImages() {

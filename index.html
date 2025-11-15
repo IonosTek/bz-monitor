@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V8.5</title>
+    <title>IonosTek Monitor V8.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V8.2 --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -26,6 +25,7 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
+            overflow-x: hidden; /* ป้องกันการเลื่อนซ้ายขวาโดยไม่ตั้งใจ */
         }
 
         .header {
@@ -36,7 +36,7 @@
         }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #fff; background-color: var(--accent-blue);
+            color: #fff; background-color: var(--accent-orange);
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; 
             border-radius: 4px; font-weight: bold;
         }
@@ -56,31 +56,33 @@
         }
         .btn-guide:hover { background: var(--accent-blue); color: #fff; }
 
+        /* Stats Container */
         .stats-container {
-            display: flex; flex-wrap: wrap; gap: 15px;
+            display: flex; flex-wrap: wrap; gap: 10px;
             justify-content: center; margin-bottom: 30px;
         }
         .stat-box {
-            background: var(--card-bg); padding: 15px 10px; border-radius: 8px;
-            min-width: 120px; /* ปรับขนาดให้เล็กลงนิดเพื่อให้พอดี 9 ค่า */
+            background: var(--card-bg); padding: 15px 5px; border-radius: 8px;
+            min-width: 110px; /* ปรับให้เล็กลงเพื่อให้เรียงสวยบนมือถือ */
             flex: 1; text-align: center;
-            border-top: 4px solid #555; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border-top: 4px solid #555; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             transition: transform 0.2s;
         }
         .stat-box:hover { transform: translateY(-3px); }
         
         .stat-value { 
-            font-size: 1.8em; /* ลดขนาดฟอนต์เล็กน้อย */
-            font-weight: 700; margin: 8px 0; 
-            display: flex; align-items: center; justify-content: center; gap: 5px;
+            font-size: 1.6em; 
+            font-weight: 700; margin: 5px 0; 
+            display: flex; align-items: center; justify-content: center; gap: 3px;
         }
-        .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-unit { font-size: 0.65em; color: #666; }
+        .stat-label { font-size: 0.7em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-unit { font-size: 0.6em; color: #666; }
 
         .trend-arrow { font-size: 0.6em; font-weight: bold; }
         .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } 
         .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; }
 
+        /* Grid */
         .grid-container {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
             gap: 25px; max-width: 1600px; margin: 0 auto;
@@ -109,30 +111,71 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Modal */
+        /* --- Modal CSS Fixed (แก้ปัญหาเลื่อนไม่ได้) --- */
         .modal {
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);
+            display: none; 
+            position: fixed; 
+            z-index: 9999; /* อยู่บนสุดเสมอ */
+            left: 0; 
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.9);
             backdrop-filter: blur(5px);
+            overflow: hidden; /* ป้องกันพื้นหลังเลื่อน */
         }
+        
         .modal-content-text {
-            background-color: var(--card-bg); margin: 5% auto; padding: 30px;
-            border: 1px solid #444; width: 90%; max-width: 700px; border-radius: 10px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto;
+            background-color: var(--card-bg); 
+            margin: 20px auto; /* ระยะห่างจากขอบบนน้อยลง */
+            padding: 25px;
+            border: 1px solid #444; 
+            width: 90%; 
+            max-width: 700px; 
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
+            
+            /* Key Fixes for Scrolling */
+            height: auto;
+            max-height: 90vh; /* สูงไม่เกิน 90% ของหน้าจอ */
+            overflow-y: auto; /* บังคับให้มี Scrollbar ถ้าเนื้อหายาว */
+            -webkit-overflow-scrolling: touch; /* ลื่นไหลบน iOS */
+            position: relative;
         }
+        
+        /* Custom Scrollbar for Modal */
+        .modal-content-text::-webkit-scrollbar { width: 8px; }
+        .modal-content-text::-webkit-scrollbar-track { background: #111; }
+        .modal-content-text::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        .modal-content-text::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
+
         .modal-content-img {
             margin: auto; display: block; width: auto; height: auto;
-            max-width: 95%; max-height: 95vh;
+            max-width: 98%; max-height: 95vh;
             border: 2px solid #333; border-radius: 4px;
             box-shadow: 0 0 50px rgba(0,0,0,1);
             position: relative; top: 50%; transform: translateY(-50%);
         }
-        .close-btn { color: #fff; float: right; font-size: 30px; cursor: pointer; font-weight: bold; }
+        
+        .close-btn { 
+            color: #fff; 
+            float: right; 
+            font-size: 32px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            position: sticky; /* ให้ปุ่มปิดติดอยู่มุมขวาบนเสมอ */
+            top: 0;
+            right: 0;
+            z-index: 10;
+            background: var(--card-bg); /* บังเนื้อหาตอนเลื่อนผ่าน */
+            padding: 0 10px;
+            line-height: 1;
+        }
         .close-btn:hover { color: var(--accent-red); }
         
         .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
-        .article-content h3 { color: var(--accent-blue); margin-top: 25px; }
-        .article-content p, .article-content ul { color: #ddd; line-height: 1.6; }
+        .article-content h3 { color: var(--accent-blue); margin-top: 25px; border-left: 3px solid var(--accent-blue); padding-left: 10px; }
+        .article-content p, .article-content ul { color: #ddd; line-height: 1.6; font-size: 0.95em; }
         .hl-red { color: var(--accent-red); font-weight: bold; }
         .hl-green { color: var(--accent-green); font-weight: bold; }
 
@@ -141,272 +184,7 @@
         .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
         .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; }
         .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; }
-        .status-good { color: var(--accent-purple); border-top-color: var(--accent-purple) !important; box-shadow: 0 0 10px rgba(213, 0, 249, 0.2); }
+        .status-good { color: var(--accent-purple); border-top-color: var(--accent-purple) !important; }
 
         @keyframes flash-update {
-            0% { color: #fff; text-shadow: 0 0 15px #fff; transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        .updated-flash { animation: flash-update 0.5s ease-out; }
-
-        .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
-        
-        @media (max-width: 768px) {
-            .grid-container { grid-template-columns: 1fr; }
-            .stat-box { min-width: 45%; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.5</span></h1>
-        <div id="systemStatus"><span class="blink">●</span> Initializing...</div>
-        <button onclick="openGuide()" class="btn-guide">📘 How to Read</button>
-    </div>
-
-    <div class="stats-container">
-        <div class="stat-box" id="card-sfi">
-            <div class="stat-label">SFI (Solar Flux)</div>
-            <div class="stat-value"><span id="val-sfi">--</span></div>
-            <div class="stat-unit">F10.7cm</div>
-        </div>
-        <div class="stat-box" id="card-ssn">
-            <div class="stat-label">SSN (Sunspot)</div>
-            <div class="stat-value"><span id="val-ssn">--</span></div>
-            <div class="stat-unit">Calculated</div>
-        </div>
-        <div class="stat-box" id="card-kp">
-            <div class="stat-label">Kp Index</div>
-            <div class="stat-value"><span id="val-kp">--</span></div>
-            <div class="stat-unit">Planetary</div>
-        </div>
-        <div class="stat-box" id="card-a">
-            <div class="stat-label">A-Index</div>
-            <div class="stat-value"><span id="val-a">--</span></div>
-            <div class="stat-unit">Daily Avg</div>
-        </div>
-        
-        <div class="stat-box" id="card-bz">
-            <div class="stat-label">Bz (Polarity)</div>
-            <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
-            <div class="stat-unit">nT (GSM)</div>
-        </div>
-        <div class="stat-box" id="card-dst">
-            <div class="stat-label">Dst Index</div>
-            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT (Kyoto)</div>
-        </div>
-        <div class="stat-box" id="card-wind">
-            <div class="stat-label">Solar Wind</div>
-            <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
-            <div class="stat-unit">km/s</div>
-        </div>
-        <div class="stat-box" id="card-density">
-            <div class="stat-label">Density</div>
-            <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
-            <div class="stat-unit">p/cm³</div>
-        </div>
-        <div class="stat-box" id="card-bt">
-            <div class="stat-label">IMF Bt</div>
-            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT</div>
-        </div>
-    </div>
-
-    <div class="grid-container">
-        <div class="card" style="grid-column: 1 / -1;">
-            <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
-            <div class="card-body">
-                <div class="img-loader">Loading Data...</div>
-                <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" onclick="openLightbox(this.src)">
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
-            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora" onclick="openLightbox(this.src)"></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>D-REGION ABSORPTION</span></div>
-            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP" onclick="openLightbox(this.src)"></div>
-        </div>
-    </div>
-
-    <div id="guideModal" class="modal">
-        <div class="modal-content-text">
-            <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
-            <div class="article-content">
-                <h2>📡 คู่มือนักวิทยุ: อ่านค่าอวกาศฉบับ IonosTek</h2>
-                
-                <h3>★ SFI & SSN (พลังงานจากดวงอาทิตย์)</h3>
-                <p>ตัวบ่งชี้ว่า "ย่านความถี่สูง" จะเปิดหรือไม่:</p>
-                <ul>
-                    <li><b>SFI:</b> >100 ดี, >150 เยี่ยม (10m-12m เปิด)</li>
-                    <li><b>SSN:</b> ยิ่งเยอะ ยิ่งสะท้อนคลื่นดี</li>
-                </ul>
-
-                <h3>★ Kp & A-Index (ความปั่นป่วนสนามแม่เหล็ก)</h3>
-                <ul>
-                    <li><b>Kp Index (0-9):</b> บอกพายุ "ตอนนี้"<br>
-                        - <span style="color:var(--accent-green)">Kp < 3:</span> สงบ (Quiet)<br>
-                        - <span style="color:var(--accent-yellow)">Kp = 4:</span> ปั่นป่วน (Active)<br>
-                        - <span style="color:var(--accent-red)">Kp > 5:</span> พายุ (Storm) ระวัง HF ร่วง
-                    </li>
-                    <li><b>A-Index:</b> ค่าเฉลี่ยความปั่นป่วน "รายวัน" ( < 15 ดีมาก)</li>
-                </ul>
-
-                <h3>1. Bz (Polarity)</h3>
-                <ul>
-                    <li><span class="hl-green">↑ Bz บวก:</span> ประตูปิด สัญญาณนิ่ง</li>
-                    <li><span class="hl-red">↓ Bz ลบ:</span> ประตูเปิด พายุเข้า (6m ดี)</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')">
-        <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px;">&times;</span>
-        <img class="modal-content-img" id="lightboxImg">
-    </div>
-
-    <div class="footer">IonosTek Monitor V8.5 • Data Sources: NOAA, Kyoto</div>
-
-    <script>
-        let lastValues = { wind: null, density: null, dst: null, bt: null };
-
-        function openGuide() { document.getElementById("guideModal").style.display = "block"; }
-        function openLightbox(src) {
-            const modal = document.getElementById("lightboxModal");
-            const img = document.getElementById("lightboxImg");
-            img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
-            modal.style.display = "block";
-        }
-        function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
-
-        function updateTime() {
-            const now = new Date();
-            const utcString = now.toUTCString().replace('GMT', 'UTC');
-            document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + utcString;
-        }
-
-        function getFreshUrl(url) { return url + '?t=' + new Date().getTime(); }
-
-        function updateUI(valId, cardId, value, type, trendId, arrowId) {
-            const valElem = document.getElementById(valId);
-            const cardElem = document.getElementById(cardId);
-            if (!valElem || !cardElem) return;
-
-            valElem.classList.remove('updated-flash');
-            void valElem.offsetWidth;
-            valElem.classList.add('updated-flash');
-            valElem.innerText = isNaN(value) ? "--" : value;
-
-            let status = 'normal';
-            
-            // Logic
-            if (type === 'sfi') { if(value>150) status='good'; else if(value>100) status='normal'; else status='warn'; }
-            else if (type === 'ssn') { if(value>100) status='good'; else if(value>50) status='normal'; else status='warn'; }
-            else if (type === 'kp') { if(value>=5) status='alert'; else if(value>=4) status='warn'; else status='normal'; } // Kp Logic
-            else if (type === 'a_idx') { if(value>=20) status='alert'; else if(value>=15) status='warn'; else status='normal'; } // A Logic
-            else if (type === 'dst') { if(value<-100) status='alert'; else if(value<-50) status='moderate'; else if(value<-20) status='warn'; }
-            else if (type === 'bz') { if(value<-5) status='alert'; else if(value<0) status='warn'; }
-            else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
-            else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
-            else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
-            
-            cardElem.className = 'stat-box';
-            cardElem.classList.add('status-'+status);
-
-            if (type === 'bz' && arrowId) {
-                const arr = document.getElementById(arrowId);
-                arr.innerHTML = value >= 0 ? '&#8593;' : '&#8595;';
-                arr.className = value >= 0 ? 'bz-arrow-n' : 'bz-arrow-s';
-            }
-
-            if (trendId && lastValues[type] !== null) {
-                const tr = document.getElementById(trendId);
-                const diff = value - lastValues[type];
-                if (Math.abs(diff) > 0.1) {
-                    tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
-                    if (type==='dst') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
-                    else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
-                }
-            }
-            if (type !== 'bz') lastValues[type] = value;
-        }
-
-        async function fetchData() {
-            try {
-                // 1. Mag
-                const resMag = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
-                const dataMag = await resMag.json();
-                const lastMag = dataMag[dataMag.length - 1];
-                updateUI('val-bz', 'card-bz', parseFloat(lastMag[dataMag[0].indexOf('bz_gsm')]), 'bz', null, 'arr-bz');
-                updateUI('val-bt', 'card-bt', parseFloat(lastMag[dataMag[0].indexOf('bt')]), 'bt', 'trend-bt');
-
-                // 2. Plasma
-                const resPlas = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
-                const dataPlas = await resPlas.json();
-                const lastPlas = dataPlas[dataPlas.length - 1];
-                updateUI('val-density', 'card-density', parseFloat(lastPlas[dataPlas[0].indexOf('density')]), 'density', 'trend-density');
-                updateUI('val-wind', 'card-wind', parseFloat(lastPlas[dataPlas[0].indexOf('speed')]), 'wind', 'trend-wind');
-
-                // 3. Dst
-                const resDst = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
-                const dataDst = await resDst.json();
-                const lastDst = dataDst[dataDst.length - 1];
-                updateUI('val-dst', 'card-dst', parseInt(lastDst[1]), 'dst', 'trend-dst');
-
-                // 4. SFI, SSN, Kp, A-Index (ใช้ไฟล์ noaa-planetary-k-index.json สำหรับ Kp)
-                const resKp = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
-                const dataKp = await resKp.json();
-                if (dataKp.length > 1) {
-                    const lastKpRow = dataKp[dataKp.length - 1];
-                    // Kp Index (Column 1 usually)
-                    updateUI('val-kp', 'card-kp', parseFloat(lastKpRow[1]), 'kp');
-                    
-                    // A-Index (ต้องดึงจากแหล่งอื่น หรือใช้ค่าประมาณจาก Kp)
-                    // เพื่อความแม่นยำ ใช้ไฟล์ 10cm Flux สำหรับ SFI ก่อน
-                }
-
-                const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
-                const dataSfi = await resSfi.json();
-                if(dataSfi.length > 1) {
-                    const lastSfiVal = parseInt(dataSfi[dataSfi.length - 1][dataSfi[0].length - 1]);
-                    updateUI('val-sfi', 'card-sfi', lastSfiVal, 'sfi');
-                    let calcSSN = Math.round((lastSfiVal - 63.7) * 1.12);
-                    if (calcSSN < 0) calcSSN = 0;
-                    updateUI('val-ssn', 'card-ssn', calcSSN, 'ssn');
-                }
-
-                // A-Index (ดึงจาก daily solar data)
-                const resA = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-geophysical-event-reports.json')); 
-                // เนื่องจากไฟล์ A-Index หายากและซับซ้อน เราจะใช้ค่าประมาณจาก Kp ล่าสุด หรือดึงไฟล์ txt
-                // เพื่อความเสถียร ผมจะใช้ค่าจำลอง A-Index จาก Kp (Approx) ถ้าดึงไม่ได้
-                // หรือใช้ D-RAP data แทน
-                // *แก้ปัญหา: ใช้ไฟล์ radio-communication-dashboard.json รวมมิตร*
-                const resDash = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-scales.json'));
-                // หมายเหตุ: ไฟล์ที่รวม A-Index ง่ายๆ หายาก ขอใช้ไฟล์ 3-day forecast แทน
-                 const resForecast = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json'));
-                 // เอาเป็นว่าใช้ Kp เป็นหลักก่อน ส่วน A-Index ขอเว้นไว้รอ Source ที่แม่นยำ หรือคำนวณจาก Kp เฉลี่ย
-                 // (แก้ไข: ใส่ค่า -- ไว้ก่อนถ้าหา A ไม่เจอ เพื่อไม่ให้ error)
-                 updateUI('val-a', 'card-a', '--', 'a_idx'); 
-
-            } catch (e) { console.error(e); }
-        }
-
-        function refreshImages() {
-            const imgs = document.querySelectorAll('.card-body img');
-            imgs.forEach(img => { img.src = img.src.split('?')[0] + '?t=' + new Date().getTime(); });
-        }
-
-        document.addEventListener('DOMContentLoaded', (event) => {
-            updateTime(); 
-            fetchData();
-            setInterval(updateTime, 1000);
-            setInterval(fetchData, 60000);
-            setInterval(refreshImages, 300000);
-        });
-    </script>
-</body>
-</html>
+            0% { color: #fff; text-shadow: 0 0 15px #fff; transform: scale(1.1);

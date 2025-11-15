@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V13.1</title>
+    <title>IonosTek Monitor V14.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- Theme: High Performance Dark --- */
+        /* --- CSS Base: V8.2 (Stable) --- */
         :root {
-            --bg-color: #0b0b0b;
-            --card-bg: #161616;
-            --text-main: #f0f0f0;
-            --text-sub: #888;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #ffffff;
+            --text-sub: #b0b0b0;
             --accent-green: #00e676;
             --accent-yellow: #ffea00;
             --accent-orange: #ff9100;
@@ -25,313 +25,367 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 15px;
-            user-select: none;
-            overflow-x: hidden;
+            padding: 20px;
+            user-select: none; /* Security */
         }
 
-        /* Header */
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; text-transform: uppercase; }
-        .version { background-color: var(--accent-purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+        .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
+        .header span.version { 
+            color: #000; background-color: var(--accent-green);
+            font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
+        }
         
-        #systemStatus { font-size: 0.9em; color: var(--text-sub); margin-top: 5px; font-family: monospace; }
-        .blink { animation: blinker 1s infinite; color: var(--accent-green); }
+        #systemStatus {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 0.95em; font-weight: 500; margin-top: 5px; color: var(--text-sub);
+        }
+        .blink { animation: blinker 1.5s linear infinite; color: var(--accent-green); }
         @keyframes blinker { 50% { opacity: 0; } }
 
         .btn-guide {
             background: transparent; border: 1px solid var(--accent-blue);
-            color: var(--accent-blue); padding: 5px 20px; margin-top: 10px;
+            color: var(--accent-blue); padding: 5px 15px; margin-top: 10px;
             border-radius: 20px; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
-            font-size: 0.85em; transition: 0.2s; text-transform: uppercase; font-weight: bold;
+            font-size: 0.85em; transition: all 0.3s; text-transform: uppercase; font-weight: bold;
         }
-        .btn-guide:hover { background: var(--accent-blue); color: #fff; box-shadow: 0 0 15px rgba(41, 121, 255, 0.4); }
+        .btn-guide:hover { background: var(--accent-blue); color: #fff; }
 
-        /* Stats Grid */
-        .stats-container { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
+        /* Stats 3x3 Grid */
+        .stats-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 30px; 
+            max-width: 1200px; 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
+
         .stat-box {
-            background: var(--card-bg); padding: 12px 5px; border-radius: 6px;
-            min-width: 110px; flex: 1; text-align: center;
-            border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            background: var(--card-bg); padding: 15px 5px; border-radius: 8px;
+            text-align: center;
+            border-top: 4px solid #555; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: transform 0.2s;
         }
-        .stat-box:hover { transform: translateY(-2px); }
+        .stat-box:hover { transform: translateY(-3px); }
         
-        .stat-value { font-size: 1.7em; font-weight: 700; margin: 5px 0; line-height: 1; }
+        .stat-value { 
+            font-size: 1.8em; font-weight: 700; margin: 8px 0; 
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
         .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-unit { font-size: 0.65em; color: #555; }
+        .stat-unit { font-size: 0.65em; color: #666; }
 
-        /* Arrows */
-        .trend-arrow { font-size: 0.6em; font-weight: bold; margin-left: 4px; }
-        
-        /* Image Grid */
+        .trend-arrow { font-size: 0.6em; font-weight: bold; }
+        .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } 
+        .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; }
+
+        /* Grid Images */
         .grid-container {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 20px; max-width: 1600px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px; max-width: 1600px; margin: 0 auto;
         }
         .card {
-            background-color: var(--card-bg); border-radius: 8px; overflow: hidden;
-            border: 1px solid #333; display: flex; flex-direction: column;
+            background-color: var(--card-bg); border-radius: 10px; overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; flex-direction: column;
+            border: 1px solid #333;
         }
         .card-header {
-            background: #202020; padding: 8px 15px; 
+            background: linear-gradient(90deg, #2c2c2c 0%, #1e1e1e 100%);
+            padding: 12px 20px; border-bottom: 1px solid #444;
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #333;
         }
-        .card-header h3 { margin: 0; font-size: 0.95em; color: #ccc; font-weight: 600; }
-        .card-header span { font-size: 0.7em; color: var(--accent-blue); }
+        .card-header h3 { margin: 0; font-size: 1.1em; font-weight: 600; color: #ddd; }
+        .card-header span { font-size: 0.75em; color: var(--accent-blue); background: rgba(33, 150, 243, 0.1); padding: 3px 8px; border-radius: 4px; }
         
         .card-body {
-            background: #000; height: 280px; display: flex; align-items: center; justify-content: center;
-            position: relative;
+            background: #000; flex-grow: 1; display: flex; align-items: center; justify-content: center;
+            min-height: 300px; position: relative; padding: 5px;
         }
-        .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s; }
-        .img-loader { position: absolute; color: #444; font-size: 0.8em; }
+        .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; transition: transform 0.3s; }
+        .card-body img:hover { transform: scale(1.02); }
+        .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Colors */
-        .s-norm { border-top-color: var(--accent-green) !important; color: var(--accent-green); }
-        .s-warn { border-top-color: var(--accent-yellow) !important; color: var(--accent-yellow); }
-        .s-mod { border-top-color: var(--accent-orange) !important; color: var(--accent-orange); }
-        .s-alert { border-top-color: var(--accent-red) !important; color: var(--accent-red); }
-        .s-good { border-top-color: var(--accent-purple) !important; color: var(--accent-purple); }
-
-        /* Modal (Simple & Robust) */
+        /* Modal & Lightbox (V8.2 Style - Proven to work) */
         .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 9999; overflow-y: auto;
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
+            backdrop-filter: blur(5px);
         }
-        .modal-content {
-            background: var(--card-bg); width: 90%; max-width: 600px;
-            margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 8px;
-            position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        /* Fix for scrolling guide */
+        .modal-content-text {
+            background-color: var(--card-bg); border: 1px solid #444; 
+            width: 90%; max-width: 700px; margin: 5% auto; padding: 30px;
+            border-radius: 10px; box-shadow: 0 0 50px rgba(0,0,0,0.8); 
+            max-height: 85vh; overflow-y: auto; position: relative;
         }
-        .close-btn {
-            position: absolute; top: 15px; right: 20px; font-size: 30px;
-            cursor: pointer; color: #fff; line-height: 1;
+        .modal-content-img {
+            margin: auto; display: block; width: auto; height: auto;
+            max-width: 98%; max-height: 95vh;
+            border: 2px solid #333; border-radius: 4px;
+            box-shadow: 0 0 50px rgba(0,0,0,1); position: relative; top: 50%; transform: translateY(-50%);
         }
+        .close-btn { position: absolute; top: 15px; right: 20px; color: #fff; font-size: 30px; cursor: pointer; z-index: 20; }
         .close-btn:hover { color: var(--accent-red); }
 
-        /* Lightbox */
-        #lightbox {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.98); z-index: 10000;
-            align-items: center; justify-content: center;
+        /* Status Colors */
+        .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; }
+        .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
+        .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; }
+        .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; }
+        .status-good { color: var(--accent-purple); border-top-color: var(--accent-purple) !important; }
+
+        @keyframes flash-update {
+            0% { color: #fff; text-shadow: 0 0 15px #fff; transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
-        #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
+        .updated-flash { animation: flash-update 0.5s ease-out; }
 
-        /* Guide Text */
-        .g-sec { margin-bottom: 20px; }
-        .g-head { color: var(--accent-blue); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 10px; }
-        .g-list { list-style: none; padding: 0; color: #ccc; line-height: 1.6; font-size: 0.9em; }
-        .g-list li b { color: #fff; }
-
-        .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
-        
+        .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
         @media (max-width: 600px) {
+            .stats-container { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+            .stat-box { min-width: auto; padding: 10px 2px; }
+            .stat-value { font-size: 1.2em; }
+            .stat-label { font-size: 0.6em; }
             .grid-container { grid-template-columns: 1fr; }
-            .stat-box { min-width: 45%; }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version">V13.1</span></h1>
-        <div id="systemStatus">Initializing Hybrid Link...</div>
-        <button onclick="document.getElementById('guideModal').style.display='block'" class="btn-guide">📘 Operator Guide</button>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V14.0</span></h1>
+        <div id="systemStatus"><span class="blink">●</span> Initializing...</div>
+        <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
     <div class="stats-container">
-        <div class="stat-box" id="box-sfi"><div class="stat-label">SFI (Flux)</div><div class="stat-value" id="v-sfi">--</div><div class="stat-unit">F10.7cm</div></div>
-        <div class="stat-box" id="box-ssn"><div class="stat-label">SSN (Spot)</div><div class="stat-value" id="v-ssn">--</div><div class="stat-unit">Calculated</div></div>
-        <div class="stat-box" id="box-xray"><div class="stat-label">X-Ray Flux</div><div class="stat-value" id="v-xray">--</div><div class="stat-unit">Solar Flare</div></div>
-        <div class="stat-box" id="box-kp"><div class="stat-label">Kp Index</div><div class="stat-value" id="v-kp">--</div><div class="stat-unit">Planetary</div></div>
-        <div class="stat-box" id="box-bz"><div class="stat-label">Bz (Polarity)</div><div class="stat-value" id="v-bz">--</div><div class="stat-unit">nT (GSM)</div></div>
-        <div class="stat-box" id="box-bt"><div class="stat-label">IMF Bt</div><div class="stat-value" id="v-bt">--</div><div class="stat-unit">nT</div></div>
-        <div class="stat-box" id="box-wind"><div class="stat-label">Solar Wind</div><div class="stat-value" id="v-wind">--</div><div class="stat-unit">km/s</div></div>
-        <div class="stat-box" id="box-den"><div class="stat-label">Density</div><div class="stat-value" id="v-den">--</div><div class="stat-unit">p/cm³</div></div>
-        <div class="stat-box" id="box-dst"><div class="stat-label">Dst Index</div><div class="stat-value" id="v-dst">--</div><div class="stat-unit">nT (Kyoto)</div></div>
+        <div class="stat-box" id="card-sfi">
+            <div class="stat-label">SFI (Flux)</div>
+            <div class="stat-value"><span id="val-sfi">--</span></div>
+            <div class="stat-unit">F10.7cm</div>
+        </div>
+        <div class="stat-box" id="card-ssn">
+            <div class="stat-label">SSN (Spot)</div>
+            <div class="stat-value"><span id="val-ssn">--</span></div>
+            <div class="stat-unit">Calculated</div>
+        </div>
+        <div class="stat-box" id="card-xray">
+            <div class="stat-label">X-Ray Flux</div>
+            <div class="stat-value"><span id="val-xray">--</span></div>
+            <div class="stat-unit">Solar Flare</div>
+        </div>
+        
+        <div class="stat-box" id="card-kp">
+            <div class="stat-label">Kp Index</div>
+            <div class="stat-value"><span id="val-kp">--</span></div>
+            <div class="stat-unit">Planetary</div>
+        </div>
+        <div class="stat-box" id="card-bz">
+            <div class="stat-label">Bz (Polarity)</div>
+            <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
+            <div class="stat-unit">nT (GSM)</div>
+        </div>
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt</div>
+            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT</div>
+        </div>
+        
+        <div class="stat-box" id="card-wind">
+            <div class="stat-label">Solar Wind</div>
+            <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
+            <div class="stat-unit">km/s</div>
+        </div>
+        <div class="stat-box" id="card-density">
+            <div class="stat-label">Density</div>
+            <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
+            <div class="stat-unit">p/cm³</div>
+        </div>
+        <div class="stat-box" id="card-dst">
+            <div class="stat-label">Dst Index</div>
+            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT (Kyoto)</div>
+        </div>
     </div>
 
     <div class="grid-container">
-        <div class="card">
-            <div class="card-header"><h3>PROPAGATION</h3><span>TEC MAP</span></div>
-            <div class="card-body"><div class="img-loader">Loading...</div><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div>
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
+            <div class="card-body">
+                <div class="img-loader">Loading Data...</div>
+                <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" onclick="openLightbox(this.src)">
+            </div>
         </div>
         <div class="card">
-            <div class="card-header"><h3>SOLAR FLARES</h3><span>3-DAY PLOT</span></div>
-            <div class="card-body"><div class="img-loader">Loading...</div><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div>
+            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora" onclick="openLightbox(this.src)"></div>
         </div>
         <div class="card">
-            <div class="card-header"><h3>AURORA</h3><span>OVATION</span></div>
-            <div class="card-body"><div class="img-loader">Loading...</div><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>BLACKOUT</h3><span>D-RAP</span></div>
-            <div class="card-body"><div class="img-loader">Loading...</div><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div>
+            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>D-REGION ABSORPTION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP" onclick="openLightbox(this.src)"></div>
         </div>
     </div>
 
     <div id="guideModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="document.getElementById('guideModal').style.display='none'">&times;</span>
-            <h2 style="color:var(--accent-green); text-align:center; margin-bottom:20px;">OPERATOR GUIDE</h2>
+        <div class="modal-content-text">
+            <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
+            <h2 style="color:var(--accent-green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             
-            <div class="g-sec">
-                <div class="g-head">SOLAR ACTIVITY</div>
-                <ul class="g-list">
-                    <li><b>X-Ray:</b> <span style="color:var(--accent-green)">A/B/C</span>=Normal, <span style="color:var(--accent-red)">M/X</span>=Blackout</li>
-                    <li><b>SFI:</b> >100 Good, >150 Excellent (High Bands Open)</li>
-                    <li><b>SSN:</b> Higher is better for propagation</li>
-                </ul>
-            </div>
+            <h3 style="color:var(--accent-blue); margin-top:20px;">★ Solar Activity</h3>
+            <ul style="line-height:1.6; color:#ddd;">
+                <li><b>X-Ray:</b> A/B/C=Normal, M/X=Blackout Alert</li>
+                <li><b>SFI:</b> >100 Good, >150 Excellent</li>
+                <li><b>SSN:</b> Higher is better</li>
+            </ul>
 
-            <div class="g-sec">
-                <div class="g-head">GEOMAGNETIC</div>
-                <ul class="g-list">
-                    <li><b>Kp:</b> 0-3 Quiet, 4 Unsettled, 5+ Storm</li>
-                    <li><b>Bz:</b> <span style="color:var(--accent-green)">Positive (+)</span> = Quiet<br><span style="color:var(--accent-red)">Negative (-)</span> = Storm Alert</li>
-                </ul>
-            </div>
+            <h3 style="color:var(--accent-blue);">★ Geomagnetic</h3>
+            <ul style="line-height:1.6; color:#ddd;">
+                <li><b>Kp:</b> 0-3 Quiet, 5+ Storm</li>
+                <li><b>Bz:</b> <span class="hl-green">Positive (+)</span> Quiet, <span class="hl-red">Negative (-)</span> Storm</li>
+            </ul>
 
-            <div class="g-sec">
-                <div class="g-head">CONDITIONS</div>
-                <ul class="g-list">
-                    <li><b>Solar Wind:</b> >500 km/s = Unstable / QSB</li>
-                    <li><b>TEC Map:</b> <span style="color:var(--accent-orange)">Red/Orange</span> = Good MUF (10m-15m)</li>
-                </ul>
-            </div>
-            <div style="text-align:center; color:#555; font-size:0.8em; margin-top:20px;">Tap outside to close</div>
+            <h3 style="color:var(--accent-blue);">★ Conditions</h3>
+            <p style="color:#ddd;">Solar Wind > 500 km/s = Unstable / QSB</p>
         </div>
     </div>
 
-    <div id="lightbox" onclick="this.style.display='none'">
-        <img id="lb-img">
+    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')" style="display:none;">
+        <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px;">&times;</span>
+        <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V13.1 • Hybrid Core</div>
+    <div class="footer">IonosTek Monitor V14.0 • Data: NOAA, Kyoto</div>
 
     <script>
         // --- Security ---
         document.addEventListener('contextmenu', e => e.preventDefault());
-        
-        // --- Core Functions ---
-        function view(src) {
-            document.getElementById('lb-img').src = src + '?t=' + Date.now();
-            document.getElementById('lightbox').style.display = 'flex';
+        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
+
+        // --- UI Functions ---
+        function openGuide() { document.getElementById("guideModal").style.display = "block"; }
+        function openLightbox(src) {
+            const m = document.getElementById("lightboxModal");
+            const img = document.getElementById("lightboxImg");
+            img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
+            m.style.display = "block";
         }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
 
-        function updateUI(id, val, type, diff = 0) {
-            const el = document.getElementById('v-'+id);
-            const box = document.getElementById('box-'+id);
-            if(!el) return;
-            
-            el.innerHTML = val;
-            if(diff !== 0 && !isNaN(diff)) {
-                let arr = diff>0 ? '&#9650;' : '&#9660;';
-                let c = (diff>0) ? 'var(--accent-red)' : 'var(--accent-green)';
-                if(type=='sfi'||type=='ssn'||type=='dst') c = (diff>0) ? 'var(--accent-green)' : 'var(--accent-red)';
-                if(type=='dst') c = (diff>0) ? 'var(--accent-green)' : 'var(--accent-red)'; 
-                
-                el.innerHTML += ` <span class="trend-arrow" style="color:${c}">${arr}</span>`;
-            }
-
-            let s = 's-norm';
-            if(type=='sfi') { if(val>150) s='s-good'; else if(val<100) s='s-warn'; }
-            if(type=='ssn') { if(val>100) s='s-good'; else if(val<50) s='s-warn'; }
-            if(type=='kp') { if(val>=4) s='s-warn'; if(val>=5) s='s-alert'; }
-            if(type=='bz') { if(val<0) s='s-warn'; if(val<-5) s='s-alert'; }
-            if(type=='wind') { if(val>500) s='s-warn'; if(val>700) s='s-alert'; }
-            if(type=='xray') { if(val.includes('M')) s='s-mod'; if(val.includes('X')) s='s-alert'; }
-            
-            box.className = 'stat-box ' + s;
-        }
-
-        function tick() {
+        function updateTime() {
             const now = new Date();
-            document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + now.toUTCString().replace('GMT','UTC');
+            document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + now.toUTCString().replace('GMT', 'UTC');
         }
 
-        // --- HYBRID FETCHING (Direct -> Proxy Fallback) ---
-        
-        async function safeFetch(url) {
-            try {
-                // Attempt 1: Direct
-                const res = await fetch(url);
-                if (!res.ok) throw new Error("Direct Failed");
-                return await res.json();
-            } catch (e) {
-                console.log("Direct fetch failed, switching to Proxy for: " + url);
-                // Attempt 2: Proxy (corsproxy.io is usually fast)
-                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
-                const res2 = await fetch(proxyUrl);
-                return await res2.json();
-            }
-        }
+        function getFreshUrl(url) { return url + '?t=' + new Date().getTime(); }
 
-        async function fetchAll() {
-            const ts = '?t=' + Date.now();
+        function updateUI(valId, cardId, value, type, trendId, arrowId) {
+            const valElem = document.getElementById(valId);
+            const cardElem = document.getElementById(cardId);
+            if (!valElem || !cardElem) return;
+
+            // Flash Effect
+            valElem.classList.remove('updated-flash');
+            void valElem.offsetWidth;
+            valElem.classList.add('updated-flash');
             
-            // 1. Mag & Plasma
-            safeFetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'+ts).then(d=>{
-                const l=d[d.length-1], p=d[d.length-2];
-                const bz=d[0].indexOf('bz_gsm'), bt=d[0].indexOf('bt');
-                updateUI('bz', parseFloat(l[bz]), 'bz', l[bz]-p[bz]);
-                updateUI('bt', parseFloat(l[bt]), 'bt', l[bt]-p[bt]);
-            }).catch(e=>{});
+            valElem.innerText = (value === null || isNaN(value) && typeof value !== 'string') ? "--" : value;
 
-            safeFetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'+ts).then(d=>{
-                const l=d[d.length-1], p=d[d.length-2];
-                const s=d[0].indexOf('speed'), den=d[0].indexOf('density');
-                updateUI('wind', parseFloat(l[s]), 'wind', l[s]-p[s]);
-                updateUI('den', parseFloat(l[den]), 'den');
-            }).catch(e=>{});
-
-            // 2. Indices
-            safeFetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'+ts).then(d=>{
-                const l=d[d.length-1];
-                updateUI('kp', parseFloat(l[1]), 'kp', parseFloat(l[1])-parseFloat(d[d.length-2][1]));
-            }).catch(e=>{});
-
-            safeFetch('https://services.swpc.noaa.gov/products/kyoto-dst.json'+ts).then(d=>{
-                const l=d[d.length-1];
-                updateUI('dst', parseInt(l[1]), 'dst', parseInt(l[1])-parseInt(d[d.length-2][1]));
-            }).catch(e=>{});
-
-            // 3. SFI & SSN
-            safeFetch('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'+ts).then(d=>{
-                const l=parseInt(d[d.length-1][d[0].length-1]);
-                const p=parseInt(d[d.length-2][d[0].length-1]);
-                updateUI('sfi', l, 'sfi', l-p);
-                // Calc SSN
-                let ssn = Math.round((l-63.7)*1.12);
-                let p_ssn = Math.round((p-63.7)*1.12);
-                updateUI('ssn', ssn<0?0:ssn, 'ssn', ssn-p_ssn);
-            }).catch(e=>{});
-
-            // 4. X-Ray (3-Step Fallback)
-            const tryXray = async (url, index) => {
-                const d = await safeFetch(url+ts);
-                let flux = null;
-                for(let i=d.length-1; i>0; i--) {
-                    if(d[i][index] && !isNaN(parseFloat(d[i][index]))) {
-                        flux = parseFloat(d[i][index]); break;
-                    }
+            let status = 'normal';
+            if (type === 'sfi') { if(value>150) status='good'; else if(value>100) status='normal'; else status='warn'; }
+            else if (type === 'ssn') { if(value>100) status='good'; else if(value>50) status='normal'; else status='warn'; }
+            else if (type === 'kp') { if(value>=5) status='alert'; else if(value>=4) status='warn'; else status='normal'; }
+            else if (type === 'dst') { if(value<-100) status='alert'; else if(value<-50) status='moderate'; else if(value<-20) status='warn'; }
+            else if (type === 'bz') { if(value<-5) status='alert'; else if(value<0) status='warn'; }
+            else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
+            else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
+            else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
+            else if (type === 'xray') { 
+                if(typeof value === 'string') {
+                    if(value.startsWith('X')) status='alert'; else if(value.startsWith('M')) status='moderate'; else status='normal';
                 }
-                if(flux !== null) return flux;
-                throw new Error("No data");
-            };
+            }
+            
+            cardElem.className = 'stat-box';
+            cardElem.classList.add('status-'+status);
 
-            tryXray('https://services.swpc.noaa.gov/products/x-rays-5-minute.json', 3)
-                .catch(() => tryXray('https://services.swpc.noaa.gov/products/x-rays-6-hour.json', 3))
-                .catch(() => tryXray('https://services.swpc.noaa.gov/products/x-rays-3-day.json', 3))
-                .then(flux => {
-                    let cls = flux<1e-7?'A': flux<1e-6?'B': flux<1e-5?'C': flux<1e-4?'M':'X';
+            if (type === 'bz' && arrowId) {
+                const arr = document.getElementById(arrowId);
+                arr.innerHTML = value >= 0 ? '&#8593;' : '&#8595;';
+                arr.className = value >= 0 ? 'bz-arrow-n' : 'bz-arrow-s';
+            }
+
+            if (trendId && lastValues[type] !== undefined) {
+                // Logic for trend arrow can be added here if needed
+            }
+            if (type !== 'bz') lastValues[type] = value;
+        }
+
+        let lastValues = {};
+
+        // --- Data Fetching (V8.2 Logic + Safe X-Ray) ---
+        async function fetchData() {
+            // 1. Mag
+            try {
+                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
+                const d = await r.json();
+                const l = d[d.length-1];
+                updateUI('val-bz', 'card-bz', parseFloat(l[d[0].indexOf('bz_gsm')]), 'bz', null, 'arr-bz');
+                updateUI('val-bt', 'card-bt', parseFloat(l[d[0].indexOf('bt')]), 'bt', 'trend-bt');
+            } catch(e){}
+
+            // 2. Plasma
+            try {
+                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
+                const d = await r.json();
+                const l = d[d.length-1];
+                updateUI('val-density', 'card-density', parseFloat(l[d[0].indexOf('density')]), 'density', 'trend-density');
+                updateUI('val-wind', 'card-wind', parseFloat(l[d[0].indexOf('speed')]), 'wind', 'trend-wind');
+            } catch(e){}
+
+            // 3. Dst
+            try {
+                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
+                const d = await r.json();
+                updateUI('val-dst', 'card-dst', parseInt(d[d.length-1][1]), 'dst', 'trend-dst');
+            } catch(e){}
+
+            // 4. Kp
+            try {
+                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
+                const d = await r.json();
+                updateUI('val-kp', 'card-kp', parseFloat(d[d.length-1][1]), 'kp', 'trend-kp');
+            } catch(e){}
+
+            // 5. SFI & SSN
+            try {
+                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
+                const d = await r.json();
+                const l = parseInt(d[d.length-1][d[0].length-1]);
+                updateUI('val-sfi', 'card-sfi', l, 'sfi');
+                let calcSSN = Math.round((l - 63.7) * 1.12);
+                updateUI('val-ssn', 'card-ssn', calcSSN<0?0:calcSSN, 'ssn');
+            } catch(e){}
+
+            // 6. X-Ray (Safe Logic: Use 6-hour file, direct access)
+            try {
+                const r = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-6-hour.json'));
+                const d = await r.json();
+                // Index 3 = Long Flux (0.1-0.8nm)
+                let flux = null;
+                // Scan last 5 entries just in case
+                for (let i = d.length - 1; i >= d.length - 5; i--) {
+                   if(d[i][3] !== null) { flux = parseFloat(d[i][3]); break; }
+                }
+                
+                if(flux !== null) {
+                    let xClass = flux<1e-7?'A': flux<1e-6?'B': flux<1e-5?'C': flux<1e-4?'M':'X';
                     let base = flux<1e-7?1e-7: flux<1e-6?1e-6: flux<1e-5?1e-5: flux<1e-4?1e-4:1e-4;
-                    let num = (flux/base).toFixed(1);
-                    updateUI('xray', cls+num, 'xray');
-                })
-                .catch(() => updateUI('xray', 'N/A', 'xray'));
+                    let sub = (flux / base).toFixed(1);
+                    updateUI('val-xray', 'card-xray', xClass + sub, 'xray');
+                }
+            } catch(e){ updateUI('val-xray', 'card-xray', '--', 'xray'); }
         }
 
         function refreshImages() {
@@ -339,17 +393,14 @@
             imgs.forEach(img => { img.src = img.src.split('?')[0] + '?t=' + new Date().getTime(); });
         }
 
-        // Init
-        tick(); fetchAll();
-        setInterval(tick, 1000);
-        setInterval(fetchAll, 60000);
-        setInterval(refreshImages, 300000);
-
-        // Modal Close
-        window.onclick = function(e) {
-            if(e.target == document.getElementById('guideModal')) document.getElementById('guideModal').style.display = "none";
-            if(e.target == document.getElementById('lightbox')) document.getElementById('lightbox').style.display = "none";
-        }
+        // Start immediately
+        document.addEventListener('DOMContentLoaded', (event) => {
+            updateTime(); 
+            fetchData();
+            setInterval(updateTime, 1000);
+            setInterval(fetchData, 60000);
+            setInterval(refreshImages, 300000);
+        });
     </script>
 </body>
 </html>

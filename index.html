@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V9.1</title>
+    <title>IonosTek Monitor V9.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- CSS Base --- */
@@ -26,13 +26,13 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            /* เอา overflow-x: hidden ออกชั่วคราวเพื่อลดปัญหาการเลื่อน */
+            overflow-x: hidden;
         }
 
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #fff; background-color: var(--accent-red); 
+            color: #000; background-color: var(--accent-green); 
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -40,8 +40,28 @@
             font-family: 'Chakra Petch', sans-serif;
             font-size: 0.95em; font-weight: 500; margin-top: 5px; color: var(--text-sub);
         }
-        .blink { animation: blinker 1.5s linear infinite; color: var(--accent-green); }
-        @keyframes blinker { 50% { opacity: 0; } }
+        
+        /* --- New Animations (Pulse & Breathe) --- */
+        @keyframes blinker { 
+            0% { opacity: 1; text-shadow: 0 0 5px var(--accent-green); } 
+            50% { opacity: 0.2; text-shadow: none; }
+            100% { opacity: 1; text-shadow: 0 0 5px var(--accent-green); } 
+        }
+        .blink { animation: blinker 1.5s infinite ease-in-out; color: var(--accent-green); }
+
+        /* Animation สำหรับลูกศร (ย่อขยาย + หรี่แสง) */
+        @keyframes arrow-pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.8); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Animation สำหรับตัวเลข (เรืองแสงเบาๆ) */
+        @keyframes value-breathe {
+            0% { text-shadow: none; }
+            50% { text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+            100% { text-shadow: none; }
+        }
 
         .btn-guide {
             background: transparent; border: 1px solid var(--accent-blue);
@@ -63,13 +83,16 @@
         .stat-value { 
             font-size: 1.6em; font-weight: 700; margin: 5px 0; 
             display: flex; align-items: center; justify-content: center; gap: 3px;
+            /* ใส่ Animation ให้ตัวเลขหายใจ */
+            animation: value-breathe 3s infinite ease-in-out;
         }
         .stat-label { font-size: 0.7em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-unit { font-size: 0.6em; color: #666; }
 
-        .trend-arrow { font-size: 0.6em; font-weight: bold; }
-        .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } 
-        .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; }
+        /* Apply Pulse to Arrows */
+        .trend-arrow { font-size: 0.6em; font-weight: bold; animation: arrow-pulse 1.5s infinite ease-in-out; }
+        .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; animation: arrow-pulse 1.5s infinite ease-in-out; } 
+        .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; animation: arrow-pulse 1.5s infinite ease-in-out; }
 
         .grid-container {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -96,70 +119,34 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* --- Modal & Scroll Fix --- */
+        /* Modal */
         .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 10000; /* เลเยอร์สูงสุด */
-            left: 0; 
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0,0,0,0.95); /* พื้นหลังมืดสนิทขึ้น */
-            backdrop-filter: blur(5px); 
-            /* แก้ไข: ปล่อยให้ Modal จัดการ Scroll เอง */
-            overflow: hidden; 
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
+            backdrop-filter: blur(5px); overflow: hidden;
+            align-items: center; justify-content: center;
         }
-        
         .modal-content-text {
-            background-color: var(--card-bg); 
-            border: 1px solid #444; 
-            width: 90%; 
-            max-width: 700px; 
-            border-radius: 10px;
+            background-color: var(--card-bg); border: 1px solid #444; 
+            width: 90%; max-width: 700px; border-radius: 10px;
             box-shadow: 0 0 50px rgba(0,0,0,0.8); 
-            
-            /* Key Fixes for Scrolling */
-            max-height: 85vh; /* สูงไม่เกิน 85% ของจอ */
-            overflow-y: auto; /* บังคับให้มี Scrollbar ในกล่อง */
-            position: relative;
-            display: flex;
-            flex-direction: column;
+            max-height: 85vh; overflow-y: auto; position: relative; display: flex; flex-direction: column;
         }
-
-        /* ส่วนหัวของ Modal (สำหรับปุ่มปิด) */
         .modal-header-bar {
-            position: sticky;
-            top: 0;
-            background-color: var(--card-bg);
-            padding: 10px 20px;
-            border-bottom: 1px solid #333;
-            z-index: 20;
-            display: flex;
-            justify-content: flex-end;
+            position: sticky; top: 0; background-color: var(--card-bg);
+            padding: 10px 20px; border-bottom: 1px solid #333; z-index: 20;
+            display: flex; justify-content: flex-end;
         }
-
-        /* ส่วนเนื้อหา */
-        .modal-body-scroll {
-            padding: 20px 30px;
-            overflow-y: auto;
-        }
-
+        .modal-body-scroll { padding: 20px 30px; overflow-y: auto; }
         .modal-content-img {
             margin: auto; display: block; width: auto; height: auto;
             max-width: 98%; max-height: 95vh;
             border: 2px solid #333; border-radius: 4px;
             box-shadow: 0 0 50px rgba(0,0,0,1);
         }
-        
-        .close-btn { 
-            color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 1;
-        }
+        .close-btn { color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 1; }
         .close-btn:hover { color: var(--accent-red); }
         
-        /* Guide Styles */
         .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
         .article-content h3 { color: var(--accent-blue); margin-top: 25px; border-left: 3px solid var(--accent-blue); padding-left: 10px; }
         .article-content p, .article-content ul { color: #ddd; line-height: 1.6; font-size: 0.95em; }
@@ -179,7 +166,6 @@
         .updated-flash { animation: flash-update 0.5s ease-out; }
 
         .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
-        
         @media (max-width: 768px) {
             .grid-container { grid-template-columns: 1fr; }
             .stat-box { min-width: 30%; }
@@ -189,7 +175,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.1</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.2</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -256,7 +242,7 @@
         </div>
     </div>
 
-    <div id="guideModal" class="modal" style="display:none; flex-direction: column;">
+    <div id="guideModal" class="modal" style="display:none;">
         <div class="modal-content-text">
             <div class="modal-header-bar">
                 <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
@@ -264,53 +250,32 @@
             <div class="modal-body-scroll">
                 <div class="article-content">
                     <h2>📡 OPERATOR GUIDE</h2>
-                    
                     <h3>★ SFI & SSN</h3>
-                    <ul>
-                        <li><b>SFI:</b> >100 ดี, >150 เยี่ยม (10m-12m เปิด)</li>
-                        <li><b>SSN:</b> ยิ่งสูง ยิ่งสะท้อนคลื่นไกล</li>
-                    </ul>
-
+                    <ul><li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li><li><b>SSN:</b> ยิ่งสูง ยิ่งสะท้อนดี</li></ul>
                     <h3>★ Kp Index</h3>
-                    <ul>
-                        <li><span style="color:var(--accent-green)">Kp 0-3:</span> สงบ (Quiet)</li>
-                        <li><span style="color:var(--accent-yellow)">Kp 4:</span> เริ่มปั่นป่วน</li>
-                        <li><span style="color:var(--accent-red)">Kp 5+:</span> พายุ (Storm)</li>
-                    </ul>
-
+                    <ul><li><span style="color:var(--accent-green)">Kp 0-3:</span> สงบ</li><li><span style="color:var(--accent-red)">Kp 5+:</span> พายุ</li></ul>
                     <h3>1. Bz (Polarity)</h3>
-                    <ul>
-                        <li><span class="hl-green">↑ Bz บวก:</span> "Shields UP" - สัญญาณนิ่ง</li>
-                        <li><span class="hl-red">↓ Bz ลบ:</span> "Shields DOWN" - พายุเข้า (6m Aurora)</li>
-                    </ul>
-
+                    <ul><li><span class="hl-green">↑ Bz บวก:</span> นิ่ง</li><li><span class="hl-red">↓ Bz ลบ:</span> พายุ</li></ul>
                     <h3>2. Solar Wind</h3>
-                    <p>หากเกิน <b>500 km/s</b> สัญญาณอาจแกว่ง (QSB)</p>
-
+                    <p>เกิน <b>500 km/s</b> สัญญาณแกว่ง</p>
                     <h3>3. TEC Map</h3>
-                    <ul>
-                        <li><b style="color:var(--accent-orange)">สีแดง/ส้ม:</b> MUF สูง (เล่น 10m-15m ได้)</li>
-                        <li><b style="color:var(--accent-blue)">สีน้ำเงิน:</b> MUF ต่ำ (เล่น 40m-80m)</li>
-                    </ul>
-                    
-                    <br>
-                    <p style="text-align:center; color:#666; font-size:0.8em;">-- IonosTek V9.1 --</p>
+                    <ul><li><b style="color:var(--accent-orange)">แดง/ส้ม:</b> 10m-15m</li><li><b style="color:var(--accent-blue)">น้ำเงิน:</b> 40m-80m</li></ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')" style="display:none; flex-direction: column;">
+    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')" style="display:none;">
         <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px; z-index:100;">&times;</span>
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V9.1 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V9.2 • Data: NOAA, Kyoto</div>
 
     <script>
         function openGuide() { 
             const m = document.getElementById("guideModal");
-            m.style.display = "flex"; /* Use flex for centering */
+            m.style.display = "flex"; 
         }
         function openLightbox(src) {
             const m = document.getElementById("lightboxModal");
@@ -332,9 +297,11 @@
             const cardElem = document.getElementById(cardId);
             if (!valElem || !cardElem) return;
 
+            // Remove animation to restart it
             valElem.classList.remove('updated-flash');
             void valElem.offsetWidth;
             valElem.classList.add('updated-flash');
+            
             valElem.innerText = isNaN(value) ? "--" : value;
 
             let status = 'normal';

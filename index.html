@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V7.6</title>
+    <title>IonosTek Monitor V7.7 Stability</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -16,7 +16,6 @@
             --accent-orange: #ff9100;
             --accent-red: #ff1744;
             --accent-blue: #2979ff;
-            --border-color: #333;
         }
 
         body {
@@ -27,74 +26,57 @@
             padding: 20px;
         }
 
-        /* Header & Button */
+        /* Header & Status */
         .header {
             text-align: center;
             margin-bottom: 25px;
             border-bottom: 2px solid #333;
             padding-bottom: 15px;
-            position: relative;
         }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: var(--bg-color); 
-            background-color: var(--accent-green);
-            font-size: 0.4em; 
-            vertical-align: middle; 
-            padding: 2px 6px; 
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        #updateTime {
-            font-size: 1em; color: var(--accent-blue); margin-top: 5px; font-weight: 500;
+            color: #000; background-color: var(--accent-yellow);
+            font-size: 0.4em; vertical-align: middle; padding: 2px 6px; 
+            border-radius: 4px; font-weight: bold;
         }
         
+        /* Status Indicator */
+        #systemStatus {
+            font-size: 0.9em; font-weight: 500; margin-top: 5px;
+            transition: color 0.5s;
+        }
+        .status-ok { color: var(--accent-green); }
+        .status-fail { color: var(--accent-red); animation: flash-red 1s infinite; }
+
         .btn-guide {
-            background: transparent;
-            border: 1px solid var(--accent-blue);
-            color: var(--accent-blue);
-            padding: 5px 15px;
-            margin-top: 10px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: 'Chakra Petch', sans-serif;
-            font-size: 0.85em;
-            transition: all 0.3s;
-            text-transform: uppercase;
+            background: transparent; border: 1px solid var(--accent-blue);
+            color: var(--accent-blue); padding: 5px 15px; margin-top: 10px;
+            border-radius: 20px; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
+            font-size: 0.85em; transition: all 0.3s; text-transform: uppercase;
         }
-        .btn-guide:hover {
-            background: var(--accent-blue);
-            color: #fff;
-            box-shadow: 0 0 10px rgba(41, 121, 255, 0.5);
-        }
+        .btn-guide:hover { background: var(--accent-blue); color: #fff; }
 
         /* Animations */
-        .blink { animation: blinker 1.5s linear infinite; color: var(--accent-green); margin-right: 5px; }
         @keyframes blinker { 50% { opacity: 0; } }
-
+        .blink { animation: blinker 1s linear infinite; }
+        
         @keyframes flash-update {
             0% { color: #fff; text-shadow: 0 0 15px #fff; transform: scale(1.1); }
             100% { transform: scale(1); }
         }
         .updated-flash { animation: flash-update 0.5s ease-out; }
+        
+        @keyframes flash-red { 50% { opacity: 0.5; } }
 
-        /* Stats Bar */
+        /* Stats Container */
         .stats-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 30px;
+            display: flex; flex-wrap: wrap; gap: 15px;
+            justify-content: center; margin-bottom: 30px;
         }
         .stat-box {
-            background: var(--card-bg);
-            padding: 15px 10px;
-            border-radius: 8px;
-            min-width: 140px;
-            flex: 1;
-            text-align: center;
-            border-top: 4px solid #555;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            background: var(--card-bg); padding: 15px 10px; border-radius: 8px;
+            min-width: 140px; flex: 1; text-align: center;
+            border-top: 4px solid #555; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             transition: transform 0.2s;
         }
         .stat-box:hover { transform: translateY(-3px); }
@@ -107,31 +89,23 @@
         .stat-unit { font-size: 0.75em; color: #666; }
 
         /* Arrows */
-        .trend-arrow { font-size: 0.6em; opacity: 1; font-weight: bold; } /* เพิ่ม opacity ให้เห็นชัด */
+        .trend-arrow { font-size: 0.6em; font-weight: bold; }
         .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } 
         .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; }
 
-        /* Grid Layout */
+        /* Grid & Cards */
         .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 25px;
-            max-width: 1600px;
-            margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px; max-width: 1600px; margin: 0 auto;
         }
         .card {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
+            background-color: var(--card-bg); border-radius: 10px; overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; flex-direction: column;
             border: 1px solid #333;
         }
         .card-header {
             background: linear-gradient(90deg, #2c2c2c 0%, #1e1e1e 100%);
-            padding: 12px 20px;
-            border-bottom: 1px solid #444;
+            padding: 12px 20px; border-bottom: 1px solid #444;
             display: flex; justify-content: space-between; align-items: center;
         }
         .card-header h3 { margin: 0; font-size: 1.1em; font-weight: 600; color: #ddd; }
@@ -141,10 +115,10 @@
             background: #000; flex-grow: 1; display: flex; align-items: center; justify-content: center;
             min-height: 300px; position: relative;
         }
-        img { width: 100%; height: 100%; object-fit: cover; z-index: 1; position: relative; }
+        img { width: 100%; height: 100%; object-fit: cover; z-index: 1; }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Modal (Popup) */
+        /* Modal */
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.85);
@@ -155,17 +129,213 @@
             border: 1px solid #444; width: 90%; max-width: 700px; border-radius: 10px;
             box-shadow: 0 0 30px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto;
         }
-        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close-btn:hover { color: #fff; }
+        .close-btn { color: #aaa; float: right; font-size: 28px; cursor: pointer; }
         
-        /* Article Style */
+        /* Article */
         .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
-        .article-content h3 { color: var(--accent-blue); margin-top: 25px; margin-bottom: 10px; }
-        .article-content p { line-height: 1.6; color: #ddd; font-size: 0.95em; margin-bottom: 10px; }
-        .article-content ul { color: #ddd; line-height: 1.6; }
-        .article-content li { margin-bottom: 8px; }
+        .article-content h3 { color: var(--accent-blue); margin-top: 25px; }
+        .article-content p, .article-content ul { color: #ddd; line-height: 1.6; }
         .hl-red { color: var(--accent-red); font-weight: bold; }
         .hl-green { color: var(--accent-green); font-weight: bold; }
-        
+
         /* Status Colors */
-        .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; text-shadow: 0 0 8px rgba(0, 230, 118, 0.2); }
+        .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; }
+        .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
+        .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; }
+        .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; }
+
+        .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
+
+        @media (max-width: 768px) {
+            .grid-container { grid-template-columns: 1fr; }
+            .stat-box { min-width: 45%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V7.7</span></h1>
+        <div id="systemStatus" class="status-ok"><span class="blink">●</span> SYSTEM ONLINE</div>
+        <button onclick="openModal()" class="btn-guide">📘 How to Read</button>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-box" id="card-bz">
+            <div class="stat-label">Bz (Polarity)</div>
+            <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
+            <div class="stat-unit">nT (GSM)</div>
+        </div>
+        <div class="stat-box" id="card-dst">
+            <div class="stat-label">Dst Index</div>
+            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT (Kyoto)</div>
+        </div>
+        <div class="stat-box" id="card-wind">
+            <div class="stat-label">Solar Wind</div>
+            <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
+            <div class="stat-unit">km/s</div>
+        </div>
+        <div class="stat-box" id="card-density">
+            <div class="stat-label">Density</div>
+            <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
+            <div class="stat-unit">p/cm³</div>
+        </div>
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt (Total)</div>
+            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT</div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
+            <div class="card-body">
+                <div id="loader-muf" class="img-loader">Loading Data...</div>
+                <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" style="display:none;" onload="this.style.display='block'; document.getElementById('loader-muf').style.display='none';">
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>D-REGION ABSORPTION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP"></div>
+        </div>
+    </div>
+
+    <div id="guideModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="article-content">
+                <h2>📡 คู่มือนักวิทยุ: อ่านค่าอวกาศฉบับ IonosTek</h2>
+                <h3>1. Bz (Polarity): กุญแจสำคัญ</h3>
+                <ul>
+                    <li><span class="hl-green">↑ Bz เป็นบวก:</span> <b>ประตูปิด</b> สัญญาณนิ่ง (DX ดี)</li>
+                    <li><span class="hl-red">↓ Bz เป็นลบ:</span> <b>ประตูเปิด</b> พายุเข้า (6m ดี)</li>
+                </ul>
+                <h3>2. Solar Wind & Density</h3>
+                <p>ถ้าลม > <b>500 km/s</b> สัญญาณอาจขาดหาย</p>
+                <h3>3. TEC Map (แผนที่อิเล็กตรอน)</h3>
+                <ul>
+                    <li><b style="color:var(--accent-orange)">สีแดง/ส้ม:</b> เล่นความถี่สูง (10-15m)</li>
+                    <li><b style="color:var(--accent-blue)">สีน้ำเงิน/ม่วง:</b> เล่นความถี่ต่ำ (40-80m)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">IonosTek Monitor V7.7 (Stability) • Data Sources: NOAA, Kyoto</div>
+
+    <script>
+        let lastValues = { wind: null, density: null, dst: null, bt: null };
+        let updateTimer = null;
+
+        // Modal Control
+        const modal = document.getElementById("guideModal");
+        function openModal() { modal.style.display = "block"; }
+        function closeModal() { modal.style.display = "none"; }
+        window.onclick = function(e) { if (e.target == modal) modal.style.display = "none"; }
+
+        // Helper: Anti-Freeze (ดึงข้อมูลสด ไม่เอา Cache)
+        function getFreshUrl(url) {
+            return url + '?t=' + new Date().getTime(); 
+        }
+
+        function setStatus(isOnline) {
+            const el = document.getElementById('systemStatus');
+            const now = new Date().toLocaleTimeString('en-GB');
+            if (isOnline) {
+                el.innerHTML = '<span class="blink">●</span> SYSTEM ACTIVE: ' + now;
+                el.className = 'status-ok';
+            } else {
+                el.innerHTML = '⚠ OFFLINE / RETRYING...';
+                el.className = 'status-fail';
+            }
+        }
+
+        function updateUI(valId, cardId, value, type, trendId, arrowId) {
+            const valElem = document.getElementById(valId);
+            const cardElem = document.getElementById(cardId);
+            if (!valElem || !cardElem) return;
+
+            valElem.classList.remove('updated-flash');
+            void valElem.offsetWidth;
+            valElem.classList.add('updated-flash');
+            valElem.innerText = isNaN(value) ? "--" : value;
+
+            // Colors
+            let status = 'normal';
+            cardElem.className = 'stat-box';
+            if (type === 'dst') { if(value<-100) status='alert'; else if(value<-50) status='moderate'; else if(value<-20) status='warn'; }
+            else if (type === 'bz') { if(value<-5) status='alert'; else if(value<0) status='warn'; }
+            else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
+            else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
+            else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
+            cardElem.classList.add('status-'+status);
+
+            // Bz Arrow
+            if (type === 'bz' && arrowId) {
+                const arr = document.getElementById(arrowId);
+                arr.innerHTML = value >= 0 ? '&#8593;' : '&#8595;';
+                arr.className = value >= 0 ? 'bz-arrow-n' : 'bz-arrow-s';
+            }
+
+            // Trend Arrow (Persistent)
+            if (trendId && lastValues[type] !== null) {
+                const tr = document.getElementById(trendId);
+                const diff = value - lastValues[type];
+                if (Math.abs(diff) > 0.1) {
+                    tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
+                    if (type==='dst') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                    else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
+                }
+            }
+            if (type !== 'bz') lastValues[type] = value;
+        }
+
+        async function fetchData() {
+            try {
+                // 1. Mag Data
+                const resMag = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
+                const dataMag = await resMag.json();
+                const lastMag = dataMag[dataMag.length - 1];
+                updateUI('val-bz', 'card-bz', parseFloat(lastMag[dataMag[0].indexOf('bz_gsm')]), 'bz', null, 'arr-bz');
+                updateUI('val-bt', 'card-bt', parseFloat(lastMag[dataMag[0].indexOf('bt')]), 'bt', 'trend-bt');
+
+                // 2. Plasma Data
+                const resPlas = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
+                const dataPlas = await resPlas.json();
+                const lastPlas = dataPlas[dataPlas.length - 1];
+                updateUI('val-density', 'card-density', parseFloat(lastPlas[dataPlas[0].indexOf('density')]), 'density', 'trend-density');
+                updateUI('val-wind', 'card-wind', parseFloat(lastPlas[dataPlas[0].indexOf('speed')]), 'wind', 'trend-wind');
+
+                // 3. Dst Data
+                const resDst = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
+                const dataDst = await resDst.json();
+                const lastDst = dataDst[dataDst.length - 1];
+                updateUI('val-dst', 'card-dst', parseInt(lastDst[1]), 'dst', 'trend-dst');
+
+                setStatus(true); // Success
+            } catch (e) {
+                console.error('Fetch Error:', e);
+                setStatus(false); // Fail
+            }
+        }
+
+        function refreshImages() {
+            const imgs = document.querySelectorAll('img');
+            imgs.forEach(img => { 
+                img.src = img.src.split('?')[0] + '?t=' + new Date().getTime(); 
+            });
+        }
+
+        // Start
+        fetchData();
+        setInterval(fetchData, 60000); // Data every 1 min
+        setInterval(refreshImages, 300000); // Images every 5 min
+    </script>
+</body>
+</html>

@@ -111,34 +111,28 @@
         function tick() { document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
 
         // --- UNIVERSAL PROXY GATEWAY ---
-        // พยายามดึงผ่าน Proxy หลายตัวจนกว่าจะเจอตัวที่เปิด
         async function fetchGate(url) {
             const target = url + '?t=' + Date.now();
-            
-            // List of proxies ordered by reliability/speed
             const gateways = [
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
                 `https://corsproxy.io/?${encodeURIComponent(target)}`,
                 `https://thingproxy.freeboard.io/fetch/${target}`
             ];
-
             for (let gateway of gateways) {
                 try {
                     const controller = new AbortController();
-                    const id = setTimeout(() => controller.abort(), 5000); // 5 sec timeout per gate
+                    const id = setTimeout(() => controller.abort(), 5000);
                     const res = await fetch(gateway, { signal: controller.signal });
                     clearTimeout(id);
                     if (res.ok) return await res.json();
-                } catch (e) {
-                    console.warn(`Gateway failed: ${gateway}`);
-                }
+                } catch (e) { console.warn(`Gateway failed for ${url}`); }
             }
             throw new Error("All gateways failed");
         }
 
         // --- Helper ---
         function update(id, val, type, diff=0) {
-            const el = document.getElementById('v-'+id);
+            const el = document.getElementById('val-'+id);
             const box = document.getElementById('box-'+id);
             if(!el) return;
             

@@ -3,225 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V19.0</title>
+    <title>IonosTek Monitor V20.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Theme: Dark Cyberpunk --- */
         :root {
             --bg-color: #0b0b0b; --card-bg: #161616; --text-main: #f0f0f0; --text-sub: #888;
             --accent-green: #00e676; --accent-yellow: #ffea00; --accent-orange: #ff9100;
             --accent-red: #ff1744; --accent-blue: #2979ff; --accent-purple: #d500f9;
         }
-        body { font-family: 'Chakra Petch', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; user-select: none; -webkit-user-select: none; }
+        body { font-family: 'Chakra Petch', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; user-select: none; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--accent-purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; }
+        .version { background: var(--accent-blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; }
         #systemStatus { font-size: 0.9em; color: var(--text-sub); margin-top: 5px; font-family: monospace; }
         .blink { animation: blinker 1s infinite; color: var(--accent-green); }
         @keyframes blinker { 50% { opacity: 0; } }
         .btn-guide { background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: 'Chakra Petch', sans-serif; font-size: 0.85em; transition: 0.2s; font-weight: bold; }
         .btn-guide:hover { background: var(--accent-blue); color: #fff; }
-        
         .stats-container { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
         .stat-box { background: var(--card-bg); padding: 12px 5px; border-radius: 6px; min-width: 110px; flex: 1; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .stat-value { font-size: 1.7em; font-weight: 700; margin: 5px 0; line-height: 1; }
         .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; }
         .stat-unit { font-size: 0.65em; color: #555; }
-        .trend-arrow { font-size: 0.6em; font-weight: bold; margin-left: 4px; }
-        
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column; }
         .card-header { background: #202020; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
         .card-header h3 { margin: 0; font-size: 0.95em; color: #ccc; }
-        .card-header span { font-size: 0.7em; color: var(--accent-blue); }
         .card-body { background: #000; height: 280px; display: flex; align-items: center; justify-content: center; position: relative; }
         .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s; }
         .img-loader { position: absolute; color: #444; font-size: 0.8em; }
         
-        /* Colors */
         .s-norm { border-top-color: var(--accent-green) !important; color: var(--accent-green); }
         .s-warn { border-top-color: var(--accent-yellow) !important; color: var(--accent-yellow); }
-        .s-mod { border-top-color: var(--accent-orange) !important; color: var(--accent-orange); }
         .s-alert { border-top-color: var(--accent-red) !important; color: var(--accent-red); }
-        .s-good { border-top-color: var(--accent-purple) !important; color: var(--accent-purple); }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; overflow-y: auto; }
-        .modal-content-text { background: var(--card-bg); width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 8px; position: relative; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+        .modal-content-text { background: var(--card-bg); width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 8px; position: relative; }
         .close-btn { position: absolute; top: 15px; right: 20px; color: #fff; font-size: 30px; cursor: pointer; }
-        
-        /* Lightbox */
         #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
         #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
-
         .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
-        .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; }
-        .article-content h3 { color: var(--accent-blue); margin-top: 20px; }
-        .article-content ul { color: #ddd; line-height: 1.6; font-size: 0.95em; }
-
-        @media (max-width: 600px) { .stats-container { grid-template-columns: repeat(3, 1fr); gap: 5px; } .stat-box { padding: 10px 2px; } .stat-value { font-size: 1.2em; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V19.0</span></h1>
-        <div id="systemStatus"><span class="blink">●</span> Syncing HamQSL...</div>
+        <h1>IONOSTEK <span class="version">V20.0</span></h1>
+        <div id="systemStatus"><span class="blink">●</span> Loading Data...</div>
         <button onclick="document.getElementById('guideModal').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
     <div class="stats-container">
-        <div class="stat-box" id="box-sfi"><div class="stat-label">SFI (Flux)</div><div class="stat-value" id="v-sfi">--</div><div class="stat-unit">F10.7cm</div></div>
-        <div class="stat-box" id="box-ssn"><div class="stat-label">SSN (Spot)</div><div class="stat-value" id="v-ssn">--</div><div class="stat-unit">Count</div></div>
-        <div class="stat-box" id="box-xray"><div class="stat-label">X-Ray Flux</div><div class="stat-value" id="v-xray">--</div><div class="stat-unit">Flare</div></div>
-        <div class="stat-box" id="box-kp"><div class="stat-label">Kp Index</div><div class="stat-value" id="v-kp">--</div><div class="stat-unit">Planetary</div></div>
-        <div class="stat-box" id="box-bz"><div class="stat-label">Bz (Polarity)</div><div class="stat-value" id="v-bz">--</div><div class="stat-unit">nT (GSM)</div></div>
-        <div class="stat-box" id="box-bt"><div class="stat-label">IMF Bt</div><div class="stat-value" id="v-bt">--</div><div class="stat-unit">nT</div></div>
-        <div class="stat-box" id="box-wind"><div class="stat-label">Solar Wind</div><div class="stat-value" id="v-wind">--</div><div class="stat-unit">km/s</div></div>
-        <div class="stat-box" id="box-den"><div class="stat-label">Density</div><div class="stat-value" id="v-den">--</div><div class="stat-unit">p/cm³</div></div>
-        <div class="stat-box" id="box-dst"><div class="stat-label">Dst Index</div><div class="stat-value" id="v-dst">--</div><div class="stat-unit">nT (Kyoto)</div></div>
+        <div class="stat-box" id="box-sfi"><div class="stat-label">SFI</div><div class="stat-value" id="val-sfi">--</div><div class="stat-unit">Flux</div></div>
+        <div class="stat-box" id="box-ssn"><div class="stat-label">SSN</div><div class="stat-value" id="val-ssn">--</div><div class="stat-unit">Count</div></div>
+        <div class="stat-box" id="box-xray"><div class="stat-label">X-Ray</div><div class="stat-value" id="val-xray">--</div><div class="stat-unit">Flare</div></div>
+        <div class="stat-box" id="box-kp"><div class="stat-label">Kp</div><div class="stat-value" id="val-kp">--</div><div class="stat-unit">Index</div></div>
+        <div class="stat-box" id="box-bz"><div class="stat-label">Bz</div><div class="stat-value" id="val-bz">--</div><div class="stat-unit">nT</div></div>
+        <div class="stat-box" id="box-bt"><div class="stat-label">Bt</div><div class="stat-value" id="val-bt">--</div><div class="stat-unit">nT</div></div>
+        <div class="stat-box" id="box-wind"><div class="stat-label">Wind</div><div class="stat-value" id="val-wind">--</div><div class="stat-unit">km/s</div></div>
+        <div class="stat-box" id="box-den"><div class="stat-label">Density</div><div class="stat-value" id="val-den">--</div><div class="stat-unit">p/cm³</div></div>
+        <div class="stat-box" id="box-dst"><div class="stat-label">Dst</div><div class="stat-value" id="val-dst">--</div><div class="stat-unit">nT</div></div>
     </div>
 
     <div class="grid-container">
-        <div class="card"><div class="card-header"><h3>PROPAGATION</h3><span>TEC MAP</span></div><div class="card-body"><div class="img-loader">Loading...</div><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="card-header"><h3>SOLAR FLARES</h3><span>3-DAY PLOT</span></div><div class="card-body"><div class="img-loader">Loading...</div><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="card-header"><h3>AURORA</h3><span>OVATION</span></div><div class="card-body"><div class="img-loader">Loading...</div><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="card-header"><h3>BLACKOUT</h3><span>D-RAP</span></div><div class="card-body"><div class="img-loader">Loading...</div><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="card-header"><h3>PROPAGATION</h3></div><div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="card-header"><h3>FLARES</h3></div><div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="card-header"><h3>AURORA</h3></div><div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="card-header"><h3>BLACKOUT</h3></div><div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
     </div>
 
     <div id="guideModal" class="modal">
         <div class="modal-content-text">
             <span class="close-btn" onclick="document.getElementById('guideModal').style.display='none'">&times;</span>
-            <div class="article-content">
-                <h2>📡 OPERATOR GUIDE</h2>
-                <h3>★ Solar Activity</h3>
-                <ul><li><b>X-Ray:</b> A/B/C=Normal, M/X=Blackout</li><li><b>SFI:</b> >100 Good, >150 Excellent</li><li><b>SSN:</b> Higher is better</li></ul>
-                <h3>★ Geomagnetic</h3>
-                <ul><li><b>Kp:</b> 0-3 Quiet, 5+ Storm</li><li><b>Bz:</b> Positive(+) Quiet, Negative(-) Storm</li></ul>
-                <h3>★ Conditions</h3>
-                <p>Solar Wind > 500 km/s = Unstable / QSB</p>
-            </div>
+            <h2 style="color:var(--accent-green)">OPERATOR GUIDE</h2>
+            <p style="color:#ccc"><b>SFI:</b> >100 Good, >150 Excellent<br><b>SSN:</b> Higher is better<br><b>Kp:</b> 0-3 Quiet, 5+ Storm<br><b>Bz:</b> (-) Negative is Storm</p>
         </div>
     </div>
 
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-
-    <div class="footer">IonosTek Monitor V19.0 • HamQSL Engine</div>
+    <div class="footer">IonosTek Monitor V20.0 • Text Protocol</div>
 
     <script>
-        // Security
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        
         // UI
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
-        function updateTime() { document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        // Helper
+        function tick() { document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
+        
         function update(id, val, type) {
-            const el = document.getElementById('v-'+id);
+            const el = document.getElementById('val-'+id);
             const box = document.getElementById('box-'+id);
             if(!el) return;
-            
             el.innerHTML = val;
             
-            // Reset Animation
-            el.classList.remove('updated-flash');
-            void el.offsetWidth;
-            el.classList.add('updated-flash');
-
             let s = 's-norm';
-            if(type=='sfi') { if(val>150) s='s-good'; else if(val<100) s='s-warn'; }
-            if(type=='ssn') { if(val>100) s='s-good'; else if(val<50) s='s-warn'; }
-            if(type=='kp') { if(val>=4) s='s-warn'; if(val>=5) s='s-alert'; }
-            if(type=='bz') { if(val<0) s='s-warn'; if(val<-5) s='s-alert'; }
-            if(type=='wind') { if(val>500) s='s-warn'; if(val>700) s='s-alert'; }
-            if(type=='xray') { if(String(val).includes('M')) s='s-mod'; if(String(val).includes('X')) s='s-alert'; }
-            
+            if(type=='sfi' && val>100) s='s-good';
+            if(type=='kp' && val>=4) s='s-warn';
+            if(type=='bz' && val<0) s='s-warn';
+            if(type=='wind' && val>500) s='s-warn';
+            if(type=='xray' && String(val).includes('M')) s='s-warn';
             box.className = 'stat-box ' + s;
         }
 
-        // --- HAMQSL ENGINE (Single Request for All Data) ---
-        async function fetchHamQSL() {
+        // --- Direct Proxy Fetcher (Robust) ---
+        async function getData() {
+            const proxy = 'https://api.allorigins.win/raw?url=';
+            const ts = '?t=' + Date.now();
+
+            // 1. Text Data (SFI/SSN) - Very stable
             try {
-                // Use AllOrigins to fetch HamQSL XML (Cross-Origin Safe)
-                const proxy = 'https://api.allorigins.win/raw?url=';
-                const target = 'https://www.hamqsl.com/solarxml.php';
-                const res = await fetch(proxy + encodeURIComponent(target));
-                const text = await res.text();
-                
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(text, "text/xml");
-                
-                // Extract Data
-                const solar = xml.querySelector("solardata");
-                
-                // 1. SFI & SSN
-                update('sfi', solar.querySelector("solarflux").textContent, 'sfi');
-                update('ssn', solar.querySelector("sunspots").textContent, 'ssn');
-                
-                // 2. X-Ray
-                update('xray', solar.querySelector("xray").textContent, 'xray');
-                
-                // 3. Kp (Planetary)
-                const kindex = solar.querySelector("kindex").textContent;
-                update('kp', kindex, 'kp');
-                
-                // 4. Solar Wind
-                update('wind', solar.querySelector("solarwind").textContent, 'wind');
-                
-                // 5. Bz & Bt
-                update('bz', solar.querySelector("magbz").textContent, 'bz');
-                update('bt', solar.querySelector("magneticfield").textContent, 'bt'); // Generic field
-                
-                // 6. Density (Not always in HamQSL, check or use dummy/separate fetch)
-                // HamQSL doesn't always send Density, let's try to fetch Density separately or leave as -- if lazy
-                // Let's try fetching Density from NOAA text file as a lightweight supplement
-                fetchDensitySupplement();
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/text/daily-solar-indices.txt') + ts);
+                const txt = await r.text();
+                const lines = txt.trim().split('\n');
+                // Scan from bottom for last valid data line (starts with Year)
+                for(let i=lines.length-1; i>=0; i--) {
+                    if(lines[i].match(/^\d{4}/)) {
+                        const cols = lines[i].trim().split(/\s+/);
+                        update('sfi', cols[3], 'sfi');
+                        update('ssn', cols[4], 'ssn');
+                        break;
+                    }
+                }
+            } catch(e){}
 
-                // 7. Dst (Not in HamQSL, fetch from Kyoto text)
-                // fetchDstSupplement(); // Optional
-
-            } catch(e) {
-                console.log("HamQSL Fetch Error", e);
-            }
-        }
-
-        async function fetchDensitySupplement() {
+            // 2. Scales (X-Ray & Kp) - Current status text
             try {
-                // Use NOAA Plasma Text (Small & Fast)
-                const r = await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/text/noaa-scales.txt') + ts);
+                const txt = await r.text();
+                // Format: Date Time R S G (R=Radio Blackout/Xray, G=Geomag/Kp)
+                // NOAA Scales: R1=M1, R2=M5, R3=X1. Not exact flux, but ALERT level.
+                // Better fallback: Try 3-day JSON via proxy again, it usually works for simple arrays
+                const r2 = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json') + ts);
+                const d2 = await r2.json();
+                update('kp', d2[d2.length-1][1], 'kp');
+
+                // X-Ray from 6-hour JSON via Proxy
+                const r3 = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/x-rays-6-hour.json') + ts);
+                const d3 = await r3.json();
+                let flux = d3[d3.length-1][3] || d3[d3.length-2][3]; // Index 3 is Long
+                if(flux) {
+                   let v = parseFloat(flux);
+                   let cls = v<1e-7?'A': v<1e-6?'B': v<1e-5?'C': v<1e-4?'M':'X';
+                   let base = v<1e-7?1e-7: v<1e-6?1e-6: v<1e-5?1e-5: v<1e-4?1e-4:1e-4;
+                   update('xray', cls+(v/base).toFixed(1), 'xray');
+                }
+            } catch(e){}
+
+            // 3. Solar Wind (Mag/Plasma)
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json') + ts);
                 const d = await r.json();
                 const l = d[d.length-1];
-                update('den', parseFloat(l[d[0].indexOf('density')]), 'den');
+                update('bz', Math.round(l[d[0].indexOf('bz_gsm')]), 'bz');
+                update('bt', Math.round(l[d[0].indexOf('bt')]), 'bt');
             } catch(e){}
-        }
-
-        async function fetchDstSupplement() {
+            
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json') + ts);
+                const d = await r.json();
+                const l = d[d.length-1];
+                update('wind', Math.round(l[d[0].indexOf('speed')]), 'wind');
+                update('den', Math.round(l[d[0].indexOf('density')]), 'den');
+            } catch(e){}
+            
              try {
-                const r = await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/kyoto-dst.json') + ts);
                 const d = await r.json();
                 update('dst', d[d.length-1][1], 'dst');
             } catch(e){}
         }
 
-        // Init
-        updateTime(); 
-        fetchHamQSL(); 
-        fetchDstSupplement();
+        // Start
+        tick(); getData();
+        setInterval(tick, 1000);
+        setInterval(getData, 60000);
         
-        setInterval(updateTime, 1000);
-        setInterval(fetchHamQSL, 60000); // HamQSL updates every min
-        setInterval(fetchDstSupplement, 120000);
-        
-        // Image Refresh
-        setInterval(() => { 
-            document.querySelectorAll('.card-body img').forEach(i => i.src = i.src.split('?')[0] + '?t=' + Date.now());
-        }, 300000);
-        
-        window.onclick = e => { 
-            if(e.target.className=='modal'||e.target.id=='lightbox') e.target.style.display='none'; 
-        }
+        // Security
+        document.onkeydown = e => { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; };
+        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>

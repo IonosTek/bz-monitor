@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V31.0</title>
+    <title>IonosTek Monitor V31.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Theme --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -31,37 +30,32 @@
         .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; }
         
-        /* Arrow Animation */
-        @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
+        @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; }
         .c-body { background: #000; height: 280px; display: flex; align-items: center; justify-content: center; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; }
         .m-content { background: var(--card); width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
-        
         #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
         #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
 
-        /* Colors */
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
-        /* Console (Hidden but active) */
         #console { display: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version" style="background:var(--blue)">V31.0</span></h1>
+        <h1>IONOSTEK <span class="version" style="background:var(--blue)">V31.1</span></h1>
         <div id="status"><span class="blink">●</span> System Active</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -79,10 +73,10 @@
     </div>
 
     <div class="grid">
-        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/x-ray-flux-3-day.gif" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
     </div>
 
     <div id="guide" class="modal">
@@ -102,111 +96,96 @@
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
 
     <script>
+        // UI
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
+        function tick() { document.getElementById('status').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
         
-        // --- Helper: Set Value & Arrow ---
         function set(id, val, s='c-norm', diff=0) {
             const el = document.getElementById('v-'+id);
             if(el) { 
                 el.innerText = val; 
                 document.getElementById('b-'+id).className = 'box '+s;
                 
-                // Add Arrow Logic
                 if(diff !== 0 && !isNaN(diff)) {
-                    let c = diff > 0 ? '#ff1744' : '#00e676'; // Default: Up is Bad (Red)
-                    if(id=='sfi'||id=='ssn') c = diff > 0 ? '#00e676' : '#ff1744'; // SFI Up is Good (Green)
-                    if(id=='dst') c = diff > 0 ? '#00e676' : '#ff1744'; // Dst Up (closer to 0) is Good
+                    let c = diff>0 ? '#ff1744' : '#00e676'; // Default: Up is Bad
+                    if(id=='sfi'||id=='ssn') c = diff>0 ? '#00e676' : '#ff1744'; // SFI/SSN: Up is Good
+                    if(id=='dst') c = diff>0 ? '#00e676' : '#ff1744'; 
                     el.innerHTML += ` <span class="trend" style="color:${c}">${diff>0?'▲':'▼'}</span>`;
                 }
             }
         }
 
-        // --- CORE FETCHER (AllOrigins Only - Stable) ---
-        async function getData(url) {
+        const proxy = 'https://api.allorigins.win/raw?url=';
+        
+        async function getData() {
+            const ts = '?t=' + Date.now();
+
+            // 1. Text Data (SFI/SSN)
             try {
-                const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url + '?t=' + Date.now()));
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/text/daily-solar-indices.txt') + ts);
+                const txt = await r.text();
+                const lines = txt.trim().split('\n').filter(l => l.match(/^\d{4}/));
+                if(lines.length >= 2) {
+                    const curr = lines[lines.length-1].trim().split(/\s+/);
+                    const prev = lines[lines.length-2].trim().split(/\s+/);
+                    set('sfi', parseInt(curr[3]), parseInt(curr[3])>100?'c-norm':'c-warn', parseInt(curr[3])-parseInt(prev[3]));
+                    set('ssn', parseInt(curr[4]), 'c-norm', parseInt(curr[4])-parseInt(prev[4]));
+                }
+            } catch(e){}
+
+            // 2. X-Ray & Kp
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json') + ts);
                 const d = await r.json();
-                if(d.contents) {
-                    try { return JSON.parse(d.contents); } 
-                    catch(e) { return d.contents; } // Return Text
-                }
-            } catch(e){ return null; }
-        }
-
-        async function updateAll() {
-            // 1. Mag & Plasma (JSON)
-            const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
-            if(mag) {
-                const l = mag[mag.length-1], p = mag[mag.length-2];
-                set('bz', parseFloat(l[1]), parseFloat(l[1])<0?'c-warn':'c-norm', parseFloat(l[1])-parseFloat(p[1]));
-                set('bt', Math.round(l[2]), 'c-norm', parseFloat(l[2])-parseFloat(p[2]));
-            }
-            
-            const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
-            if(plas) {
-                const l = plas[plas.length-1], p = plas[plas.length-2];
-                set('wind', Math.round(l[2]), l[2]>500?'c-warn':'c-norm', parseFloat(l[2])-parseFloat(p[2]));
-                set('den', Math.round(l[1]), 'c-norm', parseFloat(l[1])-parseFloat(p[1]));
-            }
-
-            // 2. Kp & Dst (JSON)
-            const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
-            if(kp) {
-                const l = kp[kp.length-1], p = kp[kp.length-2];
-                set('kp', l[1], l[1]>=4?'c-warn':'c-norm', parseFloat(l[1])-parseFloat(p[1]));
-            }
-
-            const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
-            if(dst) {
-                const l = dst[dst.length-1], p = dst[dst.length-2];
-                set('dst', l[1], parseInt(l[1])<-50?'c-alert':'c-norm', parseInt(l[1])-parseInt(p[1]));
-            }
-
-            // 3. SFI & SSN (TEXT Parser)
-            const txt = await getData('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
-            if(txt && typeof txt === 'string') {
-                const lines = txt.trim().split('\n');
-                // Find last 2 valid data lines for Trend
-                let curr=null, prev=null;
-                for(let i=lines.length-1; i>=0; i--) {
-                    if(lines[i].match(/^\d{4}/)) {
-                        if(!curr) curr = lines[i].trim().split(/\s+/);
-                        else { prev = lines[i].trim().split(/\s+/); break; }
-                    }
-                }
+                const c = d[d.length-1], p = d[d.length-2];
+                set('kp', c[1], c[1]>=4?'c-warn':'c-norm', parseFloat(c[1])-parseFloat(p[1]));
                 
-                if(curr) {
-                    let sfiVal = parseInt(curr[3]);
-                    let sfiDiff = prev ? sfiVal - parseInt(prev[3]) : 0;
-                    set('sfi', sfiVal, sfiVal>100?'c-norm':'c-warn', sfiDiff);
-                    
-                    let ssnVal = parseInt(curr[4]);
-                    let ssnDiff = prev ? ssnVal - parseInt(prev[4]) : 0;
-                    set('ssn', ssnVal, 'c-norm', ssnDiff);
-                }
-            }
+                // X-Ray from Scales Text (Robust)
+                const r2 = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/text/noaa-scales.txt') + ts);
+                const t2 = await r2.text();
+                const l2 = t2.trim().split('\n');
+                const last = l2[l2.length-1].trim().split(/\s+/);
+                const rScale = parseInt(last[2]);
+                let xD = "A/B", xC = "c-norm";
+                if(rScale==1) { xD="M1+"; xC="c-warn"; }
+                if(rScale>=2) { xD="M5+"; xC="c-alert"; }
+                if(rScale>=3) { xD="X1+"; xC="c-alert"; }
+                set('xray', xD, xC);
+            } catch(e){}
 
-            // 4. X-Ray (TEXT Scales)
-            const scale = await getData('https://services.swpc.noaa.gov/text/noaa-scales.txt');
-            if(scale && typeof scale === 'string') {
-                const lines = scale.trim().split('\n');
-                const last = lines[lines.length-1].trim().split(/\s+/);
-                const r = parseInt(last[2]); 
-                // Compare with previous line for trend? (Status rarely changes quickly, omit arrow for cleaner look or compare raw)
-                // Let's just show current status
-                let d="A/B", s="c-norm";
-                if(r==1){ d="M1+"; s="c-warn"; }
-                if(r>=2){ d="M5+"; s="c-alert"; }
-                if(r>=3){ d="X1+"; s="c-alert"; }
-                set('xray', d, s);
-            }
+            // 3. Solar Wind
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json') + ts);
+                const d = await r.json();
+                const c = d[d.length-1], p = d[d.length-2];
+                const bz = d[0].indexOf('bz_gsm'), bt = d[0].indexOf('bt');
+                set('bz', Math.round(c[bz]), parseFloat(c[bz])<0?'c-warn':'c-norm', parseFloat(c[bz])-parseFloat(p[bz]));
+                set('bt', Math.round(c[bt]), 'c-norm', parseFloat(c[bt])-parseFloat(p[bt]));
+            } catch(e){}
             
-            document.getElementById('status').innerHTML = '<span class="blink">●</span> System Active';
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json') + ts);
+                const d = await r.json();
+                const c = d[d.length-1], p = d[d.length-2];
+                const s = d[0].indexOf('speed'), den = d[0].indexOf('density');
+                set('wind', Math.round(c[s]), parseFloat(c[s])>500?'c-warn':'c-norm', parseFloat(c[s])-parseFloat(p[s]));
+                set('den', Math.round(c[den]), 'c-norm', parseFloat(c[den])-parseFloat(p[den]));
+            } catch(e){}
+
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/kyoto-dst.json') + ts);
+                const d = await r.json();
+                const c = d[d.length-1], p = d[d.length-2];
+                set('dst', c[1], parseInt(c[1])<-50?'c-alert':'c-norm', parseInt(c[1])-parseInt(p[1]));
+            } catch(e){}
         }
 
-        updateAll();
-        setInterval(updateAll, 60000);
-        setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
+        tick(); getData();
+        setInterval(tick, 1000);
+        setInterval(getData, 60000);
+        setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src = i.src.split('?')[0] + '?t=' + Date.now()); }, 300000);
+        
+        document.onkeydown = e => { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; };
         document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>

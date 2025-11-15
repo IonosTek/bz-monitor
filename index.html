@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V8.6</title>
+    <title>IonosTek Monitor V8.7</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* --- CSS Base: V8.2 Stable --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -25,7 +26,7 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            overflow-x: hidden; /* ป้องกันการเลื่อนซ้ายขวาโดยไม่ตั้งใจ */
+            overflow-x: hidden;
         }
 
         .header {
@@ -36,7 +37,7 @@
         }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #fff; background-color: var(--accent-orange);
+            color: #fff; background-color: var(--accent-red); /* สีแดงบ่งบอก Fail-Safe Edition */
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; 
             border-radius: 4px; font-weight: bold;
         }
@@ -52,27 +53,24 @@
             background: transparent; border: 1px solid var(--accent-blue);
             color: var(--accent-blue); padding: 5px 15px; margin-top: 10px;
             border-radius: 20px; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
-            font-size: 0.85em; transition: all 0.3s; text-transform: uppercase;
+            font-size: 0.85em; transition: all 0.3s; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;
         }
-        .btn-guide:hover { background: var(--accent-blue); color: #fff; }
+        .btn-guide:hover { background: var(--accent-blue); color: #fff; box-shadow: 0 0 15px rgba(41, 121, 255, 0.5); }
 
-        /* Stats Container */
         .stats-container {
             display: flex; flex-wrap: wrap; gap: 10px;
             justify-content: center; margin-bottom: 30px;
         }
         .stat-box {
             background: var(--card-bg); padding: 15px 5px; border-radius: 8px;
-            min-width: 110px; /* ปรับให้เล็กลงเพื่อให้เรียงสวยบนมือถือ */
-            flex: 1; text-align: center;
+            min-width: 110px; flex: 1; text-align: center;
             border-top: 4px solid #555; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             transition: transform 0.2s;
         }
         .stat-box:hover { transform: translateY(-3px); }
         
         .stat-value { 
-            font-size: 1.6em; 
-            font-weight: 700; margin: 5px 0; 
+            font-size: 1.6em; font-weight: 700; margin: 5px 0; 
             display: flex; align-items: center; justify-content: center; gap: 3px;
         }
         .stat-label { font-size: 0.7em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -82,7 +80,6 @@
         .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } 
         .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; }
 
-        /* Grid */
         .grid-container {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
             gap: 25px; max-width: 1600px; margin: 0 auto;
@@ -111,44 +108,19 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* --- Modal CSS Fixed (แก้ปัญหาเลื่อนไม่ได้) --- */
+        /* Modal Fixed */
         .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 9999; /* อยู่บนสุดเสมอ */
-            left: 0; 
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0,0,0,0.9);
-            backdrop-filter: blur(5px);
-            overflow: hidden; /* ป้องกันพื้นหลังเลื่อน */
+            display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);
+            backdrop-filter: blur(5px); overflow: hidden;
         }
-        
         .modal-content-text {
-            background-color: var(--card-bg); 
-            margin: 20px auto; /* ระยะห่างจากขอบบนน้อยลง */
-            padding: 25px;
-            border: 1px solid #444; 
-            width: 90%; 
-            max-width: 700px; 
-            border-radius: 10px;
+            background-color: var(--card-bg); margin: 20px auto; padding: 25px;
+            border: 1px solid #444; width: 90%; max-width: 700px; border-radius: 10px;
             box-shadow: 0 0 50px rgba(0,0,0,0.8); 
-            
-            /* Key Fixes for Scrolling */
-            height: auto;
-            max-height: 90vh; /* สูงไม่เกิน 90% ของหน้าจอ */
-            overflow-y: auto; /* บังคับให้มี Scrollbar ถ้าเนื้อหายาว */
-            -webkit-overflow-scrolling: touch; /* ลื่นไหลบน iOS */
+            height: auto; max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
             position: relative;
         }
-        
-        /* Custom Scrollbar for Modal */
-        .modal-content-text::-webkit-scrollbar { width: 8px; }
-        .modal-content-text::-webkit-scrollbar-track { background: #111; }
-        .modal-content-text::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-        .modal-content-text::-webkit-scrollbar-thumb:hover { background: var(--accent-blue); }
-
         .modal-content-img {
             margin: auto; display: block; width: auto; height: auto;
             max-width: 98%; max-height: 95vh;
@@ -156,20 +128,9 @@
             box-shadow: 0 0 50px rgba(0,0,0,1);
             position: relative; top: 50%; transform: translateY(-50%);
         }
-        
         .close-btn { 
-            color: #fff; 
-            float: right; 
-            font-size: 32px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            position: sticky; /* ให้ปุ่มปิดติดอยู่มุมขวาบนเสมอ */
-            top: 0;
-            right: 0;
-            z-index: 10;
-            background: var(--card-bg); /* บังเนื้อหาตอนเลื่อนผ่าน */
-            padding: 0 10px;
-            line-height: 1;
+            color: #fff; float: right; font-size: 32px; font-weight: bold; cursor: pointer; 
+            position: sticky; top: 0; right: 0; z-index: 10; background: var(--card-bg); padding: 0 10px; line-height: 1;
         }
         .close-btn:hover { color: var(--accent-red); }
         
@@ -179,7 +140,6 @@
         .hl-red { color: var(--accent-red); font-weight: bold; }
         .hl-green { color: var(--accent-green); font-weight: bold; }
 
-        /* Status Colors */
         .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; }
         .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
         .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; }
@@ -187,4 +147,127 @@
         .status-good { color: var(--accent-purple); border-top-color: var(--accent-purple) !important; }
 
         @keyframes flash-update {
-            0% { color: #fff; text-shadow: 0 0 15px #fff; transform: scale(1.1);
+            0% { color: #fff; text-shadow: 0 0 15px #fff; transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .updated-flash { animation: flash-update 0.5s ease-out; }
+
+        .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
+        
+        @media (max-width: 768px) {
+            .grid-container { grid-template-columns: 1fr; }
+            .stat-box { min-width: 30%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.7</span></h1>
+        <div id="systemStatus"><span class="blink">●</span> Initializing System...</div>
+        <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-box" id="card-sfi">
+            <div class="stat-label">SFI (Solar Flux)</div>
+            <div class="stat-value"><span id="val-sfi">--</span></div>
+            <div class="stat-unit">F10.7cm</div>
+        </div>
+        <div class="stat-box" id="card-ssn">
+            <div class="stat-label">SSN (Sunspot)</div>
+            <div class="stat-value"><span id="val-ssn">--</span></div>
+            <div class="stat-unit">Calculated</div>
+        </div>
+        <div class="stat-box" id="card-kp">
+            <div class="stat-label">Kp Index</div>
+            <div class="stat-value"><span id="val-kp">--</span></div>
+            <div class="stat-unit">Planetary</div>
+        </div>
+        <div class="stat-box" id="card-a">
+            <div class="stat-label">A-Index</div>
+            <div class="stat-value"><span id="val-a">--</span></div>
+            <div class="stat-unit">From Kp (Eq)</div>
+        </div>
+        
+        <div class="stat-box" id="card-bz">
+            <div class="stat-label">Bz (Polarity)</div>
+            <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
+            <div class="stat-unit">nT (GSM)</div>
+        </div>
+        <div class="stat-box" id="card-dst">
+            <div class="stat-label">Dst Index</div>
+            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT (Kyoto)</div>
+        </div>
+        <div class="stat-box" id="card-wind">
+            <div class="stat-label">Solar Wind</div>
+            <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
+            <div class="stat-unit">km/s</div>
+        </div>
+        <div class="stat-box" id="card-density">
+            <div class="stat-label">Density</div>
+            <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
+            <div class="stat-unit">p/cm³</div>
+        </div>
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt</div>
+            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT</div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
+            <div class="card-body">
+                <div class="img-loader">Loading Data...</div>
+                <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" id="img-muf" alt="Propagation Map" onclick="openLightbox(this.src)">
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora" onclick="openLightbox(this.src)"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>D-REGION ABSORPTION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP" onclick="openLightbox(this.src)"></div>
+        </div>
+    </div>
+
+    <div id="guideModal" class="modal">
+        <div class="modal-content-text">
+            <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
+            <div class="article-content">
+                <h2>📡 OPERATOR GUIDE: READING THE IONOSPHERE</h2>
+                
+                <h3>★ SFI & SSN (Solar Energy)</h3>
+                <p>ตัวชี้วัดพลังงานจากดวงอาทิตย์ สำหรับย่าน HF (10m-20m):</p>
+                <ul>
+                    <li><b>SFI (Solar Flux):</b> >100 ดี, >150 เยี่ยม</li>
+                    <li><b>SSN (Sunspot):</b> ยิ่งสูง ยิ่งสะท้อนคลื่นไกล</li>
+                </ul>
+
+                <h3>★ Kp & A-Index (Geomagnetic Activity)</h3>
+                <p>ดัชนีชี้วัดพายุแม่เหล็ก:</p>
+                <ul>
+                    <li><b>Kp Index (0-9):</b> ค่าปัจจุบัน (3 ชม.) <br>
+                        - <span style="color:var(--accent-green)">0-2:</span> Quiet (นิ่ง)<br>
+                        - <span style="color:var(--accent-yellow)">3-4:</span> Unsettled (เริ่มปั่นป่วน)<br>
+                        - <span style="color:var(--accent-red)">5+:</span> Storm (พายุ! HF อาจร่วง)
+                    </li>
+                    <li><b>A-Index:</b> ค่าเฉลี่ยความปั่นป่วนรายวัน (< 15 ดีมาก)</li>
+                </ul>
+
+                <h3>1. Bz (Interplanetary Magnetic Field)</h3>
+                <ul>
+                    <li><span class="hl-green">↑ Bz เป็นบวก:</span> "Shields UP" - โลกป้องกันดี สัญญาณ HF นิ่ง</li>
+                    <li><span class="hl-red">↓ Bz เป็นลบ:</span> "Shields DOWN" - พลังงานไหลเข้าขั้วโลก (โอกาส 6m Aurora)</li>
+                </ul>
+
+                <h3>2. Solar Wind & Density</h3>
+                <p>ลมสุริยะปกติ 300-400 km/s หากเกิน <b>500 km/s</b> สัญญาณ HF อาจแกว่ง (QSB)</p>
+
+                <h3>3. TEC Map (Total Electron Content)</h3>
+                <ul>
+                    <li><b style="color:var(--accent-orange)">สีแดง

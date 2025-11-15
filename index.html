@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V7.5 Ultimate</title>
+    <title>IonosTek Monitor V7.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -27,7 +27,7 @@
             padding: 20px;
         }
 
-        /* --- Header & Button --- */
+        /* Header & Button */
         .header {
             text-align: center;
             margin-bottom: 25px;
@@ -49,7 +49,6 @@
             font-size: 1em; color: var(--accent-blue); margin-top: 5px; font-weight: 500;
         }
         
-        /* ปุ่มคู่มือ */
         .btn-guide {
             background: transparent;
             border: 1px solid var(--accent-blue);
@@ -69,7 +68,7 @@
             box-shadow: 0 0 10px rgba(41, 121, 255, 0.5);
         }
 
-        /* --- Animations --- */
+        /* Animations */
         .blink { animation: blinker 1.5s linear infinite; color: var(--accent-green); margin-right: 5px; }
         @keyframes blinker { 50% { opacity: 0; } }
 
@@ -79,7 +78,7 @@
         }
         .updated-flash { animation: flash-update 0.5s ease-out; }
 
-        /* --- Stats Bar --- */
+        /* Stats Bar */
         .stats-container {
             display: flex;
             flex-wrap: wrap;
@@ -108,11 +107,11 @@
         .stat-unit { font-size: 0.75em; color: #666; }
 
         /* Arrows */
-        .trend-arrow { font-size: 0.6em; opacity: 0.8; }
+        .trend-arrow { font-size: 0.6em; opacity: 1; font-weight: bold; } /* เพิ่ม opacity ให้เห็นชัด */
         .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } 
         .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; }
 
-        /* --- Grid Layout --- */
+        /* Grid Layout */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -145,7 +144,7 @@
         img { width: 100%; height: 100%; object-fit: cover; z-index: 1; position: relative; }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* --- Modal (Popup) --- */
+        /* Modal (Popup) */
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.85);
@@ -168,293 +167,5 @@
         .hl-red { color: var(--accent-red); font-weight: bold; }
         .hl-green { color: var(--accent-green); font-weight: bold; }
         
-        /* --- Status Colors --- */
+        /* Status Colors */
         .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; text-shadow: 0 0 8px rgba(0, 230, 118, 0.2); }
-        .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; text-shadow: 0 0 8px rgba(255, 234, 0, 0.2); }
-        .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; text-shadow: 0 0 8px rgba(255, 145, 0, 0.2); }
-        .status-alert { color: var(--accent-red); border-top-color: var(--accent-red) !important; text-shadow: 0 0 10px rgba(255, 23, 68, 0.3); }
-
-        .footer { text-align: center; margin-top: 50px; font-size: 0.8em; color: #555; border-top: 1px solid #333; padding-top: 20px; }
-
-        @media (max-width: 768px) {
-            .grid-container { grid-template-columns: 1fr; }
-            .stat-box { min-width: 45%; }
-            .header h1 { font-size: 1.6em; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V7.5</span></h1>
-        <div id="updateTime"><span class="blink">●</span> System Initializing...</div>
-        <button onclick="openModal()" class="btn-guide">📘 How to Read</button>
-    </div>
-
-    <div class="stats-container">
-        <div class="stat-box" id="card-bz">
-            <div class="stat-label">Bz (Polarity)</div>
-            <div class="stat-value">
-                <span id="arr-bz" class="bz-arrow-n"></span>
-                <span id="val-bz">--</span>
-            </div>
-            <div class="stat-unit">nT (GSM)</div>
-        </div>
-        <div class="stat-box" id="card-dst">
-            <div class="stat-label">Dst Index</div>
-            <div class="stat-value">
-                <span id="val-dst">--</span>
-                <span id="trend-dst" class="trend-arrow"></span>
-            </div>
-            <div class="stat-unit">nT (Kyoto)</div>
-        </div>
-        <div class="stat-box" id="card-wind">
-            <div class="stat-label">Solar Wind</div>
-            <div class="stat-value">
-                <span id="val-wind">--</span>
-                <span id="trend-wind" class="trend-arrow"></span>
-            </div>
-            <div class="stat-unit">km/s</div>
-        </div>
-        <div class="stat-box" id="card-density">
-            <div class="stat-label">Density</div>
-            <div class="stat-value">
-                <span id="val-density">--</span>
-                <span id="trend-density" class="trend-arrow"></span>
-            </div>
-            <div class="stat-unit">p/cm³</div>
-        </div>
-        <div class="stat-box" id="card-bt">
-            <div class="stat-label">IMF Bt (Total)</div>
-            <div class="stat-value">
-                <span id="val-bt">--</span>
-                <span id="trend-bt" class="trend-arrow"></span>
-            </div>
-            <div class="stat-unit">nT</div>
-        </div>
-    </div>
-
-    <div class="grid-container">
-        <div class="card" style="grid-column: 1 / -1;">
-    <div class="card-header">
-        <h3>PROPAGATION MAP</h3>
-        <span>NOAA TEC MODEL</span>
-    </div>
-    <div class="card-body">
-        <div id="loader-muf" class="img-loader">Loading Data...</div>
-        
-        <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" 
-             id="img-muf" 
-             alt="Propagation Map"
-             style="object-fit: contain; width: 100%; height: 100%; display: none;"
-             onload="this.style.display='block'; document.getElementById('loader-muf').style.display='none';"
-             onerror="document.getElementById('loader-muf').innerText='Data Offline';">
-    </div>
-</div>
-        <div class="card">
-            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
-            <div class="card-body">
-                <img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora">
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>D-REGION ABSORPTION</span></div>
-            <div class="card-body">
-                <img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP">
-            </div>
-        </div>
-    </div>
-
-    <div id="guideModal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <div class="article-content">
-                <h2>📡 คู่มือนักวิทยุ: อ่านค่าอวกาศฉบับ IonosTek</h2>
-                
-                <h3>1. Bz (Polarity): กุญแจสำคัญที่สุด</h3>
-                <p>คือทิศทางของสนามแม่เหล็กลมสุริยะ (สำคัญกว่าตัวเลข):</p>
-                <ul>
-                    <li><span class="hl-green">↑ Bz เป็นบวก (North):</span> <b>"ประตูปิด"</b> สนามแม่เหล็กโลกป้องกันเราได้ดี สัญญาณวิทยุ HF นิ่ง สงบ เหมาะกับการคุย DX ไกลๆ</li>
-                    <li><span class="hl-red">↓ Bz เป็นลบ (South):</span> <b>"ประตูเปิด"</b> พลังงานไหลเข้าขั้วโลก เกิดพายุแม่เหล็ก (Storm) สัญญาณ HF อาจวูบวาบ (QSB) แต่ดีสำหรับนักเล่น VHF (6m) สะท้อน Aurora</li>
-                </ul>
-
-                <h3>2. Solar Wind & Density</h3>
-                <p>ถ้าความเร็วลมสูงกว่า <b>500 km/s</b> หรือความหนาแน่นสูง ชั้นบรรยากาศจะปั่นป่วน การติดต่อสื่อสารอาจขาดหายเป็นช่วงๆ</p>
-
-                <h3>3. Dst Index (ความรุนแรงพายุ)</h3>
-                <p>ยิ่งติดลบเยอะ ยิ่งพายุแรง: <br>
-                (0 ถึง -20 ปกติ) | (-50 ถึง -100 พายุ) | (ต่ำกว่า -100 พายุรุนแรง)</p>
-
-                <h3>4. TEC Map (แผนที่ความหนาแน่นอิเล็กตรอน)</h3>
-                <p>ใช้ดูโอกาสในการติดต่อสื่อสาร (แทน MUF):</p>
-                <ul>
-                    <li><b style="color:var(--accent-orange)">สีแดง/ส้ม/เหลือง:</b> พื้นที่ที่มีความหนาแน่นอิเล็กตรอนสูง = <b>โอกาสติดต่อ DX บนความถี่สูง (10m, 15m) ดีมาก</b></li>
-                    <li><b style="color:var(--accent-blue)">สีน้ำเงิน/ม่วง:</b> ความหนาแน่นต่ำ = <b>ควรเล่นความถี่ต่ำ (40m, 80m)</b> หรือรอย่าน VHF (ถ้ามี Sporadic-E)</li>
-                </ul>
-                
-                <p style="margin-top:30px; font-size:0.8em; color:#666; text-align:center; border-top:1px solid #333; padding-top:10px;">
-                    IonosTek Intelligent Assistant System
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer">
-        IonosTek Monitor V7.5 • Developed for Radio Amateurs<br>
-        Data Sources: NOAA SWPC, WDC Kyoto, KC2G
-    </div>
-
-    <script>
-        let lastValues = { wind: null, density: null, dst: null, bt: null };
-
-        // --- Modal Control ---
-        const modal = document.getElementById("guideModal");
-        function openModal() { modal.style.display = "block"; }
-        function closeModal() { modal.style.display = "none"; }
-        window.onclick = function(event) { if (event.target == modal) modal.style.display = "none"; }
-
-        // --- Helper ---
-        function getIndex(headerRow, keyName) {
-            return headerRow.findIndex(h => h.toLowerCase().includes(keyName));
-        }
-
-        // --- Main Update Function ---
-        function updateDisplay(valId, cardId, value, type, trendId = null, arrowId = null) {
-            const valElem = document.getElementById(valId);
-            const cardElem = document.getElementById(cardId);
-            if (!valElem || !cardElem) return;
-
-            // Animation Flash
-            valElem.classList.remove('updated-flash');
-            void valElem.offsetWidth;
-            valElem.classList.add('updated-flash');
-
-            valElem.innerText = isNaN(value) ? "--" : value;
-
-            // Status Color Logic
-            let status = 'normal';
-            cardElem.className = 'stat-box'; 
-
-            if (type === 'dst') { 
-                if (value < -100) status = 'alert';
-                else if (value < -50) status = 'moderate';
-                else if (value < -20) status = 'warn';
-            } 
-            else if (type === 'bz') { 
-                if (value < -5) status = 'alert'; 
-                else if (value < 0) status = 'warn'; 
-            } 
-            else if (type === 'wind') { 
-                if (value > 600) status = 'alert'; 
-                else if (value > 400) status = 'warn'; 
-            }
-            else if (type === 'density') { 
-                if (value > 20) status = 'alert'; 
-                else if (value > 10) status = 'warn'; 
-            }
-            else if (type === 'bt') { 
-                if (value > 15) status = 'alert'; 
-                else if (value > 10) status = 'warn'; 
-            }
-            cardElem.classList.add('status-' + status);
-
-            // Bz Arrow Logic
-            if (type === 'bz' && arrowId) {
-                const arrElem = document.getElementById(arrowId);
-                if (value >= 0) {
-                    arrElem.innerHTML = '&#8593;'; 
-                    arrElem.className = 'bz-arrow-n';
-                } else {
-                    arrElem.innerHTML = '&#8595;';
-                    arrElem.className = 'bz-arrow-s';
-                }
-            }
-
-            // Trend Arrow Logic
-            if (trendId && lastValues[type] !== null) {
-                const trendElem = document.getElementById(trendId);
-                const diff = value - lastValues[type];
-                if (Math.abs(diff) < 0.1) {
-                    trendElem.innerHTML = '';
-                } else if (diff > 0) {
-                    trendElem.innerHTML = '&#9650;'; // Up
-                    if(type === 'dst') trendElem.style.color = 'var(--accent-green)'; // Dst closer to 0 is good
-                    else trendElem.style.color = 'var(--accent-red)'; // Wind/Bt UP is bad
-                } else {
-                    trendElem.innerHTML = '&#9660;'; // Down
-                    if(type === 'dst') trendElem.style.color = 'var(--accent-red)'; // Dst Lower is bad
-                    else trendElem.style.color = 'var(--accent-green)'; // Wind/Bt DOWN is good
-                }
-            }
-            if (type !== 'bz') lastValues[type] = value;
-        }
-
-        // --- Fetch Data ---
-        async function fetchMag() {
-            try {
-                const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
-                if(!res.ok) throw new Error('Net');
-                const data = await res.json();
-                if (data && data.length > 1) {
-                    const last = data[data.length - 1];
-                    const bzIdx = getIndex(data[0], 'bz'); 
-                    const btIdx = getIndex(data[0], 'bt');
-                    if(bzIdx!=-1) updateDisplay('val-bz', 'card-bz', parseFloat(last[bzIdx]), 'bz', null, 'arr-bz');
-                    if(btIdx!=-1) updateDisplay('val-bt', 'card-bt', parseFloat(last[btIdx]), 'bt', 'trend-bt');
-                }
-            } catch (e) { console.log('Mag Err', e); }
-        }
-
-        async function fetchPlasma() {
-            try {
-                const res = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
-                if(!res.ok) throw new Error('Net');
-                const data = await res.json();
-                if (data && data.length > 1) {
-                    const last = data[data.length - 1];
-                    const denIdx = getIndex(data[0], 'density');
-                    const spdIdx = getIndex(data[0], 'speed');
-                    if(denIdx!=-1) updateDisplay('val-density', 'card-density', parseFloat(last[denIdx]), 'density', 'trend-density');
-                    if(spdIdx!=-1) updateDisplay('val-wind', 'card-wind', parseFloat(last[spdIdx]), 'wind', 'trend-wind');
-                }
-            } catch (e) { console.log('Plasma Err', e); }
-        }
-
-        async function fetchDst() {
-            try {
-                const res = await fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json');
-                if(!res.ok) throw new Error('Net');
-                const data = await res.json();
-                if (data && data.length > 1) {
-                    const last = data[data.length - 1];
-                    updateDisplay('val-dst', 'card-dst', parseInt(last[1]), 'dst', 'trend-dst');
-                }
-            } catch (e) { console.log('Dst Err', e); }
-        }
-
-        function updateTime() {
-            const now = new Date();
-            const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'UTC', timeZoneName: 'short' };
-            document.getElementById('updateTime').innerHTML = '<span class="blink">●</span> SYSTEM ACTIVE: ' + now.toLocaleString('en-GB', options);
-        }
-
-        function refreshImages() {
-            const images = document.querySelectorAll('img');
-            const ts = new Date().getTime();
-            images.forEach(img => { 
-                const tempImg = new Image();
-                tempImg.src = img.src.split('?')[0] + '?t=' + ts;
-                tempImg.onload = () => { img.src = tempImg.src; };
-            });
-        }
-
-        function updateAll() { fetchMag(); fetchPlasma(); fetchDst(); updateTime(); }
-
-        // --- Intervals ---
-        updateAll();
-        setInterval(updateAll, 60000);
-        setInterval(refreshImages, 300000);
-        setInterval(updateTime, 1000);
-    </script>
-</body>
-</html>

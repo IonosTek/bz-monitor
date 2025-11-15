@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V9.2</title>
+    <title>IonosTek Monitor V9.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- CSS Base --- */
@@ -41,7 +41,7 @@
             font-size: 0.95em; font-weight: 500; margin-top: 5px; color: var(--text-sub);
         }
         
-        /* --- New Animations (Pulse & Breathe) --- */
+        /* Animations */
         @keyframes blinker { 
             0% { opacity: 1; text-shadow: 0 0 5px var(--accent-green); } 
             50% { opacity: 0.2; text-shadow: none; }
@@ -49,18 +49,16 @@
         }
         .blink { animation: blinker 1.5s infinite ease-in-out; color: var(--accent-green); }
 
-        /* Animation สำหรับลูกศร (ย่อขยาย + หรี่แสง) */
-        @keyframes arrow-pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(0.8); opacity: 0.6; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        /* Animation สำหรับตัวเลข (เรืองแสงเบาๆ) */
         @keyframes value-breathe {
             0% { text-shadow: none; }
-            50% { text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+            50% { text-shadow: 0 0 5px rgba(255,255,255,0.5); }
             100% { text-shadow: none; }
+        }
+
+        @keyframes arrow-pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.85); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .btn-guide {
@@ -83,16 +81,14 @@
         .stat-value { 
             font-size: 1.6em; font-weight: 700; margin: 5px 0; 
             display: flex; align-items: center; justify-content: center; gap: 3px;
-            /* ใส่ Animation ให้ตัวเลขหายใจ */
             animation: value-breathe 3s infinite ease-in-out;
         }
         .stat-label { font-size: 0.7em; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-unit { font-size: 0.6em; color: #666; }
 
-        /* Apply Pulse to Arrows */
-        .trend-arrow { font-size: 0.6em; font-weight: bold; animation: arrow-pulse 1.5s infinite ease-in-out; }
-        .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; animation: arrow-pulse 1.5s infinite ease-in-out; } 
-        .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; animation: arrow-pulse 1.5s infinite ease-in-out; }
+        .trend-arrow { font-size: 0.6em; font-weight: bold; animation: arrow-pulse 1.5s infinite; }
+        .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; } 
+        .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; }
 
         .grid-container {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -119,9 +115,9 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Modal */
+        /* Modal Fixed */
         .modal {
-            display: none; position: fixed; z-index: 9999; left: 0; top: 0;
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
             backdrop-filter: blur(5px); overflow: hidden;
             align-items: center; justify-content: center;
@@ -130,7 +126,7 @@
             background-color: var(--card-bg); border: 1px solid #444; 
             width: 90%; max-width: 700px; border-radius: 10px;
             box-shadow: 0 0 50px rgba(0,0,0,0.8); 
-            max-height: 85vh; overflow-y: auto; position: relative; display: flex; flex-direction: column;
+            max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column;
         }
         .modal-header-bar {
             position: sticky; top: 0; background-color: var(--card-bg);
@@ -147,6 +143,7 @@
         .close-btn { color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 1; }
         .close-btn:hover { color: var(--accent-red); }
         
+        /* Guide Styles */
         .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
         .article-content h3 { color: var(--accent-blue); margin-top: 25px; border-left: 3px solid var(--accent-blue); padding-left: 10px; }
         .article-content p, .article-content ul { color: #ddd; line-height: 1.6; font-size: 0.95em; }
@@ -175,7 +172,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.2</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.3</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -189,7 +186,7 @@
         <div class="stat-box" id="card-ssn">
             <div class="stat-label">SSN (Sunspot)</div>
             <div class="stat-value"><span id="val-ssn">--</span></div>
-            <div class="stat-unit">Calculated</div>
+            <div class="stat-unit">NOAA Count (R)</div>
         </div>
         <div class="stat-box" id="card-kp">
             <div class="stat-label">Kp Index</div>
@@ -251,7 +248,7 @@
                 <div class="article-content">
                     <h2>📡 OPERATOR GUIDE</h2>
                     <h3>★ SFI & SSN</h3>
-                    <ul><li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li><li><b>SSN:</b> ยิ่งสูง ยิ่งสะท้อนดี</li></ul>
+                    <ul><li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li><li><b>SSN:</b> นับจุดจริงจาก NOAA</li></ul>
                     <h3>★ Kp Index</h3>
                     <ul><li><span style="color:var(--accent-green)">Kp 0-3:</span> สงบ</li><li><span style="color:var(--accent-red)">Kp 5+:</span> พายุ</li></ul>
                     <h3>1. Bz (Polarity)</h3>
@@ -270,7 +267,7 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V9.2 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V9.3 • Data: NOAA, Kyoto</div>
 
     <script>
         function openGuide() { 
@@ -297,7 +294,6 @@
             const cardElem = document.getElementById(cardId);
             if (!valElem || !cardElem) return;
 
-            // Remove animation to restart it
             valElem.classList.remove('updated-flash');
             void valElem.offsetWidth;
             valElem.classList.add('updated-flash');
@@ -368,19 +364,33 @@
                 }
             } catch(e){}
 
+            // SFI & SSN (NEW: Using Real Counting for SSN)
             try {
-                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
-                const data = await res.json();
-                const len = data.length;
-                if (len > 2) {
-                    const currSfi = parseInt(data[len-1][data[0].length-1]);
-                    const prevSfi = parseInt(data[len-2][data[0].length-1]);
+                // 1. SFI
+                const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
+                const dataSfi = await resSfi.json();
+                if (dataSfi.length > 2) {
+                    const currSfi = parseInt(dataSfi[dataSfi.length-1][dataSfi[0].length-1]);
+                    const prevSfi = parseInt(dataSfi[dataSfi.length-2][dataSfi[0].length-1]);
                     renderStat('val-sfi', 'card-sfi', currSfi, 'sfi', 'trend-sfi', prevSfi);
-                    let currSSN = Math.round((currSfi - 63.7) * 1.12);
-                    if(currSSN<0) currSSN=0;
-                    renderStat('val-ssn', 'card-ssn', currSSN, 'ssn');
                 }
-            } catch(e){}
+
+                // 2. SSN (REAL COUNT from Region Summary)
+                const resSpots = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-region-summary.json'));
+                const dataSpots = await resSpots.json();
+                let realSSN = 0;
+                if (Array.isArray(dataSpots) && dataSpots.length > 0) {
+                    const groups = dataSpots.length; // Count regions
+                    let spots = 0;
+                    dataSpots.forEach(r => spots += parseInt(r.number_spots));
+                    realSSN = (10 * groups) + spots; // Wolf Formula
+                }
+                renderStat('val-ssn', 'card-ssn', realSSN, 'ssn');
+
+            } catch(e){ 
+                // Fallback if Spot file is empty (early UTC)
+                console.log("Spot fail, calc from SFI not implemented to avoid confusion");
+            }
 
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));

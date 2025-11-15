@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V15.0</title>
+    <title>IonosTek Monitor V16.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V14.0 (Stable) --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -26,13 +25,13 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            user-select: none; /* Security */
+            user-select: none;
         }
 
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-yellow); /* Yellow for Proxy Mode */
+            color: #000; background-color: var(--accent-blue);
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -78,8 +77,6 @@
         .stat-unit { font-size: 0.65em; color: #666; }
 
         .trend-arrow { font-size: 0.6em; font-weight: bold; }
-        .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; } 
-        .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; }
 
         /* Grid Images */
         .grid-container {
@@ -155,8 +152,8 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V15.0</span></h1>
-        <div id="systemStatus"><span class="blink">●</span> Connecting via Proxy...</div>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V16.0</span></h1>
+        <div id="systemStatus"><span class="blink">●</span> Connecting via AllOrigins...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
@@ -211,7 +208,7 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V15.0 • Hybrid Proxy Core</div>
+    <div class="footer">IonosTek Monitor V16.0 • Hybrid Proxy Core</div>
 
     <script>
         // --- Security ---
@@ -230,58 +227,45 @@
             document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC');
         }
 
-        // --- SMART PROXY FETCHING (The Key Fix) ---
-        async function smartFetch(url) {
+        // --- ROBUST PROXY FETCHING (AllOrigins) ---
+        async function proxyFetch(targetUrl) {
+            // Use AllOrigins (Very reliable for JSON)
+            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl + '?t=' + Date.now());
             try {
-                // Try Direct first (some browsers might allow it locally)
-                // const r = await fetch(url); if(r.ok) return await r.json();
-                throw new Error("Force Proxy");
-            } catch(e) {
-                // Primary Proxy: corsproxy.io (Fastest)
-                try {
-                    const p1 = 'https://corsproxy.io/?' + encodeURIComponent(url);
-                    const r1 = await fetch(p1);
-                    if(r1.ok) return await r1.json();
-                } catch(e2) {
-                    // Backup Proxy: allorigins (Reliable)
-                    console.log("Switching to Backup Proxy...");
-                    const p2 = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                    const r2 = await fetch(p2);
-                    const d2 = await r2.json();
-                    return JSON.parse(d2.contents);
-                }
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                return JSON.parse(data.contents); // AllOrigins wraps response in 'contents'
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                throw error;
             }
-            throw new Error("All fetch methods failed");
         }
 
         // --- Update Logic ---
         function updateUI(id, val, type, diff=0) {
             const el = document.getElementById('val-'+id);
-            const box = document.getElementById('card-'+id); // Using card- prefix in HTML? No, verify IDs.
-            // Re-verify HTML IDs: 'val-sfi', 'card-sfi' ...
-            // Wait, in V15 HTML above, I used 'box-sfi' and 'val-sfi'. 
-            // Correcting function to match HTML.
-            const boxEl = document.getElementById('box-'+id); // Correction
+            const box = document.getElementById('card-'+id); // Check ID match!
+            // In HTML: id="box-sfi", "val-sfi". My JS uses 'val-'+id.
+            // Let's fix selector
+            const boxEl = document.getElementById('box-'+id);
             
             if(!el || !boxEl) return;
             
-            // Animate
             el.classList.remove('updated-flash');
             void el.offsetWidth;
             el.classList.add('updated-flash');
 
-            el.innerHTML = isNaN(val) && typeof val !== 'string' ? "--" : val;
+            el.innerHTML = (val === null || (typeof val === 'number' && isNaN(val))) ? "--" : val;
             
-            // Trend Arrow
             if(diff !== 0 && !isNaN(diff)) {
-                let c = diff > 0 ? '#ff1744' : '#00e676'; // Default: Up is Bad
+                let c = diff > 0 ? '#ff1744' : '#00e676'; 
                 if(type=='sfi'||type=='ssn'||type=='dst') c = diff > 0 ? '#00e676' : '#ff1744';
                 if(type=='dst') c = diff > 0 ? '#00e676' : '#ff1744';
                 let arr = diff > 0 ? '&#9650;' : '&#9660;';
                 el.innerHTML += ` <span class="trend-arrow" style="color:${c}">${arr}</span>`;
             }
 
-            // Status Color
             let s = 'status-normal';
             if(type=='sfi') { if(val>150) s='status-good'; else if(val<100) s='status-warn'; }
             if(type=='ssn') { if(val>100) s='status-good'; else if(val<50) s='status-warn'; }
@@ -295,36 +279,35 @@
 
         // --- Data Fetcher ---
         async function fetchAll() {
-            const ts = '?t=' + Date.now();
-            
-            // 1. Mag & Plasma
-            smartFetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'+ts).then(d=>{
+            // 1. Mag
+            proxyFetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json').then(d=>{
                 const l=d[d.length-1], p=d[d.length-2];
                 const bz=d[0].indexOf('bz_gsm'), bt=d[0].indexOf('bt');
-                updateUI('bz', parseFloat(l[bz]), 'bz', l[bz]-p[bz]);
-                updateUI('bt', parseFloat(l[bt]), 'bt', l[bt]-p[bt]);
+                updateUI('bz', parseFloat(l[bz]), 'bz', parseFloat(l[bz])-parseFloat(p[bz]));
+                updateUI('bt', parseFloat(l[bt]), 'bt', parseFloat(l[bt])-parseFloat(p[bt]));
             }).catch(e=>{});
 
-            smartFetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'+ts).then(d=>{
+            // 2. Plasma
+            proxyFetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json').then(d=>{
                 const l=d[d.length-1], p=d[d.length-2];
                 const s=d[0].indexOf('speed'), den=d[0].indexOf('density');
-                updateUI('wind', parseFloat(l[s]), 'wind', l[s]-p[s]);
+                updateUI('wind', parseFloat(l[s]), 'wind', parseFloat(l[s])-parseFloat(p[s]));
                 updateUI('density', parseFloat(l[den]), 'density');
             }).catch(e=>{});
 
-            // 2. Indices
-            smartFetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'+ts).then(d=>{
+            // 3. Indices
+            proxyFetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json').then(d=>{
                 const l=d[d.length-1];
                 updateUI('kp', parseFloat(l[1]), 'kp', parseFloat(l[1])-parseFloat(d[d.length-2][1]));
             }).catch(e=>{});
 
-            smartFetch('https://services.swpc.noaa.gov/products/kyoto-dst.json'+ts).then(d=>{
+            proxyFetch('https://services.swpc.noaa.gov/products/kyoto-dst.json').then(d=>{
                 const l=d[d.length-1];
                 updateUI('dst', parseInt(l[1]), 'dst', parseInt(l[1])-parseInt(d[d.length-2][1]));
             }).catch(e=>{});
 
-            // 3. SFI & SSN
-            smartFetch('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'+ts).then(d=>{
+            // 4. SFI & SSN
+            proxyFetch('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json').then(d=>{
                 const l=parseInt(d[d.length-1][d[0].length-1]);
                 const p=parseInt(d[d.length-2][d[0].length-1]);
                 updateUI('sfi', l, 'sfi', l-p);
@@ -332,11 +315,9 @@
                 updateUI('ssn', ssn<0?0:ssn, 'ssn', ssn-Math.round((p-63.7)*1.12));
             }).catch(e=>{});
 
-            // 4. X-Ray (6-Hour Safe File)
-            smartFetch('https://services.swpc.noaa.gov/products/x-rays-6-hour.json'+ts).then(d=>{
+            // 5. X-Ray (Safe & Sound)
+            proxyFetch('https://services.swpc.noaa.gov/products/x-rays-6-hour.json').then(d=>{
                 let flux = null;
-                // Scan backwards for valid Long Flux (index 3 or 4 depending on file structure)
-                // Usually index 3 is Long (0.1-0.8) in 6-hour file
                 for(let i=d.length-1; i>0; i--) {
                     if(d[i][3] && !isNaN(parseFloat(d[i][3]))) {
                         flux = parseFloat(d[i][3]); break;
@@ -359,8 +340,8 @@
         }
 
         // Start
-        tick(); fetchAll();
-        setInterval(tick, 1000);
+        updateTime(); fetchAll();
+        setInterval(updateTime, 1000);
         setInterval(fetchAll, 60000);
         setInterval(refreshImages, 300000);
     </script>

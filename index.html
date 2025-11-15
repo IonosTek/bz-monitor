@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V10.3</title>
+    <title>IonosTek Monitor V10.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V10.2 --- */
+        /* --- CSS Base --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -26,14 +26,14 @@
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            user-select: none;
+            user-select: none; /* Security */
             -webkit-user-select: none;
         }
 
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-orange); 
+            color: #000; background-color: var(--accent-green); 
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -70,6 +70,7 @@
         }
         .btn-guide:hover { background: var(--accent-blue); color: #fff; }
 
+        /* Stats Grid */
         .stats-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; }
         .stat-box {
             background: var(--card-bg); padding: 15px 5px; border-radius: 8px;
@@ -77,7 +78,6 @@
             border-top: 4px solid #555; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             transition: transform 0.2s;
         }
-        .stat-box:hover { transform: translateY(-3px); }
         
         .stat-value { 
             font-size: 1.6em; font-weight: 700; margin: 5px 0; 
@@ -91,6 +91,7 @@
         .bz-arrow-n { color: var(--accent-green); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; } 
         .bz-arrow-s { color: var(--accent-red); font-size: 0.8em; animation: arrow-pulse 1.5s infinite; }
 
+        /* Cards Grid */
         .grid-container {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
             gap: 25px; max-width: 1600px; margin: 0 auto;
@@ -116,34 +117,43 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Modal Fixed 100% */
+        /* --- Modal Fixed V10.4 (Scroll Friendly) --- */
         .modal {
-            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
-            backdrop-filter: blur(5px); overflow-y: auto; -webkit-overflow-scrolling: touch;
+            display: none; 
+            position: fixed; 
+            z-index: 10000; 
+            left: 0; 
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.95);
+            backdrop-filter: blur(5px); 
+            overflow-y: auto; /* ให้ตัว Modal เองเลื่อนได้ */
+            -webkit-overflow-scrolling: touch;
         }
-        .modal-content-text {
-            background-color: var(--card-bg); border: 1px solid #444; 
-            width: 90%; max-width: 700px; border-radius: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); margin: 50px auto; position: relative; display: block;
-        }
-        .modal-header-bar {
-            background-color: var(--card-bg); padding: 10px 20px;
-            border-bottom: 1px solid #333; display: flex; justify-content: flex-end;
-            border-radius: 10px 10px 0 0; position: sticky; top: 0; z-index: 50;
-        }
-        .modal-body-scroll { padding: 20px 30px; }
         
-        /* Lightbox */
-        #lightboxModal { display: none; align-items: center; justify-content: center; overflow: hidden; }
-        .modal-content-img {
-            margin: auto; display: block; width: auto; height: auto;
-            max-width: 98%; max-height: 95vh;
-            border: 2px solid #333; border-radius: 4px;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+        .modal-content-text {
+            background-color: var(--card-bg); 
+            border: 1px solid #444; 
+            width: 90%; 
+            max-width: 700px; 
+            margin: 5% auto 10% auto; /* เว้นระยะบนล่าง */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
+            position: relative;
         }
 
-        .close-btn { color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .close-btn { 
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: #fff; 
+            font-size: 32px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            z-index: 20;
+        }
         .close-btn:hover { color: var(--accent-red); }
         
         /* Guide Styles */
@@ -153,6 +163,21 @@
         .hl-red { color: var(--accent-red); font-weight: bold; }
         .hl-green { color: var(--accent-green); font-weight: bold; }
 
+        /* Lightbox Centering */
+        #lightboxModal {
+            display: none; /* Override default flex for lightbox specific */
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Lock scroll for image */
+        }
+        .modal-content-img {
+            margin: auto; display: block; width: auto; height: auto;
+            max-width: 98%; max-height: 95vh;
+            border: 2px solid #333; border-radius: 4px;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+        }
+
+        /* Status Colors */
         .status-normal { color: var(--accent-green); border-top-color: var(--accent-green) !important; }
         .status-warn { color: var(--accent-yellow); border-top-color: var(--accent-yellow) !important; }
         .status-moderate { color: var(--accent-orange); border-top-color: var(--accent-orange) !important; }
@@ -175,7 +200,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.3</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.4</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -250,50 +275,49 @@
 
     <div id="guideModal" class="modal">
         <div class="modal-content-text">
-            <div class="modal-header-bar">
-                <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
-            </div>
-            <div class="modal-body-scroll">
-                <div class="article-content">
-                    <h2>📡 OPERATOR GUIDE</h2>
-                    <h3>★ Solar Activity</h3>
-                    <ul>
-                        <li><b>X-Ray:</b> <span style="color:var(--accent-green)">A/B/C</span> ปกติ, <span style="color:var(--accent-red)">M/X</span> สัญญาณดับ</li>
-                        <li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li>
-                        <li><b>SSN:</b> ยิ่งสูง ยิ่งดี</li>
-                    </ul>
-                    <h3>★ Geomagnetic</h3>
-                    <ul>
-                        <li><b>Kp:</b> 0-3 สงบ, 5+ พายุ</li>
-                        <li><b>Bz:</b> <span class="hl-green">บวก(+)</span> นิ่ง, <span class="hl-red">ลบ(-)</span> พายุเข้า</li>
-                    </ul>
-                    <h3>★ Solar Wind</h3>
-                    <p>ลม > 500 km/s สัญญาณอาจแกว่ง (QSB)</p>
-                    <h3>3. TEC Map</h3>
-                    <ul><li><b style="color:var(--accent-orange)">แดง/ส้ม:</b> 10m-15m</li><li><b style="color:var(--accent-blue)">น้ำเงิน:</b> 40m-80m</li></ul>
-                </div>
+            <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
+            <div class="article-content">
+                <h2>📡 OPERATOR GUIDE</h2>
+                <h3>★ Solar Activity</h3>
+                <ul>
+                    <li><b>X-Ray:</b> <span style="color:var(--accent-green)">A/B/C</span> ปกติ, <span style="color:var(--accent-red)">M/X</span> สัญญาณดับ</li>
+                    <li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li>
+                    <li><b>SSN:</b> ยิ่งสูง ยิ่งดี</li>
+                </ul>
+                <h3>★ Geomagnetic</h3>
+                <ul>
+                    <li><b>Kp:</b> 0-3 สงบ, 5+ พายุ</li>
+                    <li><b>Bz:</b> <span class="hl-green">บวก(+)</span> นิ่ง, <span class="hl-red">ลบ(-)</span> พายุเข้า</li>
+                </ul>
+                <h3>★ Solar Wind</h3>
+                <p>ลม > 500 km/s สัญญาณอาจแกว่ง (QSB)</p>
+                <h3>3. TEC Map</h3>
+                <ul><li><b style="color:var(--accent-orange)">แดง/ส้ม:</b> 10m-15m</li><li><b style="color:var(--accent-blue)">น้ำเงิน:</b> 40m-80m</li></ul>
+                <br><p style="text-align:center; color:#555;">End of Guide</p>
             </div>
         </div>
     </div>
 
-    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')">
+    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')" style="align-items:center; justify-content:center; overflow:hidden;">
         <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px; z-index:100;">&times;</span>
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V10.3 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V10.4 • Data: NOAA, Kyoto</div>
 
     <script>
         // Security
         document.addEventListener('contextmenu', event => event.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) return false; }
 
-        function openGuide() { document.getElementById("guideModal").style.display = "block"; }
+        function openGuide() { 
+            document.getElementById("guideModal").style.display = "block"; 
+        }
         function openLightbox(src) {
             const m = document.getElementById("lightboxModal");
             const img = document.getElementById("lightboxImg");
             img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
-            m.style.display = "flex";
+            m.style.display = "flex"; // Lightbox needs flex to center
         }
         function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
 
@@ -354,7 +378,6 @@
         }
 
         async function fetchData() {
-            // 1. Solar Wind
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
                 const data = await res.json();
@@ -377,7 +400,6 @@
                 }
             } catch(e){}
 
-            // 2. Dst
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
                 const data = await res.json();
@@ -386,7 +408,6 @@
                 }
             } catch(e){}
 
-            // 3. Kp
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
                 const data = await res.json();
@@ -395,7 +416,6 @@
                 }
             } catch(e){}
 
-            // 4. Hybrid SSN & SFI
             try {
                 const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
                 const dataSfi = await resSfi.json();
@@ -426,20 +446,19 @@
                 renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn', 'trend-ssn', prevSSN_calc);
             } catch(e){}
 
-            // 5. X-Ray Flux (DEEP SEARCH FIX)
+            // --- X-Ray Flux (FIX: Use 5-minute file for stability) ---
             try {
-                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-1-minute.json'));
+                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-5-minute.json'));
                 const data = await res.json();
                 if (data.length > 0) {
                     let flux = null;
-                    
-                    // Loop backwards to find valid data (Deep Search)
-                    for (let i = data.length - 1; i >= 0; i--) {
-                        // Index 4 is 'flux' (long)
-                        let val = data[i][4];
-                        if (val !== null && !isNaN(parseFloat(val))) {
-                            flux = parseFloat(val);
-                            break; // Stop when found
+                    // Loop backwards until valid data found
+                    for (let i = data.length - 1; i > 0; i--) {
+                        let row = data[i];
+                        // Index 4 is flux long (0.1-0.8)
+                        if (row[4] !== null && !isNaN(parseFloat(row[4]))) {
+                            flux = parseFloat(row[4]);
+                            break;
                         }
                     }
 

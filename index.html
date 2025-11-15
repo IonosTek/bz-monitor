@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V41.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>IonosTek Monitor V42.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
@@ -12,20 +12,33 @@
             --red: #ff1744; --blue: #2979ff; --purple: #d500f9;
         }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
+        
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
         .version { background: var(--accent-blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
         #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 8px; letter-spacing: 0.5px; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
+        
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 30px; }
+        /* Stats Grid (Revised for 8 items) */
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 30px; 
+            max-width: 1400px; 
+            margin-left: auto; 
+            margin-right: auto; 
+        }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .box:hover { transform: translateY(-3px); }
-        .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; }
+        .val { font-size: 1.8em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .lbl { font-size: 0.75em; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .unit { font-size: 0.6em; color: #666; display: block; margin-top: -5px; }
+
         @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
 
@@ -46,32 +59,31 @@
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
-        @media (max-width: 600px) { .stats { grid-template-columns: repeat(3, 1fr); gap: 5px; } .box { padding: 10px 2px; } .val { font-size: 1.2em; } }
+        @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } .box { padding: 10px 2px; } .val { font-size: 1.5em; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version" style="background:var(--accent-blue)">V41.0</span></h1>
+        <h1>IONOSTEK <span class="version" style="background:var(--accent-blue)">V42.0</span></h1>
         <div id="status"><span class="blink">●</span> System Active</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
     <div class="stats">
-        <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div></div>
-        <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div></div>
-        <div class="box" id="b-xray"><div class="lbl">R-Scale</div><div class="val" id="v-xray">--</div></div>
-        <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div></div>
-        <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div></div>
-        <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div></div>
-        <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div></div>
-        <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div></div>
-        <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div></div>
+        <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div><span class="unit">F10.7cm</span></div>
+        <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
+        <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
+        <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div><span class="unit">nT</span></div>
+        <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
+        <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
+        <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
+        <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
     </div>
 
     <div class="grid">
         <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
     </div>
@@ -81,18 +93,12 @@
             <span class="close" onclick="document.getElementById('guide').style.display='none'">&times;</span>
             <h2 style="color:var(--green)">OPERATOR GUIDE</h2>
             <p style="color:#ccc; line-height:1.6">
-                <b>SFI:</b> >100 Good<br><b>SSN:</b> Higher is Better<br>
-                <b>R-Scale (X-Ray):</b><br>
-                0 = Normal<br>
-                1 = Minor (M1)<br>
-                2 = Moderate (M5)<br>
-                3+ = Strong (X)<br>
-                <b>Kp:</b> >4 Storm<br><b>Bz:</b> Negative=Storm<br><b>Wind:</b> >500 km/s Unstable
+                <b>SFI:</b> >100 Good<br><b>SSN:</b> Higher is Better<br><b>Kp:</b> >4 Storm<br><b>Bz:</b> Negative=Storm<br><b>Wind:</b> >500 km/s Unstable
             </p>
         </div>
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V41.0 • R-Scale Protocol</div>
+    <div class="footer">IonosTek Monitor V42.0 • Final Clean</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -125,7 +131,6 @@
         }
 
         async function updateAll() {
-            // 1. Mag
             const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
             if(mag && mag.length > 2) {
                 const l = mag[mag.length-1], p = mag[mag.length-2];
@@ -133,7 +138,6 @@
                 set('bt', Math.round(l[2]), 'c-norm', parseFloat(l[2])-parseFloat(p[2]));
             }
 
-            // 2. Plasma
             const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
             if(plas && plas.length > 2) {
                 const l = plas[plas.length-1], p = plas[plas.length-2];
@@ -141,19 +145,18 @@
                 set('den', Math.round(l[1]), 'c-norm', parseFloat(l[1])-parseFloat(p[1]));
             }
 
-            // 3. Kp & Dst
             const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 const l = kp[kp.length-1], p = kp[kp.length-2];
                 set('kp', l[1], l[1]>=4?'c-warn':'c-norm', parseFloat(l[1])-parseFloat(p[1]));
             }
+
             const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
             if(dst && dst.length > 2) {
                 const l = dst[dst.length-1], p = dst[dst.length-2];
                 set('dst', l[1], parseInt(l[1])<-50?'c-alert':'c-norm', parseInt(l[1])-parseInt(p[1]));
             }
 
-            // 4. SFI & SSN (Text)
             const txtSfi = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(txtSfi) {
                 const lines = txtSfi.trim().split('\n');
@@ -171,37 +174,10 @@
                     let sfiVal = parseInt(curr[3]);
                     let prevSfi = prev ? parseInt(prev[3]) : sfiVal;
                     set('sfi', sfiVal, sfiVal>100?'c-norm':'c-warn', sfiVal-prevSfi);
+                    
                     let ssnVal = parseInt(curr[4]);
                     let prevSsn = prev ? parseInt(prev[4]) : ssnVal;
                     set('ssn', ssnVal, 'c-norm', ssnVal-prevSsn);
-                }
-            }
-
-            // 5. X-Ray R-Scale (New Reliable Method)
-            // ใช้ไฟล์ Scales JSON แทน Text เพื่อความแม่นยำ
-            const scales = await getData('https://services.swpc.noaa.gov/products/noaa-scales.json');
-            if(scales && scales.length > 1) {
-                const curr = scales[scales.length-1];
-                const r = parseInt(curr[1]); // Index 1 is R-Scale
-                let d="Normal", s="c-norm";
-                if(r==1){ d="R1 (Minor)"; s="c-warn"; }
-                if(r==2){ d="R2 (Mod)"; s="c-alert"; }
-                if(r>=3){ d="R"+r+" (High)"; s="c-alert"; }
-                // No Arrow needed for Scale
-                set('xray', d, s);
-            } else {
-                // Fallback to Text Scale
-                const tScale = await getText('https://services.swpc.noaa.gov/text/noaa-scales.txt');
-                if(tScale) {
-                    const lines = tScale.trim().split('\n');
-                    const last = lines[lines.length-1].trim().split(/\s+/);
-                    if(last.length > 2) {
-                        const r = parseInt(last[2]);
-                        let d="Normal", s="c-norm";
-                        if(r==1){ d="R1 (Minor)"; s="c-warn"; }
-                        if(r>=2){ d="R"+r+" (High)"; s="c-alert"; }
-                        set('xray', d, s);
-                    }
                 }
             }
         }

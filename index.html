@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V36.0</title>
+    <title>IonosTek Monitor V37.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,18 +15,12 @@
         
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--accent-green); color: #000; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
+        .version { background: var(--accent-red); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
         
-        /* Time Font Fix */
         #status { 
-            font-family: 'Chakra Petch', sans-serif; /* Force Font */
-            font-weight: 500; 
-            font-size: 0.95em; 
-            color: var(--sub); 
-            margin-top: 8px; 
-            letter-spacing: 0.5px;
+            font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; 
+            color: #aaa; margin-top: 8px; letter-spacing: 0.5px;
         }
-
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
         
@@ -65,7 +59,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version" style="background:var(--accent-blue)">V36.0</span></h1>
+        <h1>IONOSTEK <span class="version" style="background:var(--red)">V37.0</span></h1>
         <div id="status"><span class="blink">●</span> System Active</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -84,7 +78,14 @@
 
     <div class="grid">
         <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/x-ray-flux-3-day.gif" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
+        
+        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body">
+            <img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" 
+                 onload="this.style.opacity=1" style="opacity:0" 
+                 onclick="view(this.src)"
+                 onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'">
+        </div></div>
+
         <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
     </div>
@@ -99,10 +100,9 @@
         </div>
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V36.0 • UI Polish</div>
+    <div class="footer">IonosTek Monitor V37.0 • Final Restoration</div>
 
     <script>
-        // Security
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
 
@@ -123,7 +123,6 @@
             }
         }
 
-        // --- Robust Fetcher ---
         async function getData(url) {
             try { const r = await fetch(url + '?t=' + Date.now()); if(r.ok) return await r.json(); } catch(e){}
             try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.json(); } catch(e){ return null; }
@@ -134,38 +133,37 @@
         }
 
         async function updateAll() {
+            // 1. Mag/Plasma/Kp/Dst (JSON - Proven Working)
             const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
             if(mag && mag.length > 2) {
                 const l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', parseFloat(l[1]), parseFloat(l[1])<0?'c-warn':'c-norm', parseFloat(l[1])-parseFloat(p[1]));
                 set('bt', Math.round(l[2]), 'c-norm', parseFloat(l[2])-parseFloat(p[2]));
             }
-
             const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
             if(plas && plas.length > 2) {
                 const l = plas[plas.length-1], p = plas[plas.length-2];
                 set('wind', Math.round(l[2]), l[2]>500?'c-warn':'c-norm', parseFloat(l[2])-parseFloat(p[2]));
                 set('den', Math.round(l[1]), 'c-norm', parseFloat(l[1])-parseFloat(p[1]));
             }
-
             const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 const l = kp[kp.length-1], p = kp[kp.length-2];
                 set('kp', l[1], l[1]>=4?'c-warn':'c-norm', parseFloat(l[1])-parseFloat(p[1]));
             }
-
             const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
             if(dst && dst.length > 2) {
                 const l = dst[dst.length-1], p = dst[dst.length-2];
                 set('dst', l[1], parseInt(l[1])<-50?'c-alert':'c-norm', parseInt(l[1])-parseInt(p[1]));
             }
 
+            // 2. SFI/SSN (Text Parser - Proven Working)
             const txtSfi = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(txtSfi) {
                 const lines = txtSfi.trim().split('\n');
                 let curr=null, prev=null;
                 for(let i=lines.length-1; i>=0; i--) {
-                    if(lines[i].trim().startsWith('20')) {
+                    if(lines[i].includes('20')) { // Simple check for year 20xx
                         let cols = lines[i].trim().split(/\s+/);
                         if(cols.length > 4) {
                             if(!curr) curr = cols;
@@ -184,36 +182,40 @@
                 }
             }
 
-            // --- X-RAY HYBRID FIX (JSON + Text Backup) ---
+            // 3. X-Ray (Improved Scale Parser)
+            const txtScale = await getText('https://services.swpc.noaa.gov/text/noaa-scales.txt');
             let xRayDone = false;
-            
-            // 1. Try JSON First
-            const xray = await getData('https://services.swpc.noaa.gov/products/x-rays-6-hour.json');
-            if(xray && xray.length > 0) {
-                for(let i=xray.length-1; i>0; i--) {
-                    if(xray[i][3] && !isNaN(parseFloat(xray[i][3]))) {
-                        let v = parseFloat(xray[i][3]);
-                        let c = v<1e-5?'C':(v<1e-4?'M':'X');
-                        if(v<1e-6) c='B'; if(v<1e-7) c='A';
-                        set('xray', c, (c=='M'||c=='X')?'c-alert':'c-norm');
-                        xRayDone = true; break;
-                    }
-                }
-            }
-            
-            // 2. If JSON failed, try Text Scale
-            if(!xRayDone) {
-                const txtScale = await getText('https://services.swpc.noaa.gov/text/noaa-scales.txt');
-                if(txtScale) {
-                    const lines = txtScale.trim().split('\n');
-                    const last = lines[lines.length-1].trim().split(/\s+/);
-                    if(last.length > 2) {
-                        const r = parseInt(last[2]);
+            if(txtScale) {
+                const lines = txtScale.trim().split('\n');
+                // Find the last line that has data (not empty)
+                for(let i=lines.length-1; i>=0; i--) {
+                    let cols = lines[i].trim().split(/\s+/);
+                    // Format: Date Time R S G (At least 5 cols)
+                    if(cols.length >= 5 && cols[0].includes('20')) {
+                        const r = parseInt(cols[2]); // R-Scale
                         let d="A/B", s="c-norm";
                         if(r==1){ d="M1+"; s="c-warn"; }
                         if(r>=2){ d="M5+"; s="c-alert"; }
                         if(r>=3){ d="X1+"; s="c-alert"; }
                         set('xray', d, s);
+                        xRayDone = true;
+                        break;
+                    }
+                }
+            }
+            
+            // JSON Fallback
+            if(!xRayDone) {
+                const xray = await getData('https://services.swpc.noaa.gov/products/x-rays-6-hour.json');
+                if(xray) {
+                    for(let i=xray.length-1; i>0; i--) {
+                        if(xray[i][3] && !isNaN(parseFloat(xray[i][3]))) {
+                            let v = parseFloat(xray[i][3]);
+                            let c = v<1e-5?'C':(v<1e-4?'M':'X');
+                            if(v<1e-6) c='B'; if(v<1e-7) c='A';
+                            set('xray', c, (c=='M'||c=='X')?'c-alert':'c-norm');
+                            break;
+                        }
                     }
                 }
             }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V8.0</title>
+    <title>IonosTek Monitor V8.1 (Fixed)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -170,8 +170,8 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.0</span></h1>
-        <div id="systemClock"><span class="blink">●</span> Loading Time...</div>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.1</span></h1>
+        <div id="systemClock"><span class="blink">●</span> Initializing...</div>
         <div id="dataStatus">Connecting to Satellite Feed...</div>
         <button onclick="openGuide()" class="btn-guide">📘 How to Read</button>
     </div>
@@ -209,4 +209,120 @@
             <div class="card-header"><h3>PROPAGATION MAP</h3><span>NOAA TEC MODEL</span></div>
             <div class="card-body">
                 <div id="loader-muf" class="img-loader">Loading Data...</div>
-                <img src="https://services.
+                <img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" 
+                     id="img-muf" alt="Propagation Map" 
+                     style="display:none;" 
+                     onload="this.style.display='block'; document.getElementById('loader-muf').style.display='none';"
+                     onclick="openLightbox(this.src)">
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>AURORA FORECAST</h3><span>NOAA OVATION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" id="img-aurora" alt="Aurora" onclick="openLightbox(this.src)"></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>RADIO BLACKOUT</h3><span>D-REGION ABSORPTION</span></div>
+            <div class="card-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" id="img-drap" alt="DRAP" onclick="openLightbox(this.src)"></div>
+        </div>
+    </div>
+
+    <div id="guideModal" class="modal">
+        <div class="modal-content-text">
+            <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
+            <div class="article-content">
+                <h2>📡 คู่มือนักวิทยุ: อ่านค่าอวกาศฉบับ IonosTek</h2>
+                <h3>1. Bz (Polarity): กุญแจสำคัญ</h3>
+                <ul>
+                    <li><span class="hl-green">↑ Bz เป็นบวก:</span> <b>ประตูปิด</b> สัญญาณนิ่ง (DX ดี)</li>
+                    <li><span class="hl-red">↓ Bz เป็นลบ:</span> <b>ประตูเปิด</b> พายุเข้า (6m ดี)</li>
+                </ul>
+                <h3>2. Solar Wind & Density</h3>
+                <p>ถ้าลม > <b>500 km/s</b> สัญญาณอาจขาดหาย</p>
+                <h3>3. TEC Map (แผนที่อิเล็กตรอน)</h3>
+                <ul>
+                    <li><b style="color:var(--accent-orange)">สีแดง/ส้ม:</b> เล่นความถี่สูง (10-15m)</li>
+                    <li><b style="color:var(--accent-blue)">สีน้ำเงิน/ม่วง:</b> เล่นความถี่ต่ำ (40-80m)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')">
+        <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px;">&times;</span>
+        <img class="modal-content-img" id="lightboxImg">
+    </div>
+
+    <div class="footer">IonosTek Monitor V8.1 • Data Sources: NOAA, Kyoto</div>
+
+    <script>
+        let lastValues = { wind: null, density: null, dst: null, bt: null };
+
+        function openGuide() { document.getElementById("guideModal").style.display = "block"; }
+        function openLightbox(src) {
+            const modal = document.getElementById("lightboxModal");
+            const img = document.getElementById("lightboxImg");
+            img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
+            modal.style.display = "block";
+        }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+
+        // --- Time Logic (Robust) ---
+        function updateTime() {
+            try {
+                const now = new Date();
+                const utcString = now.toUTCString().replace('GMT', 'UTC');
+                document.getElementById('systemClock').innerHTML = '<span class="blink">●</span> ' + utcString;
+            } catch (e) { console.log("Time Err"); }
+        }
+
+        function getFreshUrl(url) { return url + '?t=' + new Date().getTime(); }
+
+        function updateUI(valId, cardId, value, type, trendId, arrowId) {
+            const valElem = document.getElementById(valId);
+            const cardElem = document.getElementById(cardId);
+            if (!valElem || !cardElem) return;
+
+            valElem.classList.remove('updated-flash');
+            void valElem.offsetWidth;
+            valElem.classList.add('updated-flash');
+            valElem.innerText = isNaN(value) ? "--" : value;
+
+            let status = 'normal';
+            cardElem.className = 'stat-box';
+            if (type === 'dst') { if(value<-100) status='alert'; else if(value<-50) status='moderate'; else if(value<-20) status='warn'; }
+            else if (type === 'bz') { if(value<-5) status='alert'; else if(value<0) status='warn'; }
+            else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
+            else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
+            else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
+            cardElem.classList.add('status-'+status);
+
+            if (type === 'bz' && arrowId) {
+                const arr = document.getElementById(arrowId);
+                arr.innerHTML = value >= 0 ? '&#8593;' : '&#8595;';
+                arr.className = value >= 0 ? 'bz-arrow-n' : 'bz-arrow-s';
+            }
+
+            if (trendId && lastValues[type] !== null) {
+                const tr = document.getElementById(trendId);
+                const diff = value - lastValues[type];
+                if (Math.abs(diff) > 0.1) {
+                    tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
+                    if (type==='dst') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                    else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
+                }
+            }
+            if (type !== 'bz') lastValues[type] = value;
+        }
+
+        async function fetchData() {
+            try {
+                const resMag = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
+                const dataMag = await resMag.json();
+                const lastMag = dataMag[dataMag.length - 1];
+                // Robust Index Finding
+                const bzIdx = dataMag[0].findIndex(h => h.includes('bz_gsm'));
+                const btIdx = dataMag[0].findIndex(h => h.includes('bt'));
+                if(bzIdx !== -1) updateUI('val-bz', 'card-bz', parseFloat(lastMag[bzIdx]), 'bz', null, 'arr-bz');
+                if(btIdx !== -1) updateUI('val-bt', 'card-bt', parseFloat(lastMag[btIdx]), 'bt', 'trend-bt');
+
+                const resPlas = await fetch(

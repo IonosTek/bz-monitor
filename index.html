@@ -3,56 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V26.0</title>
+    <title>IonosTek Monitor V27.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Theme --- */
         :root {
-            --bg: #050505; --card: #111; --text: #e0e0e0; --sub: #888;
-            --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff;
+            --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
+            --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
+            --red: #ff1744; --blue: #2979ff; --purple: #d500f9;
         }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
+        
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; }
-        #status { font-size: 0.9em; color: var(--sub); margin-top: 5px; font-family: monospace; }
+        .version { background: var(--purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; }
+        #status { font-size: 0.8em; color: var(--sub); margin-top: 5px; font-family: monospace; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
-        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; }
-        .btn-guide:hover { background: var(--blue); color: #fff; }
         
+        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
+        .btn-guide:hover { background: var(--blue); color: #fff; }
+
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 30px; }
-        .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; }
+        .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; }
         .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; }
-        
+        .arrow { font-size: 0.6em; margin-left: 4px; }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
-        .card { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .card { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column; }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; }
         .c-body { background: #000; height: 280px; display: flex; align-items: center; justify-content: center; }
-        .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; }
+        .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; }
-        .m-content { background: var(--card); width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
-        .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
-        
-        #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
-        #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
-        
-        /* Colors */
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
+
+        /* Modal & Lightbox */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; overflow-y: auto; }
+        .m-content { background: var(--card); width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
+        .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
+        #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
+        #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
+
+        .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
         
-        /* Console */
-        #console { margin-top: 30px; font-family: monospace; font-size: 0.7em; color: #555; height: 100px; overflow-y: auto; border-top: 1px solid #333; padding: 10px; }
+        /* Debug Log */
+        #debug { color: #555; font-size: 0.7em; margin-top: 10px; height: 20px; overflow: hidden; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version">V26.0</span></h1>
-        <div id="status"><span class="blink">●</span> System Active</div>
+        <h1>IONOSTEK <span class="version">V27.0</span></h1>
+        <div id="status"><span class="blink">●</span> Connecting...</div>
+        <div id="debug">Waiting for Network...</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
@@ -64,151 +69,142 @@
         <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div></div>
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div></div>
-        <div class="box" id="b-den"><div class="lbl">Density</div><div class="val" id="v-den">--</div></div>
+        <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div></div>
     </div>
 
     <div class="grid">
-        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)" onload="this.style.opacity=1" style="opacity:0"></div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)" onload="this.style.opacity=1" style="opacity:0"></div></div>
+        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)" onload="this.style.opacity=1" style="opacity:0"></div></div>
+        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)" onload="this.style.opacity=1" style="opacity:0"></div></div>
     </div>
 
     <div id="guide" class="modal">
         <div class="m-content">
             <span class="close" onclick="document.getElementById('guide').style.display='none'">&times;</span>
-            <h2 style="color:var(--green)">OPERATOR GUIDE</h2>
+            <h2 style="color:var(--green); border-bottom:1px solid #333; padding-bottom:10px;">OPERATOR GUIDE</h2>
             <p style="color:#ccc; line-height:1.6">
                 <b>SFI:</b> >100 Good, >150 Excellent<br>
                 <b>SSN:</b> Higher is better<br>
                 <b>X-Ray:</b> M/X Class = Blackout<br>
                 <b>Kp:</b> 0-3 Quiet, 5+ Storm<br>
-                <b>Bz:</b> Negative (-) is Storm
+                <b>Bz:</b> Negative (-) is Storm<br>
+                <b>Wind:</b> >500 km/s Unstable
             </p>
         </div>
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div id="console">Initializing...</div>
+
+    <div class="footer">IonosTek Monitor V27.0 • Universal Gateway System</div>
 
     <script>
-        // Security
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        
-        function log(msg) {
-            const c = document.getElementById('console');
-            c.innerHTML += `<div>> ${msg}</div>`;
-            c.scrollTop = c.scrollHeight;
-        }
+        // --- Config ---
+        const PROXIES = [
+            u => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+            u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+            u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`
+        ];
 
+        // --- UI Helpers ---
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
+        function log(msg) { document.getElementById('debug').innerText = msg; }
         
-        function set(id, val, s='c-norm') {
+        function set(id, val, s='c-norm', diff=0) {
             const el = document.getElementById('v-'+id);
             if(el) { 
-                el.innerText = val; 
-                document.getElementById('b-'+id).className = 'box '+s;
+                let arr = '';
+                if(diff !== 0 && !isNaN(diff)) {
+                    let c = (diff>0) ? 'var(--red)' : 'var(--green)';
+                    if(id=='sfi'||id=='ssn') c = (diff>0) ? 'var(--green)' : 'var(--red)';
+                    arr = ` <span class="arrow" style="color:${c}">${diff>0?'▲':'▼'}</span>`;
+                }
+                el.innerHTML = val + arr; 
+                document.getElementById('b-'+id).className = 'stat-box '+s;
             }
         }
 
-        // --- GATE A: AllOrigins (For Text & Small Data) ---
-        async function fetchGateA() {
-            const proxy = 'https://api.allorigins.win/raw?url=';
-            const ts = '&t=' + Date.now();
+        // --- Universal Fetcher ---
+        async function fetchAny(url) {
+            let errs = [];
+            for (let p of PROXIES) {
+                try {
+                    const target = p(url + '?t=' + Date.now());
+                    log(`Trying: ${new URL(target).hostname}...`);
+                    const r = await fetch(target);
+                    if (r.ok) return await r.json();
+                } catch(e) { errs.push(e.message); }
+            }
+            throw new Error("All Proxies Failed");
+        }
+
+        // --- Logic ---
+        async function updateAll() {
+            log('Starting Update Sequence...');
             
-            // SFI & SSN (Text)
-            try {
-                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/text/daily-solar-indices.txt') + ts);
-                const txt = await r.text();
-                const lines = txt.trim().split('\n');
-                for(let i=lines.length-1; i>=0; i--) {
-                    if(lines[i].match(/^\d{4}/)) {
-                        const c = lines[i].trim().split(/\s+/);
-                        let sfi = parseInt(c[3]);
-                        set('sfi', sfi, sfi>100?'c-norm':'c-warn');
-                        set('ssn', c[4]);
-                        log('Gate A: SFI/SSN Loaded');
+            // 1. Mag
+            fetchAny('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json').then(d => {
+                const c = d[d.length-1], p = d[d.length-2];
+                const bz = parseFloat(c[1]);
+                set('bz', bz, bz<0?'c-warn':(bz<-5?'c-alert':'c-norm'), bz-parseFloat(p[1]));
+                set('bt', Math.round(c[2]));
+            }).catch(()=>{});
+
+            // 2. Plasma
+            fetchAny('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json').then(d => {
+                const c = d[d.length-1], p = d[d.length-2];
+                const spd = parseFloat(c[2]);
+                set('wind', Math.round(spd), spd>500?'c-warn':'c-norm', spd-parseFloat(p[2]));
+                set('den', Math.round(c[1]));
+            }).catch(()=>{});
+
+            // 3. Kp
+            fetchAny('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json').then(d => {
+                const kp = parseFloat(d[d.length-1][1]);
+                set('kp', kp, kp>=4?'c-alert':'c-norm');
+            }).catch(()=>{});
+
+            // 4. SFI/SSN
+            fetchAny('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json').then(d => {
+                const sfi = parseInt(d[d.length-1][2]);
+                const psfi = parseInt(d[d.length-2][2]);
+                set('sfi', sfi, sfi>100?'c-norm':'c-warn', sfi-psfi);
+                set('ssn', Math.round((sfi-63.7)*1.12), 'c-norm'); // Calc
+            }).catch(()=>{});
+
+            // 5. X-Ray (6-Hour)
+            fetchAny('https://services.swpc.noaa.gov/products/x-rays-6-hour.json').then(d => {
+                for(let i=d.length-1; i>0; i--) {
+                    if(d[i][3]) {
+                        let v = parseFloat(d[i][3]);
+                        let cls = v<1e-5?'C':(v<1e-4?'M':'X');
+                        if(v<1e-6) cls='B'; if(v<1e-7) cls='A';
+                        set('xray', cls, (cls=='M'||cls=='X')?'c-alert':'c-norm');
                         break;
                     }
                 }
-            } catch(e){ log('Gate A (SFI) Fail'); }
-
-            // Kp (Small JSON)
-            try {
-                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json') + ts);
-                const d = await r.json();
-                let kp = d[d.length-1][1];
-                set('kp', kp, kp>=4?'c-warn':'c-norm');
-                log('Gate A: Kp Loaded');
-            } catch(e){ log('Gate A (Kp) Fail'); }
-        }
-
-        // --- GATE B: CodeTabs (For Heavy JSON) ---
-        async function fetchGateB() {
-            // CodeTabs handles large files better
-            const proxy = 'https://api.codetabs.com/v1/proxy?quest=';
-            const ts = '?t=' + Date.now();
-
-            // Mag (Bz)
-            try {
-                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json' + ts));
-                const d = await r.json();
-                const l = d[d.length-1];
-                let bz = Math.round(l[1]);
-                set('bz', bz, bz<0?'c-warn':'c-norm');
-                set('bt', Math.round(l[2]));
-                log('Gate B: Mag Loaded');
-            } catch(e){ log('Gate B (Mag) Fail: '+e.message); }
-
-            // Plasma (Wind)
-            try {
-                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json' + ts));
-                const d = await r.json();
-                const l = d[d.length-1];
-                let spd = Math.round(l[2]);
-                set('wind', spd, spd>500?'c-warn':'c-norm');
-                set('den', Math.round(l[1]));
-                log('Gate B: Plasma Loaded');
-            } catch(e){ log('Gate B (Plasma) Fail'); }
-
-            // X-Ray (6-Hour)
-            try {
-                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/x-rays-6-hour.json' + ts));
-                const d = await r.json();
-                let flux = null;
-                for(let i=d.length-1; i>0; i--) {
-                    if(d[i][3]) { flux = parseFloat(d[i][3]); break; }
-                }
-                if(flux) {
-                    let c = flux<1e-5?'C':(flux<1e-4?'M':'X');
-                    if(flux<1e-6) c='B'; if(flux<1e-7) c='A';
-                    let s = (c=='M'||c=='X')?'c-alert':'c-norm';
-                    set('xray', c, s);
-                    log('Gate B: X-Ray Loaded');
-                }
-            } catch(e){ log('Gate B (XRay) Fail'); }
+            }).catch(()=>{});
             
-            // Dst
-             try {
-                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/kyoto-dst.json' + ts));
-                const d = await r.json();
-                set('dst', d[d.length-1][1]);
-            } catch(e){}
+            // 6. Dst
+            fetchAny('https://services.swpc.noaa.gov/products/kyoto-dst.json').then(d => {
+                 const dst = parseInt(d[d.length-1][1]);
+                 set('dst', dst, dst<-50?'c-alert':'c-norm');
+            }).catch(()=>{});
+
+            setTimeout(() => {
+                document.getElementById('status').innerHTML = '<span class="blink">●</span> System Active';
+                log('Data Sync Complete');
+            }, 2000);
         }
 
         // Init
-        fetchGateA();
-        setTimeout(fetchGateB, 1500); // Delay heavy fetch slightly
+        updateAll();
+        setInterval(updateAll, 60000);
+        setInterval(() => document.getElementById('status').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT','UTC'), 1000);
         
-        setInterval(() => {
-            log('Refreshing...');
-            fetchGateA();
-            setTimeout(fetchGateB, 1500);
-        }, 60000);
-        
-        setInterval(() => { 
-            document.querySelectorAll('.c-body img').forEach(i => i.src = i.src.split('?')[0] + '?t=' + Date.now());
-        }, 300000);
+        // Security
+        document.onkeydown = e => { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; };
+        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V9.5</title>
+    <title>IonosTek Monitor V10.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V9.x --- */
+        /* --- CSS Base: V9.5 --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -32,7 +32,7 @@
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-yellow); 
+            color: #fff; background-color: var(--accent-red); 
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -172,7 +172,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.5</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.0</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -188,22 +188,28 @@
             <div class="stat-value"><span id="val-ssn">--</span><span id="trend-ssn" class="trend-arrow"></span></div>
             <div class="stat-unit">Hybrid Count</div>
         </div>
+        <div class="stat-box" id="card-xray">
+            <div class="stat-label">X-Ray Flux</div>
+            <div class="stat-value"><span id="val-xray">--</span></div>
+            <div class="stat-unit">Solar Flare</div>
+        </div>
+        
         <div class="stat-box" id="card-kp">
             <div class="stat-label">Kp Index</div>
             <div class="stat-value"><span id="val-kp">--</span><span id="trend-kp" class="trend-arrow"></span></div>
             <div class="stat-unit">Planetary</div>
         </div>
-        
         <div class="stat-box" id="card-bz">
             <div class="stat-label">Bz (Polarity)</div>
             <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
             <div class="stat-unit">nT (GSM)</div>
         </div>
-        <div class="stat-box" id="card-dst">
-            <div class="stat-label">Dst Index</div>
-            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT (Kyoto)</div>
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt</div>
+            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT</div>
         </div>
+        
         <div class="stat-box" id="card-wind">
             <div class="stat-label">Solar Wind</div>
             <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
@@ -214,10 +220,10 @@
             <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
             <div class="stat-unit">p/cm³</div>
         </div>
-        <div class="stat-box" id="card-bt">
-            <div class="stat-label">IMF Bt</div>
-            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT</div>
+        <div class="stat-box" id="card-dst">
+            <div class="stat-label">Dst Index</div>
+            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT (Kyoto)</div>
         </div>
     </div>
 
@@ -247,16 +253,19 @@
             <div class="modal-body-scroll">
                 <div class="article-content">
                     <h2>📡 OPERATOR GUIDE</h2>
-                    <h3>★ SFI & SSN</h3>
-                    <ul><li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li><li><b>SSN:</b> ยิ่งสูง ยิ่งสะท้อนดี (Hybrid Data)</li></ul>
-                    <h3>★ Kp Index</h3>
-                    <ul><li><span style="color:var(--accent-green)">Kp 0-3:</span> สงบ</li><li><span style="color:var(--accent-red)">Kp 5+:</span> พายุ</li></ul>
-                    <h3>1. Bz (Polarity)</h3>
-                    <ul><li><span class="hl-green">↑ Bz บวก:</span> นิ่ง</li><li><span class="hl-red">↓ Bz ลบ:</span> พายุ</li></ul>
-                    <h3>2. Solar Wind</h3>
-                    <p>เกิน <b>500 km/s</b> สัญญาณแกว่ง</p>
-                    <h3>3. TEC Map</h3>
-                    <ul><li><b style="color:var(--accent-orange)">แดง/ส้ม:</b> 10m-15m</li><li><b style="color:var(--accent-blue)">น้ำเงิน:</b> 40m-80m</li></ul>
+                    <h3>★ Solar Activity</h3>
+                    <ul>
+                        <li><b>X-Ray:</b> <span style="color:var(--accent-green)">A/B/C</span> ปกติ, <span style="color:var(--accent-red)">M/X</span> สัญญาณดับ (Blackout)</li>
+                        <li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li>
+                        <li><b>SSN:</b> ยิ่งสูง ยิ่งดี</li>
+                    </ul>
+                    <h3>★ Geomagnetic</h3>
+                    <ul>
+                        <li><b>Kp:</b> 0-3 สงบ, 5+ พายุ</li>
+                        <li><b>Bz:</b> <span class="hl-green">บวก(+)</span> นิ่ง, <span class="hl-red">ลบ(-)</span> พายุเข้า</li>
+                    </ul>
+                    <h3>★ Solar Wind</h3>
+                    <p>ลม > 500 km/s สัญญาณอาจวูบวาบ (QSB)</p>
                 </div>
             </div>
         </div>
@@ -267,7 +276,7 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V9.5 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V10.0 • Data: NOAA, Kyoto</div>
 
     <script>
         function openGuide() { 
@@ -298,7 +307,7 @@
             void valElem.offsetWidth;
             valElem.classList.add('updated-flash');
             
-            valElem.innerText = isNaN(value) ? "--" : value;
+            valElem.innerText = (value === null || value === undefined || (typeof value === 'number' && isNaN(value))) ? "--" : value;
 
             let status = 'normal';
             if (type === 'sfi') { if(value>150) status='good'; else if(value>100) status='normal'; else status='warn'; }
@@ -309,6 +318,13 @@
             else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
             else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
             else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
+            else if (type === 'xray') { 
+                if(typeof value === 'string') {
+                    if(value.startsWith('X')) status='alert';
+                    else if(value.startsWith('M')) status='moderate';
+                    else status='normal';
+                }
+            }
 
             cardElem.className = 'stat-box';
             cardElem.classList.add('status-'+status);
@@ -322,8 +338,7 @@
             if (trendId && !isNaN(prevValue) && !isNaN(value)) {
                 const tr = document.getElementById(trendId);
                 const diff = value - prevValue;
-                // Reduce threshold for SSN to make arrow more responsive
-                const threshold = (type === 'ssn') ? 0.1 : 0.05; 
+                const threshold = (type === 'ssn') ? 0.1 : 0.05;
                 if (Math.abs(diff) > threshold) {
                     tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
                     if(type==='dst' || type==='sfi' || type==='ssn') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
@@ -337,9 +352,8 @@
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
                 const data = await res.json();
-                const len = data.length;
-                if (len > 2) {
-                    const curr = data[len - 1]; const prev = data[len - 2];
+                if (data.length > 2) {
+                    const curr = data[data.length-1]; const prev = data[data.length-2];
                     const bzIdx = data[0].indexOf('bz_gsm'); const btIdx = data[0].indexOf('bt');
                     renderStat('val-bz', 'card-bz', parseFloat(curr[bzIdx]), 'bz', null, parseFloat(prev[bzIdx]), 'arr-bz');
                     renderStat('val-bt', 'card-bt', parseFloat(curr[btIdx]), 'bt', 'trend-bt', parseFloat(prev[btIdx]));
@@ -349,9 +363,8 @@
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
                 const data = await res.json();
-                const len = data.length;
-                if (len > 2) {
-                    const curr = data[len - 1]; const prev = data[len - 2];
+                if (data.length > 2) {
+                    const curr = data[data.length-1]; const prev = data[data.length-2];
                     const denIdx = data[0].indexOf('density'); const spdIdx = data[0].indexOf('speed');
                     renderStat('val-density', 'card-density', parseFloat(curr[denIdx]), 'density', 'trend-density', parseFloat(prev[denIdx]));
                     renderStat('val-wind', 'card-wind', parseFloat(curr[spdIdx]), 'wind', 'trend-wind', parseFloat(prev[spdIdx]));
@@ -362,18 +375,24 @@
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
                 const data = await res.json();
-                const len = data.length;
-                if (len > 2) {
-                    renderStat('val-dst', 'card-dst', parseInt(data[len-1][1]), 'dst', 'trend-dst', parseInt(data[len-2][1]));
+                if (data.length > 2) {
+                    renderStat('val-dst', 'card-dst', parseInt(data[data.length-1][1]), 'dst', 'trend-dst', parseInt(data[data.length-2][1]));
                 }
             } catch(e){}
 
-            // 3. Hybrid SSN Logic (With Arrow)
+            // 3. Kp
             try {
-                // A. Get SFI for Trend Baseline
+                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
+                const data = await res.json();
+                if (data.length > 2) {
+                    renderStat('val-kp', 'card-kp', parseFloat(data[data.length-1][1]), 'kp', 'trend-kp', parseFloat(data[data.length-2][1]));
+                }
+            } catch(e){}
+
+            // 4. Hybrid SSN & SFI
+            try {
                 const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
                 const dataSfi = await resSfi.json();
-                
                 let currSfi = 0, prevSfi = 0;
                 if (dataSfi.length > 2) {
                     currSfi = parseInt(dataSfi[dataSfi.length-1][dataSfi[0].length-1]);
@@ -381,12 +400,11 @@
                     renderStat('val-sfi', 'card-sfi', currSfi, 'sfi', 'trend-sfi', prevSfi);
                 }
 
-                // B. Calculate "Previous SSN" from "Previous SFI" (Approximation for Trend Comparison)
-                let prevSSN_calc = Math.round((prevSfi - 63.7) * 1.12);
-                if (prevSSN_calc < 0) prevSSN_calc = 0;
-
-                // C. Get "Real" Current SSN
+                // SSN Logic
                 let finalSSN = 0;
+                let prevSSN_calc = Math.round((prevSfi - 63.7) * 1.12);
+                if(prevSSN_calc < 0) prevSSN_calc = 0;
+
                 try {
                     const resSpots = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-region-summary.json'));
                     const dataSpots = await resSpots.json();
@@ -394,33 +412,53 @@
                         const groups = dataSpots.length;
                         let spots = 0;
                         dataSpots.forEach(r => spots += parseInt(r.number_spots));
-                        finalSSN = (10 * groups) + spots; // Real Value
-                    } else {
-                        throw new Error("Empty");
-                    }
+                        finalSSN = (10 * groups) + spots; 
+                    } else { throw new Error("Empty"); }
                 } catch (spotErr) {
-                    // Fallback: Calc current from SFI
                     finalSSN = Math.round((currSfi - 63.7) * 1.12);
                     if (finalSSN < 0) finalSSN = 0;
                 }
-                
-                // Render SSN with Trend (Comparing Final SSN vs Previous Calculated SSN)
-                // Note: Comparing Real vs Calc is acceptable for general trend direction
                 renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn', 'trend-ssn', prevSSN_calc);
-
-            } catch(e){ console.log("SSN Logic Error"); }
-
-            // 4. Kp
-            try {
-                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
-                const data = await res.json();
-                const len = data.length;
-                if (len > 2) {
-                    const currKp = parseFloat(data[len-1][1]);
-                    const prevKp = parseFloat(data[len-2][1]);
-                    renderStat('val-kp', 'card-kp', currKp, 'kp', 'trend-kp', prevKp);
-                }
             } catch(e){}
+
+            // 5. X-Ray Flux (Safe Fetch)
+            try {
+                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-1-minute.json'));
+                const data = await res.json();
+                if (data.length > 0) {
+                    const last = data[data.length-1];
+                    // Index 4 usually is flux long (0.1-0.8nm)
+                    // Or search for 'flux' column if headers available, but fixed index 4 is common in this JSON product
+                    // Actually, let's allow fail-safe
+                    let flux = parseFloat(last[4]); 
+                    
+                    let xClass = "A";
+                    if (flux < 1e-7) xClass = "A";
+                    else if (flux < 1e-6) xClass = "B";
+                    else if (flux < 1e-5) xClass = "C";
+                    else if (flux < 1e-4) xClass = "M";
+                    else xClass = "X";
+                    
+                    // Add decimal (e.g. M1.2)
+                    let base = 1e-7;
+                    if (xClass == 'B') base = 1e-7; // Wait, NOAA scale:
+                    // A: < 10-7
+                    // B: 10-7 to 10-6
+                    // C: 10-6 to 10-5
+                    // M: 10-5 to 10-4
+                    // X: > 10-4
+                    if (xClass == 'B') base = 1e-7;
+                    if (xClass == 'C') base = 1e-6;
+                    if (xClass == 'M') base = 1e-5;
+                    if (xClass == 'X') base = 1e-4;
+                    
+                    let sub = (flux / base).toFixed(1);
+                    renderStat('val-xray', 'card-xray', xClass + sub, 'xray');
+                }
+            } catch(e){ 
+                // If X-Ray fails, just show --
+                renderStat('val-xray', 'card-xray', '--', 'xray'); 
+            }
         }
 
         function refreshImages() {

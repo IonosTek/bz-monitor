@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V62.0</title>
+    <title>IonosTek Monitor V62.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS remains stable */
+        /* --- Reverted to CSS V61.0 (Stable Layout) --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -15,41 +15,75 @@
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--accent-blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
+        .version { background: var(--purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
         #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 8px; letter-spacing: 0.5px; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
+
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
-        .val { font-size: 1.8em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
-        .unit { font-size: 0.6em; color: #666; display: block; margin-top: -5px; }
-        .trend { font-size: 0.6em; animation: pulse 2s infinite; display: inline-block; }
+        .box:hover { transform: translateY(-3px); }
+        
+        /* Font Visibility Enhancement */
+        .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .lbl { font-size: 0.8em; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .unit { font-size: 0.7em; font-weight: 500; color: #666; display: block; margin-top: -5px; }
+        
+        @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
+        .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
+        .bz-state-arrow { font-size: 1.2em; margin-right: 5px; font-weight: 900; }
+
+        /* Grid & Image Fitting Fix (V61.0 - The Stable Version) */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
-        .card { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
-        .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; }
-        .c-body { background: #000; height: 280px; display: flex; align-items: center; justify-content: center; }
-        .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
+        .card { 
+            overflow: hidden; /* Safety net */ 
+            background: var(--card); 
+            border-radius: 8px; 
+            border: 1px solid #333; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
+        }
+        .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
+        
+        .c-body {
+            background: #000;
+            height: 300px; /* Fixed Height */
+            overflow: hidden; /* CRITICAL FIX: Clip anything that pushes out */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        .card-body img { 
+            width: 100%; 
+            max-height: 100%; /* Enforce height constraint */
+            object-fit: contain; 
+            cursor: pointer;
+        }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; }
         .m-content { background: var(--card); width: 90%; max-width: 700px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
         
+        #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
+        #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
+
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
-        .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         .c-mod { border-top-color: var(--orange) !important; color: var(--orange); }
-
+        .c-alert { border-top-color: var(--red) !important; color: var(--red); }
+        
         .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
+        
+        @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } .box { padding: 10px 2px; } .val { font-size: 1.5em; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V62.0</span></h1>
-        <div id="status"><span class="blink">●</span> System Active (HamQSL Core)</div>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V62.1</span></h1>
+        <div id="status"><span class="blink">●</span> System Active (Data Core Focus)</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
@@ -71,10 +105,10 @@
     </div>
 
     <div class="grid">
-        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
-        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
+        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
     </div>
 
     <div id="guide" class="modal">
@@ -99,7 +133,7 @@
         </div>
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V62.0 • HamQSL Stable Core</div>
+    <div class="footer">IonosTek Monitor V62.1 • Revert & Data Core Fix</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -153,11 +187,10 @@
                 el.innerHTML += ` <span class="trend" style="color:${arrColor}">${diff>0?'▲':'▼'}</span>`;
             }
         }
-
-        // --- HAMQSL Data Fetching Engine ---
-        async function fetchHamQSL() {
+        
+        // --- NEW & IMPROVED DATA CORE (AllOrigins + HamQSL) ---
+        async function fetchHamQSLData() {
             try {
-                // Use AllOrigins to fetch HamQSL XML (Cross-Origin Safe)
                 const proxy = 'https://api.allorigins.win/raw?url=';
                 const target = 'https://www.hamqsl.com/solarxml.php';
                 const res = await fetch(proxy + encodeURIComponent(target));
@@ -166,11 +199,9 @@
                 const parser = new DOMParser();
                 const xml = parser.parseFromString(text, "text/xml");
                 
-                // Helper to safely get XML tag content
                 const getXmlVal = (tag) => parseFloat(xml.querySelector(tag)?.textContent) || null;
-                const getXmlText = (tag) => xml.querySelector(tag)?.textContent || '--';
+                const getXmlText = (tag) => xml.querySelector(tag)?.textContent || '--'; // Not used in 'set' but for reference
                 
-                // Fetch Wind/Bz/Kp/SFI values
                 const sfi = getXmlVal("solarflux");
                 const ssn = getXmlVal("sunspots");
                 const kp = getXmlVal("kindex");
@@ -178,48 +209,43 @@
                 const wind = getXmlVal("solarwind");
                 const bt = getXmlVal("magneticfield"); // Using generic field for Bt
 
-                // Update UI (Dummy diff = 1 to show arrows immediately for the first check)
-                if (sfi !== null) update('sfi', sfi, 1);
-                if (ssn !== null) update('ssn', ssn, 1);
-                if (kp !== null) update('kp', kp, 1);
-                if (bz !== null) update('bz', bz, 1);
-                if (bt !== null) update('bt', bt, 1);
-                if (wind !== null) update('wind', wind, 1);
-                
-                // Dst and Density are often missing or unreliable in this single feed, but let's try to update them
-                // Density and Dst still need dedicated NOAA JSON for accuracy.
+                // Use 'set' function with dummy diff for initial load, if actual diff is not available
+                // We'll calculate diff on subsequent updates if needed, for now just show data
+                if (sfi !== null) set('sfi', sfi);
+                if (ssn !== null) set('ssn', ssn);
+                if (kp !== null) set('kp', kp);
+                if (bz !== null) set('bz', bz);
+                if (bt !== null) set('bt', bt);
+                if (wind !== null) set('wind', wind);
+
+                // Dst and Density are not typically available from HamQSL, these might remain '--'
+                // unless we find another reliable single-shot source that allows CORS.
+                // For now, prioritize the working HamQSL data.
                 
             } catch(e) {
                 console.error("HamQSL Fetch/Parse Error:", e);
-                // Fallback to simpler NOAA JSONs for wind/density/dst
-                fetchDataSupplements(); 
+                // In case of error, values will remain '--' as initialized.
             }
         }
 
-        async function fetchDataSupplements() {
-            // Placeholder function for Dst/Density fetch (using working logic from V49/V51)
-            const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
-            if(dst && dst.length > 2) {
-                const l = dst[dst.length-1], p = dst[dst.length-2];
-                const val = parseInt(l[1]);
-                let color = (val < -50) ? 'c-alert' : (val < -20 ? 'c-warn' : 'c-norm');
-                set('dst', val, color, val-parseInt(p[1]));
-            }
+        // --- Init & Intervals ---
+        tick(); 
+        fetchHamQSLData(); // Initial data load
+        
+        setInterval(tick, 1000); // Clock update
+        setInterval(fetchHamQSLData, 60000); // Data update every 1 minute
+        
+        // Image refresh (if needed, 5 minutes)
+        setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => {
+            const currentSrc = i.src.split('?')[0]; // Remove existing timestamp
+            i.src = currentSrc + '?t=' + Date.now();
+        });}, 300000); 
 
-            const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
-            if(plas && plas.length > 2) {
-                const l = plas[plas.length-1], p = plas[plas.length-2];
-                set('den', Math.round(l[1]), 'c-norm', parseFloat(l[1])-parseFloat(p[1]));
+        window.onclick = function(e) { 
+            if(e.target.className === 'modal' || e.target.id === 'lightbox') {
+                e.target.style.display = 'none';
             }
         }
-
-        // Init
-        tick(); fetchHamQSL(); fetchDataSupplements();
-        setInterval(tick, 1000);
-        setInterval(fetchHamQSL, 60000);
-        setInterval(fetchDataSupplements, 300000); // Less frequent updates for supplements
-        setInterval(() => { document.querySelectorAll('.card-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
-        window.onclick = function(e) { if(e.target.className=='modal'||e.target.id=='lightbox') e.target.style.display='none'; }
     </script>
 </body>
 </html>

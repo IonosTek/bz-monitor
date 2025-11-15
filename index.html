@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V8.8</title>
+    <title>IonosTek Monitor V8.9</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base --- */
+        /* --- CSS Base: V8.2 (Stable Version) --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -37,7 +37,7 @@
         }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #fff; background-color: var(--accent-blue);
+            color: #fff; background-color: var(--accent-green);
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; 
             border-radius: 4px; font-weight: bold;
         }
@@ -53,9 +53,9 @@
             background: transparent; border: 1px solid var(--accent-blue);
             color: var(--accent-blue); padding: 5px 15px; margin-top: 10px;
             border-radius: 20px; cursor: pointer; font-family: 'Chakra Petch', sans-serif;
-            font-size: 0.85em; transition: all 0.3s; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;
+            font-size: 0.85em; transition: all 0.3s; text-transform: uppercase; font-weight: bold;
         }
-        .btn-guide:hover { background: var(--accent-blue); color: #fff; box-shadow: 0 0 15px rgba(41, 121, 255, 0.5); }
+        .btn-guide:hover { background: var(--accent-blue); color: #fff; }
 
         .stats-container {
             display: flex; flex-wrap: wrap; gap: 10px;
@@ -108,7 +108,7 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Modal Fixed */
+        /* Modal (Fixed Scrolling) */
         .modal {
             display: none; position: fixed; z-index: 9999; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);
@@ -134,6 +134,7 @@
         }
         .close-btn:hover { color: var(--accent-red); }
         
+        /* Guide Styles */
         .article-content h2 { color: var(--accent-green); border-bottom: 1px solid #444; padding-bottom: 10px; margin-top: 0; }
         .article-content h3 { color: var(--accent-blue); margin-top: 25px; border-left: 3px solid var(--accent-blue); padding-left: 10px; }
         .article-content p, .article-content ul { color: #ddd; line-height: 1.6; font-size: 0.95em; }
@@ -163,8 +164,8 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.8</span></h1>
-        <div id="systemStatus"><span class="blink">●</span> System Active</div>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.9</span></h1>
+        <div id="systemStatus"><span class="blink">●</span> Initializing...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
@@ -175,32 +176,26 @@
             <div class="stat-unit">F10.7cm</div>
         </div>
         <div class="stat-box" id="card-ssn">
-            <div class="stat-label">Sunspot (SSN)</div>
+            <div class="stat-label">SSN (Sunspot)</div>
             <div class="stat-value"><span id="val-ssn">--</span></div>
             <div class="stat-unit">Calculated</div>
         </div>
-        <div class="stat-box" id="card-xray">
-            <div class="stat-label">X-Ray Flux</div>
-            <div class="stat-value"><span id="val-xray">--</span></div>
-            <div class="stat-unit">Class</div>
-        </div>
-        
         <div class="stat-box" id="card-kp">
             <div class="stat-label">Kp Index</div>
             <div class="stat-value"><span id="val-kp">--</span></div>
             <div class="stat-unit">Planetary</div>
         </div>
+        
         <div class="stat-box" id="card-bz">
             <div class="stat-label">Bz (Polarity)</div>
             <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
             <div class="stat-unit">nT (GSM)</div>
         </div>
-        <div class="stat-box" id="card-bt">
-            <div class="stat-label">IMF Bt</div>
-            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT</div>
+        <div class="stat-box" id="card-dst">
+            <div class="stat-label">Dst Index</div>
+            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT (Kyoto)</div>
         </div>
-        
         <div class="stat-box" id="card-wind">
             <div class="stat-label">Solar Wind</div>
             <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
@@ -211,10 +206,10 @@
             <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
             <div class="stat-unit">p/cm³</div>
         </div>
-        <div class="stat-box" id="card-dst">
-            <div class="stat-label">Dst Index</div>
-            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT (Kyoto)</div>
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt</div>
+            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT</div>
         </div>
     </div>
 
@@ -248,17 +243,10 @@
                     <li><b>SSN (Sunspot):</b> ยิ่งสูง ยิ่งสะท้อนคลื่นไกล</li>
                 </ul>
 
-                <h3>★ X-Ray Flux (NEW!)</h3>
-                <p>ระดับรังสี X ที่ทำให้เกิด Radio Blackout (สัญญาณหาย):</p>
-                <ul>
-                    <li><span style="color:var(--accent-green)">A, B, C:</span> ปกติ (Normal)</li>
-                    <li><span style="color:var(--accent-orange)">M Class:</span> สัญญาณรบกวน/หายเล็กน้อย (R1-R2)</li>
-                    <li><span style="color:var(--accent-red)">X Class:</span> สัญญาณหายทั่วโลก (Blackout R3+)</li>
-                </ul>
-
                 <h3>★ Kp Index (Geomagnetic)</h3>
                 <ul>
                     <li><span style="color:var(--accent-green)">Kp 0-3:</span> สงบ (Quiet)</li>
+                    <li><span style="color:var(--accent-yellow)">Kp 4:</span> เริ่มปั่นป่วน</li>
                     <li><span style="color:var(--accent-red)">Kp 5+:</span> พายุ (Storm) ระวัง HF ร่วง</li>
                 </ul>
 
@@ -270,6 +258,12 @@
 
                 <h3>2. Solar Wind</h3>
                 <p>หากเกิน <b>500 km/s</b> สัญญาณอาจแกว่ง (QSB)</p>
+
+                <h3>3. TEC Map (Electron Content)</h3>
+                <ul>
+                    <li><b style="color:var(--accent-orange)">สีแดง/ส้ม:</b> MUF สูง (เล่น 10m-15m ได้)</li>
+                    <li><b style="color:var(--accent-blue)">สีน้ำเงิน:</b> MUF ต่ำ (เล่น 40m-80m)</li>
+                </ul>
                 <br>
                 <p style="text-align:center; color:#666; font-size:0.8em;">-- END OF BRIEFING --</p>
             </div>
@@ -281,7 +275,7 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V8.8 • Data: NOAA SWPC</div>
+    <div class="footer">IonosTek Monitor V8.9 • Data Sources: NOAA, Kyoto</div>
 
     <script>
         let lastValues = { wind: null, density: null, dst: null, bt: null };
@@ -290,4 +284,124 @@
         function openLightbox(src) {
             const modal = document.getElementById("lightboxModal");
             const img = document.getElementById("lightboxImg");
-            img.src = src.split('?')[0] + '?t
+            img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
+            modal.style.display = "block";
+        }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+
+        function updateTime() {
+            try {
+                const now = new Date();
+                const utcString = now.toUTCString().replace('GMT', 'UTC');
+                document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + utcString;
+            } catch(e){}
+        }
+
+        function getFreshUrl(url) { return url + '?t=' + new Date().getTime(); }
+
+        function updateUI(valId, cardId, value, type, trendId, arrowId) {
+            const valElem = document.getElementById(valId);
+            const cardElem = document.getElementById(cardId);
+            if (!valElem || !cardElem) return;
+
+            valElem.classList.remove('updated-flash');
+            void valElem.offsetWidth;
+            valElem.classList.add('updated-flash');
+            
+            const displayVal = isNaN(value) ? "--" : value;
+            valElem.innerText = displayVal;
+
+            let status = 'normal';
+            // Logic Colors
+            if (type === 'sfi') { if(value>150) status='good'; else if(value>100) status='normal'; else status='warn'; }
+            else if (type === 'ssn') { if(value>100) status='good'; else if(value>50) status='normal'; else status='warn'; }
+            else if (type === 'kp') { if(value>=5) status='alert'; else if(value>=4) status='warn'; else status='normal'; }
+            else if (type === 'dst') { if(value<-100) status='alert'; else if(value<-50) status='moderate'; else if(value<-20) status='warn'; }
+            else if (type === 'bz') { if(value<-5) status='alert'; else if(value<0) status='warn'; }
+            else if (type === 'wind') { if(value>600) status='alert'; else if(value>400) status='warn'; }
+            else if (type === 'density') { if(value>20) status='alert'; else if(value>10) status='warn'; }
+            else if (type === 'bt') { if(value>15) status='alert'; else if(value>10) status='warn'; }
+            
+            cardElem.className = 'stat-box';
+            cardElem.classList.add('status-'+status);
+
+            if (type === 'bz' && arrowId) {
+                const arr = document.getElementById(arrowId);
+                arr.innerHTML = value >= 0 ? '&#8593;' : '&#8595;';
+                arr.className = value >= 0 ? 'bz-arrow-n' : 'bz-arrow-s';
+            }
+            
+            if (trendId && lastValues[type] !== null && !isNaN(value)) {
+                const tr = document.getElementById(trendId);
+                const diff = value - lastValues[type];
+                if (Math.abs(diff) > 0.1) {
+                    tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
+                    if (type==='dst') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                    else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
+                }
+            }
+            if (type !== 'bz' && !isNaN(value)) lastValues[type] = value;
+        }
+
+        // --- Safe Data Fetching (One by one protection) ---
+        async function fetchData() {
+            // 1. Mag
+            try {
+                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
+                const data = await res.json();
+                const last = data[data.length - 1];
+                updateUI('val-bz', 'card-bz', parseFloat(last[data[0].indexOf('bz_gsm')]), 'bz', null, 'arr-bz');
+                updateUI('val-bt', 'card-bt', parseFloat(last[data[0].indexOf('bt')]), 'bt', 'trend-bt');
+            } catch(e){ console.log("Mag fail"); }
+
+            // 2. Plasma
+            try {
+                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json'));
+                const data = await res.json();
+                const last = data[data.length - 1];
+                updateUI('val-density', 'card-density', parseFloat(last[data[0].indexOf('density')]), 'density', 'trend-density');
+                updateUI('val-wind', 'card-wind', parseFloat(last[data[0].indexOf('speed')]), 'wind', 'trend-wind');
+            } catch(e){ console.log("Plasma fail"); }
+
+            // 3. Dst
+            try {
+                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
+                const data = await res.json();
+                updateUI('val-dst', 'card-dst', parseInt(data[data.length - 1][1]), 'dst', 'trend-dst');
+            } catch(e){ console.log("Dst fail"); }
+
+            // 4. SFI & SSN
+            try {
+                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
+                const data = await res.json();
+                if(data.length > 1) {
+                    const lastSfi = parseInt(data[data.length - 1][data[0].length - 1]);
+                    updateUI('val-sfi', 'card-sfi', lastSfi, 'sfi');
+                    let calcSSN = Math.round((lastSfi - 63.7) * 1.12);
+                    updateUI('val-ssn', 'card-ssn', calcSSN < 0 ? 0 : calcSSN, 'ssn');
+                }
+            } catch(e){ console.log("SFI fail"); }
+
+            // 5. Kp Index
+            try {
+                const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
+                const data = await res.json();
+                if (data.length > 1) updateUI('val-kp', 'card-kp', parseFloat(data[data.length - 1][1]), 'kp');
+            } catch(e){ console.log("Kp fail"); }
+        }
+
+        function refreshImages() {
+            const imgs = document.querySelectorAll('.card-body img');
+            imgs.forEach(img => { img.src = img.src.split('?')[0] + '?t=' + new Date().getTime(); });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTime();
+            fetchData();
+            setInterval(updateTime, 1000);
+            setInterval(fetchData, 60000);
+            setInterval(refreshImages, 300000);
+        });
+    </script>
+</body>
+</html>

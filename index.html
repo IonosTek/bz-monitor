@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V10.0</title>
+    <title>IonosTek Monitor V10.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V9.5 --- */
+        /* --- CSS Base: V10.0 --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -20,6 +20,7 @@
             --accent-purple: #d500f9;
         }
 
+        /* ป้องกันการเลือกข้อความ (Text Selection) เพื่อให้ Copy ยากขึ้น */
         body {
             font-family: 'Chakra Petch', sans-serif;
             background-color: var(--bg-color);
@@ -27,12 +28,14 @@
             margin: 0;
             padding: 20px;
             overflow-x: hidden;
+            user-select: none; /* ห้ามลากคลุมดำ */
+            -webkit-user-select: none;
         }
 
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #fff; background-color: var(--accent-red); 
+            color: #000; background-color: var(--accent-yellow); /* สีเหลืองบ่งบอก Security Alert */
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -172,7 +175,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.0</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.1</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -255,7 +258,7 @@
                     <h2>📡 OPERATOR GUIDE</h2>
                     <h3>★ Solar Activity</h3>
                     <ul>
-                        <li><b>X-Ray:</b> <span style="color:var(--accent-green)">A/B/C</span> ปกติ, <span style="color:var(--accent-red)">M/X</span> สัญญาณดับ (Blackout)</li>
+                        <li><b>X-Ray:</b> <span style="color:var(--accent-green)">A/B/C</span> ปกติ, <span style="color:var(--accent-red)">M/X</span> สัญญาณดับ</li>
                         <li><b>SFI:</b> >100 ดี, >150 เยี่ยม</li>
                         <li><b>SSN:</b> ยิ่งสูง ยิ่งดี</li>
                     </ul>
@@ -265,7 +268,7 @@
                         <li><b>Bz:</b> <span class="hl-green">บวก(+)</span> นิ่ง, <span class="hl-red">ลบ(-)</span> พายุเข้า</li>
                     </ul>
                     <h3>★ Solar Wind</h3>
-                    <p>ลม > 500 km/s สัญญาณอาจวูบวาบ (QSB)</p>
+                    <p>ลม > 500 km/s สัญญาณอาจแกว่ง (QSB)</p>
                 </div>
             </div>
         </div>
@@ -276,9 +279,20 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V10.0 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V10.1 • Data: NOAA, Kyoto</div>
 
     <script>
+        // --- SECURITY: Anti-Copy Script ---
+        document.addEventListener('contextmenu', event => event.preventDefault()); // ปิดคลิกขวา
+        
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false; // F12
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+            if(e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) return false; // Ctrl+S
+        }
+
+        // --- Main Logic ---
         function openGuide() { 
             const m = document.getElementById("guideModal");
             m.style.display = "flex"; 
@@ -400,7 +414,6 @@
                     renderStat('val-sfi', 'card-sfi', currSfi, 'sfi', 'trend-sfi', prevSfi);
                 }
 
-                // SSN Logic
                 let finalSSN = 0;
                 let prevSSN_calc = Math.round((prevSfi - 63.7) * 1.12);
                 if(prevSSN_calc < 0) prevSSN_calc = 0;
@@ -421,17 +434,13 @@
                 renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn', 'trend-ssn', prevSSN_calc);
             } catch(e){}
 
-            // 5. X-Ray Flux (Safe Fetch)
+            // 5. X-Ray Flux (Safe)
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-1-minute.json'));
                 const data = await res.json();
                 if (data.length > 0) {
                     const last = data[data.length-1];
-                    // Index 4 usually is flux long (0.1-0.8nm)
-                    // Or search for 'flux' column if headers available, but fixed index 4 is common in this JSON product
-                    // Actually, let's allow fail-safe
                     let flux = parseFloat(last[4]); 
-                    
                     let xClass = "A";
                     if (flux < 1e-7) xClass = "A";
                     else if (flux < 1e-6) xClass = "B";
@@ -439,14 +448,7 @@
                     else if (flux < 1e-4) xClass = "M";
                     else xClass = "X";
                     
-                    // Add decimal (e.g. M1.2)
                     let base = 1e-7;
-                    if (xClass == 'B') base = 1e-7; // Wait, NOAA scale:
-                    // A: < 10-7
-                    // B: 10-7 to 10-6
-                    // C: 10-6 to 10-5
-                    // M: 10-5 to 10-4
-                    // X: > 10-4
                     if (xClass == 'B') base = 1e-7;
                     if (xClass == 'C') base = 1e-6;
                     if (xClass == 'M') base = 1e-5;
@@ -455,10 +457,7 @@
                     let sub = (flux / base).toFixed(1);
                     renderStat('val-xray', 'card-xray', xClass + sub, 'xray');
                 }
-            } catch(e){ 
-                // If X-Ray fails, just show --
-                renderStat('val-xray', 'card-xray', '--', 'xray'); 
-            }
+            } catch(e){ renderStat('val-xray', 'card-xray', '--', 'xray'); }
         }
 
         function refreshImages() {

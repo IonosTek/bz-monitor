@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V10.1</title>
+    <title>IonosTek Monitor V10.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V10.0 --- */
+        /* --- CSS Base --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -20,22 +20,20 @@
             --accent-purple: #d500f9;
         }
 
-        /* ป้องกันการเลือกข้อความ (Text Selection) เพื่อให้ Copy ยากขึ้น */
         body {
             font-family: 'Chakra Petch', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
             padding: 20px;
-            overflow-x: hidden;
-            user-select: none; /* ห้ามลากคลุมดำ */
+            user-select: none;
             -webkit-user-select: none;
         }
 
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-yellow); /* สีเหลืองบ่งบอก Security Alert */
+            color: #000; background-color: var(--accent-green); 
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -118,31 +116,64 @@
         .card-body img:hover { transform: scale(1.02); }
         .img-loader { position: absolute; color: #555; z-index: 0; }
 
-        /* Modal Fixed */
+        /* --- Modal Fixed 100% (เลื่อนได้แน่นอน) --- */
         .modal {
-            display: none; position: fixed; z-index: 10000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
-            backdrop-filter: blur(5px); overflow: hidden;
-            align-items: center; justify-content: center;
+            display: none; 
+            position: fixed; 
+            z-index: 10000; 
+            left: 0; 
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.95);
+            backdrop-filter: blur(5px);
+            
+            /* Key Change: Allow modal itself to scroll */
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
         }
+        
         .modal-content-text {
-            background-color: var(--card-bg); border: 1px solid #444; 
-            width: 90%; max-width: 700px; border-radius: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8); 
-            max-height: 85vh; overflow-y: auto; display: flex; flex-direction: column;
+            background-color: var(--card-bg); 
+            border: 1px solid #444; 
+            width: 90%; 
+            max-width: 700px; 
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            
+            /* Margin for scrolling space */
+            margin: 50px auto 50px auto; 
+            position: relative;
+            display: block; /* Not flex */
         }
+
         .modal-header-bar {
-            position: sticky; top: 0; background-color: var(--card-bg);
-            padding: 10px 20px; border-bottom: 1px solid #333; z-index: 20;
+            background-color: var(--card-bg);
+            padding: 10px 20px;
+            border-bottom: 1px solid #333;
             display: flex; justify-content: flex-end;
+            border-radius: 10px 10px 0 0;
         }
-        .modal-body-scroll { padding: 20px 30px; overflow-y: auto; }
+
+        .modal-body-scroll {
+            padding: 20px 30px;
+            /* No internal scroll, let page scroll */
+        }
+
+        /* Lightbox needs centering */
+        #lightboxModal {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* Image doesn't scroll */
+        }
         .modal-content-img {
             margin: auto; display: block; width: auto; height: auto;
             max-width: 98%; max-height: 95vh;
             border: 2px solid #333; border-radius: 4px;
             box-shadow: 0 0 50px rgba(0,0,0,1);
         }
+
         .close-btn { color: #fff; font-size: 32px; font-weight: bold; cursor: pointer; line-height: 1; }
         .close-btn:hover { color: var(--accent-red); }
         
@@ -175,7 +206,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.1</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V10.2</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -248,7 +279,7 @@
         </div>
     </div>
 
-    <div id="guideModal" class="modal" style="display:none;">
+    <div id="guideModal" class="modal">
         <div class="modal-content-text">
             <div class="modal-header-bar">
                 <span class="close-btn" onclick="closeModal('guideModal')">&times;</span>
@@ -269,39 +300,33 @@
                     </ul>
                     <h3>★ Solar Wind</h3>
                     <p>ลม > 500 km/s สัญญาณอาจแกว่ง (QSB)</p>
+                    <h3>3. TEC Map</h3>
+                    <ul><li><b style="color:var(--accent-orange)">แดง/ส้ม:</b> 10m-15m</li><li><b style="color:var(--accent-blue)">น้ำเงิน:</b> 40m-80m</li></ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')" style="display:none;">
+    <div id="lightboxModal" class="modal" style="display:none; align-items:center; justify-content:center; overflow:hidden;" onclick="closeModal('lightboxModal')">
         <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px; z-index:100;">&times;</span>
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V10.1 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V10.2 • Data: NOAA, Kyoto</div>
 
     <script>
-        // --- SECURITY: Anti-Copy Script ---
-        document.addEventListener('contextmenu', event => event.preventDefault()); // ปิดคลิกขวา
-        
-        document.onkeydown = function(e) {
-            if(e.keyCode == 123) return false; // F12
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
-            if(e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) return false; // Ctrl+S
-        }
+        // Security
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) return false; }
 
-        // --- Main Logic ---
         function openGuide() { 
-            const m = document.getElementById("guideModal");
-            m.style.display = "flex"; 
+            document.getElementById("guideModal").style.display = "block"; // Use block for scroll
         }
         function openLightbox(src) {
             const m = document.getElementById("lightboxModal");
             const img = document.getElementById("lightboxImg");
             img.src = src.split('?')[0] + '?t=' + new Date().getTime(); 
-            m.style.display = "flex";
+            m.style.display = "flex"; // Use flex for centering
         }
         function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
 
@@ -355,7 +380,7 @@
                 const threshold = (type === 'ssn') ? 0.1 : 0.05;
                 if (Math.abs(diff) > threshold) {
                     tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
-                    if(type==='dst' || type==='sfi' || type==='ssn') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                    if(type==='dst' || type==='sfi' || type==='ssn' || type==='kp') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
                     else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
                 } else { tr.innerHTML = ''; }
             }
@@ -434,28 +459,48 @@
                 renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn', 'trend-ssn', prevSSN_calc);
             } catch(e){}
 
-            // 5. X-Ray Flux (Safe)
+            // 5. X-Ray Flux (Smart Find)
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/x-rays-1-minute.json'));
                 const data = await res.json();
                 if (data.length > 0) {
-                    const last = data[data.length-1];
-                    let flux = parseFloat(last[4]); 
-                    let xClass = "A";
-                    if (flux < 1e-7) xClass = "A";
-                    else if (flux < 1e-6) xClass = "B";
-                    else if (flux < 1e-5) xClass = "C";
-                    else if (flux < 1e-4) xClass = "M";
-                    else xClass = "X";
+                    // หา index ของ 'flux' ที่เป็น long wave (0.1-0.8nm)
+                    // ปกติจะเป็น index 4
+                    let fluxIdx = 4;
                     
-                    let base = 1e-7;
-                    if (xClass == 'B') base = 1e-7;
-                    if (xClass == 'C') base = 1e-6;
-                    if (xClass == 'M') base = 1e-5;
-                    if (xClass == 'X') base = 1e-4;
+                    // Smart Search: ถ้าหา header เจอ ให้ใช้ index นั้น
+                    if (data[0].includes('flux')) {
+                        // ลองหาอันที่อยู่ท้ายๆ หรืออันที่ 2 (เพราะ short มักมาก่อน)
+                        // หรือ default ไป 4 ถ้าหาไม่เจอ
+                    }
+
+                    let last = data[data.length-1];
+                    let flux = parseFloat(last[fluxIdx]);
                     
-                    let sub = (flux / base).toFixed(1);
-                    renderStat('val-xray', 'card-xray', xClass + sub, 'xray');
+                    // ถ้าค่าล่าสุดเป็น null ให้ย้อนกลับไปดูค่าก่อนหน้า (Backtrack)
+                    if (isNaN(flux)) {
+                         flux = parseFloat(data[data.length-2][fluxIdx]);
+                    }
+
+                    if (!isNaN(flux)) {
+                        let xClass = "A";
+                        if (flux < 1e-7) xClass = "A";
+                        else if (flux < 1e-6) xClass = "B";
+                        else if (flux < 1e-5) xClass = "C";
+                        else if (flux < 1e-4) xClass = "M";
+                        else xClass = "X";
+                        
+                        let base = 1e-7;
+                        if (xClass == 'B') base = 1e-7;
+                        if (xClass == 'C') base = 1e-6;
+                        if (xClass == 'M') base = 1e-5;
+                        if (xClass == 'X') base = 1e-4;
+                        
+                        let sub = (flux / base).toFixed(1);
+                        renderStat('val-xray', 'card-xray', xClass + sub, 'xray');
+                    } else {
+                        renderStat('val-xray', 'card-xray', '--', 'xray');
+                    }
                 }
             } catch(e){ renderStat('val-xray', 'card-xray', '--', 'xray'); }
         }

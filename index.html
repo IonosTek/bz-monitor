@@ -3,156 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V24.0 (Diagnostic)</title>
+    <title>IonosTek Monitor V25.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #111; color: #fff; font-family: monospace; padding: 20px; }
-        h1 { text-align: center; color: #00e676; }
-        
-        /* Layout */
-        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-        .box { background: #222; border: 1px solid #444; padding: 15px; text-align: center; border-radius: 5px; }
-        .label { color: #888; font-size: 0.8em; }
-        .value { font-size: 1.5em; font-weight: bold; margin-top: 5px; }
-        
-        /* Debug Box */
-        #debug-log { 
-            margin-top: 20px; padding: 10px; background: #000; 
-            border: 1px solid #ff1744; color: #ff1744; font-size: 0.8em; 
-            height: 150px; overflow-y: scroll; white-space: pre-wrap;
+        /* --- V25 Theme --- */
+        :root {
+            --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
+            --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff;
         }
-        .log-ok { color: #00e676; }
+        body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
+        
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .header h1 { margin: 0; font-weight: 700; letter-spacing: 1px; }
+        .version { background: var(--blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; }
+        
+        /* Grid */
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .stat-box { background: var(--card); padding: 10px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .stat-value { font-size: 1.6em; font-weight: 700; margin: 5px 0; }
+        .stat-label { font-size: 0.7em; color: var(--sub); text-transform: uppercase; }
+        
+        /* Colors */
+        .c-norm { border-top-color: var(--green); color: var(--green); }
+        .c-warn { border-top-color: var(--yellow); color: var(--yellow); }
+        .c-alert { border-top-color: var(--red); color: var(--red); }
+
+        /* Log Console (Keep for debugging) */
+        #console {
+            background: #000; border: 1px solid #333; color: #ccc; 
+            font-family: monospace; font-size: 0.75em; padding: 10px; 
+            height: 120px; overflow-y: auto; margin-top: 30px;
+        }
+        .log-ok { color: var(--green); } .log-err { color: var(--red); }
     </style>
 </head>
 <body>
 
-    <h1>IONOSTEK V24.0 (DIAGNOSTIC)</h1>
-
-    <div class="container">
-        <div class="box"><div class="label">Solar Flux (SFI)</div><div class="value" id="v-sfi">--</div></div>
-        <div class="box"><div class="label">Sunspot (SSN)</div><div class="value" id="v-ssn">--</div></div>
-        <div class="box"><div class="label">Solar Wind</div><div class="value" id="v-wind">--</div></div>
-        <div class="box"><div class="label">Bz (Polarity)</div><div class="value" id="v-bz">--</div></div>
-        <div class="box"><div class="label">Kp Index</div><div class="value" id="v-kp">--</div></div>
-        <div class="box"><div class="label">X-Ray</div><div class="value" id="v-xray">--</div></div>
+    <div class="header">
+        <h1>IONOSTEK <span class="version">V25.0</span></h1>
+        <div style="font-size:0.8em; color:#888; margin-top:5px;">Hybrid Gateway System</div>
     </div>
 
-    <h3>SYSTEM LOG (ส่งข้อความในนี้มาให้ผมถ้ายังไม่ทำงาน)</h3>
-    <div id="debug-log">System Started... Waiting for data...</div>
+    <div class="stats-container">
+        <div class="stat-box" id="box-sfi"><div class="stat-label">SFI</div><div class="stat-value" id="v-sfi">--</div></div>
+        <div class="stat-box" id="box-ssn"><div class="stat-label">SSN</div><div class="stat-value" id="v-ssn">--</div></div>
+        <div class="stat-box" id="box-kp"><div class="stat-label">Kp</div><div class="stat-value" id="v-kp">--</div></div>
+        <div class="stat-box" id="box-xray"><div class="stat-label">X-Ray</div><div class="stat-value" id="v-xray">--</div></div>
+        <div class="stat-box" id="box-wind"><div class="stat-label">Wind</div><div class="stat-value" id="v-wind">--</div></div>
+        <div class="stat-box" id="box-den"><div class="stat-label">Density</div><div class="stat-value" id="v-den">--</div></div>
+        <div class="stat-box" id="box-bz"><div class="stat-label">Bz</div><div class="stat-value" id="v-bz">--</div></div>
+        <div class="stat-box" id="box-bt"><div class="stat-label">Bt</div><div class="stat-value" id="v-bt">--</div></div>
+    </div>
+
+    <div id="console">System Initializing...</div>
 
     <script>
-        function log(msg, type='err') {
-            const d = document.getElementById('debug-log');
+        function log(msg, type='info') {
+            const c = document.getElementById('console');
             const time = new Date().toLocaleTimeString();
-            const color = type === 'ok' ? '#00e676' : '#ff1744';
-            d.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
-            d.scrollTop = d.scrollHeight;
+            const color = type=='ok'?'var(--green)':(type=='err'?'var(--red)':'#ccc');
+            c.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
+            c.scrollTop = c.scrollHeight;
         }
 
-        function update(id, val) {
+        function update(id, val, status='c-norm') {
             const el = document.getElementById('v-'+id);
-            if(el) {
-                el.innerText = val;
-                el.style.color = '#00e676';
-            }
+            const box = document.getElementById('box-'+id);
+            if(el) el.innerText = val;
+            if(box) box.className = 'stat-box ' + status;
         }
 
-        // --- Core Fetcher ---
-        async function fetchData() {
-            log("Starting Fetch Sequence...", "ok");
+        // --- 1. GATEWAY A: AllOrigins (Works for Text & Small JSON) ---
+        async function fetchGateA() {
+            const ts = '&t=' + Date.now();
+            const proxy = 'https://api.allorigins.win/raw?url=';
 
-            const proxy = "https://api.allorigins.win/get?url=";
-            const ts = "&t=" + Date.now();
-
-            // 1. Test Solar Wind (JSON)
+            // SFI & SSN (Text) - Proven Working
             try {
-                const url = "https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json";
-                log("Fetching Mag...");
-                const res = await fetch(proxy + encodeURIComponent(url) + ts);
-                const data = await res.json(); // AllOrigins returns JSON wrapper
-                
-                if (data.contents) {
-                    const innerData = JSON.parse(data.contents); // Parse inner NOAA JSON
-                    const last = innerData[innerData.length - 1];
-                    // Index 1 = Bz, Index 2 = Bt (usually)
-                    update('bz', last[1] + " nT");
-                    log("Mag Data OK", "ok");
-                } else {
-                    throw new Error("No contents in proxy response");
-                }
-            } catch(e) {
-                log("Mag Error: " + e.message);
-            }
-
-            // 2. Test Plasma (JSON)
-            try {
-                const url = "https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json";
-                log("Fetching Plasma...");
-                const res = await fetch(proxy + encodeURIComponent(url) + ts);
-                const data = await res.json();
-                const innerData = JSON.parse(data.contents);
-                const last = innerData[innerData.length - 1];
-                // Index 1 = Density, Index 2 = Speed
-                update('wind', last[2] + " km/s");
-                log("Plasma Data OK", "ok");
-            } catch(e) {
-                log("Plasma Error: " + e.message);
-            }
-
-            // 3. Test SFI (Text File)
-            try {
-                const url = "https://services.swpc.noaa.gov/text/daily-solar-indices.txt";
-                log("Fetching Text SFI...");
-                const res = await fetch(proxy + encodeURIComponent(url) + ts);
-                const data = await res.json();
-                const text = data.contents;
-                const lines = text.trim().split('\n');
-                
-                // Loop from bottom to find data
-                let found = false;
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/text/daily-solar-indices.txt') + ts);
+                const txt = await r.text();
+                const lines = txt.trim().split('\n');
                 for(let i=lines.length-1; i>=0; i--) {
-                    if(lines[i].match(/^\d{4}/)) { // Starts with year
-                        const parts = lines[i].trim().split(/\s+/);
-                        update('sfi', parts[3]);
-                        update('ssn', parts[4]);
-                        found = true;
-                        log("SFI/SSN OK", "ok");
+                    if(lines[i].match(/^\d{4}/)) {
+                        const cols = lines[i].trim().split(/\s+/);
+                        let sfi = parseInt(cols[3]);
+                        update('sfi', sfi, sfi>100?'c-norm':'c-warn');
+                        update('ssn', cols[4], 'c-norm');
+                        log('SFI/SSN Updated (Gate A)', 'ok');
                         break;
                     }
                 }
-                if(!found) log("SFI pattern not found");
-            } catch(e) {
-                log("SFI Error: " + e.message);
-            }
-            
-            // 4. Test Kp (JSON)
-             try {
-                const url = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json";
-                const res = await fetch(proxy + encodeURIComponent(url) + ts);
-                const data = await res.json();
-                const inner = JSON.parse(data.contents);
-                const last = inner[inner.length-1];
-                update('kp', last[1]);
-                log("Kp Data OK", "ok");
-             } catch(e) { log("Kp Error: " + e.message); }
+            } catch(e){ log('SFI Error: '+e.message, 'err'); }
 
-            // 5. X-Ray (6-hour JSON)
+            // Kp (Small JSON) - Proven Working
             try {
-                const url = "https://services.swpc.noaa.gov/products/x-rays-6-hour.json";
-                const res = await fetch(proxy + encodeURIComponent(url) + ts);
-                const data = await res.json();
-                const inner = JSON.parse(data.contents);
-                // Find valid flux
-                let flux = "N/A";
-                for(let i=inner.length-1; i>0; i--) {
-                    if(inner[i][3]) { flux = inner[i][3]; break; }
-                }
-                update('xray', flux);
-                log("X-Ray OK", "ok");
-            } catch(e) { log("X-Ray Error: " + e.message); }
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json') + ts);
+                const d = await r.json();
+                let kp = d[d.length-1][1];
+                update('kp', kp, kp>=4?'c-warn':'c-norm');
+                log('Kp Updated (Gate A)', 'ok');
+            } catch(e){ log('Kp Error: '+e.message, 'err'); }
         }
 
-        // Run once on load
-        fetchData();
+        // --- 2. GATEWAY B: CorsProxy.io (Works for Large JSON/Complex Headers) ---
+        async function fetchGateB() {
+            const ts = '?t=' + Date.now();
+            const proxy = 'https://corsproxy.io/?'; // Direct prepend
+
+            // Mag (Bz, Bt)
+            try {
+                const url = 'https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json';
+                const r = await fetch(proxy + encodeURIComponent(url + ts));
+                const d = await r.json();
+                const l = d[d.length-1];
+                let bz = Math.round(l[1]);
+                update('bz', bz, bz<0?'c-warn':'c-norm');
+                update('bt', Math.round(l[2]), 'c-norm');
+                log('Mag Updated (Gate B)', 'ok');
+            } catch(e){ log('Mag Error (Gate B): '+e.message, 'err'); }
+
+            // Plasma (Wind, Den)
+            try {
+                const url = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json';
+                const r = await fetch(proxy + encodeURIComponent(url + ts));
+                const d = await r.json();
+                const l = d[d.length-1];
+                let spd = Math.round(l[2]);
+                update('wind', spd, spd>500?'c-warn':'c-norm');
+                update('den', Math.round(l[1]), 'c-norm');
+                log('Plasma Updated (Gate B)', 'ok');
+            } catch(e){ log('Plasma Error (Gate B): '+e.message, 'err'); }
+
+            // X-Ray (Using 6-hour JSON via Gate B)
+            try {
+                const url = 'https://services.swpc.noaa.gov/products/x-rays-6-hour.json';
+                const r = await fetch(proxy + encodeURIComponent(url + ts));
+                const d = await r.json();
+                let flux = null;
+                for(let i=d.length-1; i>0; i--) {
+                    if(d[i][3] && !isNaN(parseFloat(d[i][3]))) { flux = parseFloat(d[i][3]); break; }
+                }
+                if(flux) {
+                    let cls = flux<1e-5?'C':(flux<1e-4?'M':'X');
+                    if(flux<1e-6) cls='B'; if(flux<1e-7) cls='A';
+                    update('xray', cls, (cls=='M'||cls=='X')?'c-alert':'c-norm');
+                    log('X-Ray Updated (Gate B)', 'ok');
+                }
+            } catch(e){ log('X-Ray Error (Gate B): '+e.message, 'err'); }
+        }
+
+        // Execute
+        log('Starting Hybrid Fetch...');
+        fetchGateA(); // Run Gate A
+        setTimeout(fetchGateB, 1000); // Run Gate B with slight delay
+        
+        // Refresh Loop
+        setInterval(() => {
+            log('Refreshing...');
+            fetchGateA();
+            setTimeout(fetchGateB, 1000);
+        }, 60000);
     </script>
 </body>
 </html>

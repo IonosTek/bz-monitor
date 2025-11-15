@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V60.0</title>
+    <title>IonosTek Monitor V63.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V59.0 --- */
+        /* --- CSS Base: V63.0 (Logic) + V63.1 (Image Fix) --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -15,82 +15,71 @@
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--accent-purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
+        .version { background: var(--purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
         #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 8px; letter-spacing: 0.5px; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
+        /* Stats Grid (8 Items) */
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .box:hover { transform: translateY(-3px); }
         
-        /* --- ENHANCED READABILITY (V60.0) --- */
-        .val { 
-            font-size: 2.0em; /* Larger Size */
-            font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; 
-        }
-        .lbl { 
-            font-size: 0.8em; /* Bolder Label */
-            font-weight: 600; 
-            color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; 
-        }
-        .unit { 
-            font-size: 0.7em; /* Bolder Unit */
-            font-weight: 500; 
-            color: #666; display: block; margin-top: -5px; 
-        }
+        /* Font Visibility Enhancement (V60.0) */
+        .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .lbl { font-size: 0.8em; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .unit { font-size: 0.7em; font-weight: 500; color: #666; display: block; margin-top: -5px; }
         
         @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
-
-        .bz-state-arrow {
-            font-size: 1.2em;
-            margin-right: 5px;
-            font-weight: 900;
-        }
+        .bz-state-arrow { font-size: 1.2em; margin-right: 5px; font-weight: 900; }
 
         /* Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
-        .card { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
-        .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; }
-        .c-body { background: #000; height: 280px; display: flex; align-items: center; justify-content: center; }
-        .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; }
-        .m-content { background: var(--card); width: 90%; max-width: 700px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
-        .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
+        .card { overflow: hidden; background: var(--card); border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
         
-        #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
-        #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
+        /* --- CRITICAL IMAGE FIT FIXES (V63.1) --- */
+        .c-body { 
+            background: #000; 
+            height: 280px; /* Fixed height for image container */
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0; 
+            overflow: hidden; /* **ENSURE anything overflowing is clipped** */
+        }
+        .c-body img { 
+            width: 100%; 
+            height: 100%; /* **Make image take full height of its container** */
+            object-fit: contain; /* **Shrink image to fit while maintaining aspect ratio** */
+            cursor: pointer; 
+            /* No opacity animation needed, just load directly */
+        }
 
+        /* Status Colors */
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
+        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
-        
-        /* Guide Styles */
-        .guide-sec { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .guide-h { color: var(--accent-blue); font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
-        .guide-p { color: #ccc; font-size: 0.9em; line-height: 1.6; }
-        .hl-g { color: var(--green); } .hl-r { color: var(--red); } .hl-y { color: var(--yellow); }
-
-        @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } .box { padding: 10px 2px; } .val { font-size: 1.5em; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V60.0</span></h1>
-        <div id="status"><span class="blink">●</span> System Active</div>
-        <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V63.1</span></h1>
+        <div id="status"><span class="blink">●</span> System Active (Image Fit Stability)</div>
+        <button onclick="document.getElementById('guideModal').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
     <div class="stats">
         <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div><span class="unit">F10.7cm</span></div>
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
+        
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-bz"><div class="lbl">Bz</div>
@@ -101,41 +90,41 @@
             <span class="unit">nT</span>
         </div>
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
+        
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
     </div>
 
     <div class="grid">
-        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
-        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onload="this.style.opacity=1" style="opacity:0" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
+        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
     </div>
 
-    <div id="guide" class="modal">
+    <div id="guideModal" class="modal">
         <div class="m-content">
-            <span class="close" onclick="document.getElementById('guide').style.display='none'">&times;</span>
+            <span class="close" onclick="document.getElementById('guideModal').style.display='none'">&times;</span>
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             
             <div class="guide-sec">
                 <div class="guide-h">★ Understanding Bz (The Switch)</div>
                 <div class="guide-p">
-                    <p><span class="hl-g">Bz Positive (+) North: "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.</p>
-                    <p><span class="hl-r">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!</p>
+                    <p><span style="color:var(--green)">Bz Positive (+): "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.</p>
+                    <p><span style="color:var(--red)">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!</p>
                 </div>
             </div>
             <div class="guide-sec">
                 <div class="guide-h">★ Reading Values</div>
                 <div class="guide-p">
-                    <b class="hl-g">Bz > 0 nT:</b> Stable | <b class="hl-y">0 to -5 nT:</b> Unsettled | <b class="hl-r">< -5 nT:</b> Storm<br>
-                    <b class="hl-g">Dst > -20:</b> Quiet | <b class="hl-y">-20 to -50:</b> Minor | <b class="hl-r">< -50:</b> Storm<br>
+                    <b style="color:var(--green)">Dst > -20 nT:</b> Quiet | <b style="color:var(--yellow)">-20 to -50 nT:</b> Minor | <b style="color:var(--red)">< -50 nT:</b> Storm<br>
                     <b>Kp:</b> 0-3 Quiet, 5+ Storm | <b>Wind:</b> >500 Unstable
                 </div>
             </div>
         </div>
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V60.0 • Visibility Enhanced</div>
+    <div class="footer">IonosTek Monitor V63.1 • Image Fit Stability</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -153,31 +142,44 @@
             
             // 1. Status Color Logic
             let s = 'c-norm';
-            if(id=='dst') { if(val < -50) s = 'c-alert'; else if(val < -20) s = 'c-warn'; else s = 'c-norm'; }
-            else if(id=='kp') { if(val >= 7) s = 'c-alert'; else if(val == 6) s = 'c-mod'; else if(val >= 4) s = 'c-warn'; else s = 'c-norm'; }
+            // Dst Logic
+            if(id=='dst') {
+                if(val < -100) s = 'c-alert';
+                else if(val < -50) s = 'c-mod';
+                else if(val < -20) s = 'c-warn';
+                else s = 'c-norm';
+            }
+            // Kp Logic (G-Scale Mapping)
+            else if(id=='kp') {
+                if(val >= 7) s = 'c-alert'; 
+                else if(val == 6) s = 'c-mod';
+                else if(val >= 4) s = 'c-warn';
+                else s = 'c-norm';
+            }
+            // Bz Logic
             else if(id=='bz') {
                 if(val < -5) s = 'c-alert';
                 else if(val < 0) s = 'c-warn';
                 else s = 'c-norm';
                 
-                // RENDER Bz STATE ARROW
                 const stateEl = document.getElementById('bz-state');
                 if (stateEl) {
                     if (val >= 0) { stateEl.innerHTML = '&#8593;'; stateEl.style.color = 'var(--green)'; } 
                     else { stateEl.innerHTML = '&#8595;'; stateEl.style.color = 'var(--red)'; }
                 }
             }
-            else if(id=='sfi') s = val>100?'c-norm':'c-warn';
-            else if(id=='wind') s = val>500?'c-warn':(val>700?'c-alert':'c-norm');
+            // SFI, Wind (General)
+            else if(id=='sfi') s = val>150?'c-good':(val>100?'c-norm':'c-warn');
+            else if(id=='wind') s = val>700?'c-alert':(val>500?'c-warn':'c-norm');
 
             box.className = 'box '+s;
 
             // 2. Arrow Logic
             if(diff !== 0 && !isNaN(diff)) {
-                let c = diff>0 ? 'var(--red)' : 'var(--green)';
-                if(['sfi','ssn','dst','bz'].includes(id)) c = diff > 0 ? 'var(--green)' : 'var(--red)';
-                else c = diff > 0 ? 'var(--red)' : 'var(--green)'; 
-                el.innerHTML += ` <span class="trend" style="color:${c}">${diff>0?'▲':'▼'}</span>`;
+                let arrColor = 'var(--red)'; 
+                if(['sfi','ssn','dst','bz'].includes(id)) arrColor = diff > 0 ? 'var(--green)' : 'var(--red)';
+                else arrColor = diff > 0 ? 'var(--red)' : 'var(--green)'; 
+                el.innerHTML += ` <span class="trend" style="color:${arrColor}">${diff>0?'▲':'▼'}</span>`;
             }
         }
 
@@ -202,7 +204,7 @@
             // Plasma
             const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
             if(plas && plas.length > 2) {
-                const l = plas[plas.length-1], p = plas[plas.length-2];
+                const l = plas[plas.length-1], p = plas[mag.length-2]; // Fixed: changed plas.length-2 to mag.length-2
                 set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
                 set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
             }
@@ -239,10 +241,10 @@
                 }
                 if(curr) {
                     let sfiVal = parseInt(curr[3]), prevSfi = prev ? parseInt(prev[3]) : sfiVal;
-                    set('sfi', sfiVal, sfiVal>100?'c-norm':'c-warn', sfiVal-prevSfi);
+                    set('sfi', sfiVal, sfiVal-prevSfi);
                     
                     let ssnVal = parseInt(curr[4]), prevSsn = prev ? parseInt(prev[4]) : ssnVal;
-                    set('ssn', ssnVal, 'c-norm', ssnVal-prevSsn);
+                    set('ssn', ssnVal, ssnVal-prevSsn);
                 }
             }
         }

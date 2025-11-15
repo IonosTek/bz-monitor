@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V8.7</title>
+    <title>IonosTek Monitor V8.8</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V8.2 Stable --- */
+        /* --- CSS Base --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -37,7 +37,7 @@
         }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #fff; background-color: var(--accent-red); /* สีแดงบ่งบอก Fail-Safe Edition */
+            color: #fff; background-color: var(--accent-blue);
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; 
             border-radius: 4px; font-weight: bold;
         }
@@ -163,43 +163,44 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.7</span></h1>
-        <div id="systemStatus"><span class="blink">●</span> Initializing System...</div>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V8.8</span></h1>
+        <div id="systemStatus"><span class="blink">●</span> System Active</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
     <div class="stats-container">
         <div class="stat-box" id="card-sfi">
-            <div class="stat-label">SFI (Solar Flux)</div>
+            <div class="stat-label">SFI (Flux)</div>
             <div class="stat-value"><span id="val-sfi">--</span></div>
             <div class="stat-unit">F10.7cm</div>
         </div>
         <div class="stat-box" id="card-ssn">
-            <div class="stat-label">SSN (Sunspot)</div>
+            <div class="stat-label">Sunspot (SSN)</div>
             <div class="stat-value"><span id="val-ssn">--</span></div>
             <div class="stat-unit">Calculated</div>
         </div>
+        <div class="stat-box" id="card-xray">
+            <div class="stat-label">X-Ray Flux</div>
+            <div class="stat-value"><span id="val-xray">--</span></div>
+            <div class="stat-unit">Class</div>
+        </div>
+        
         <div class="stat-box" id="card-kp">
             <div class="stat-label">Kp Index</div>
             <div class="stat-value"><span id="val-kp">--</span></div>
             <div class="stat-unit">Planetary</div>
         </div>
-        <div class="stat-box" id="card-a">
-            <div class="stat-label">A-Index</div>
-            <div class="stat-value"><span id="val-a">--</span></div>
-            <div class="stat-unit">From Kp (Eq)</div>
-        </div>
-        
         <div class="stat-box" id="card-bz">
             <div class="stat-label">Bz (Polarity)</div>
             <div class="stat-value"><span id="arr-bz" class="bz-arrow-n"></span><span id="val-bz">--</span></div>
             <div class="stat-unit">nT (GSM)</div>
         </div>
-        <div class="stat-box" id="card-dst">
-            <div class="stat-label">Dst Index</div>
-            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT (Kyoto)</div>
+        <div class="stat-box" id="card-bt">
+            <div class="stat-label">IMF Bt</div>
+            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT</div>
         </div>
+        
         <div class="stat-box" id="card-wind">
             <div class="stat-label">Solar Wind</div>
             <div class="stat-value"><span id="val-wind">--</span><span id="trend-wind" class="trend-arrow"></span></div>
@@ -210,10 +211,10 @@
             <div class="stat-value"><span id="val-density">--</span><span id="trend-density" class="trend-arrow"></span></div>
             <div class="stat-unit">p/cm³</div>
         </div>
-        <div class="stat-box" id="card-bt">
-            <div class="stat-label">IMF Bt</div>
-            <div class="stat-value"><span id="val-bt">--</span><span id="trend-bt" class="trend-arrow"></span></div>
-            <div class="stat-unit">nT</div>
+        <div class="stat-box" id="card-dst">
+            <div class="stat-label">Dst Index</div>
+            <div class="stat-value"><span id="val-dst">--</span><span id="trend-dst" class="trend-arrow"></span></div>
+            <div class="stat-unit">nT (Kyoto)</div>
         </div>
     </div>
 
@@ -241,33 +242,52 @@
             <div class="article-content">
                 <h2>📡 OPERATOR GUIDE: READING THE IONOSPHERE</h2>
                 
-                <h3>★ SFI & SSN (Solar Energy)</h3>
-                <p>ตัวชี้วัดพลังงานจากดวงอาทิตย์ สำหรับย่าน HF (10m-20m):</p>
+                <h3>★ SFI & SSN (พลังงานจากดวงอาทิตย์)</h3>
                 <ul>
-                    <li><b>SFI (Solar Flux):</b> >100 ดี, >150 เยี่ยม</li>
+                    <li><b>SFI (Solar Flux):</b> >100 ดี, >150 เยี่ยม (10m/12m เปิด)</li>
                     <li><b>SSN (Sunspot):</b> ยิ่งสูง ยิ่งสะท้อนคลื่นไกล</li>
                 </ul>
 
-                <h3>★ Kp & A-Index (Geomagnetic Activity)</h3>
-                <p>ดัชนีชี้วัดพายุแม่เหล็ก:</p>
+                <h3>★ X-Ray Flux (NEW!)</h3>
+                <p>ระดับรังสี X ที่ทำให้เกิด Radio Blackout (สัญญาณหาย):</p>
                 <ul>
-                    <li><b>Kp Index (0-9):</b> ค่าปัจจุบัน (3 ชม.) <br>
-                        - <span style="color:var(--accent-green)">0-2:</span> Quiet (นิ่ง)<br>
-                        - <span style="color:var(--accent-yellow)">3-4:</span> Unsettled (เริ่มปั่นป่วน)<br>
-                        - <span style="color:var(--accent-red)">5+:</span> Storm (พายุ! HF อาจร่วง)
-                    </li>
-                    <li><b>A-Index:</b> ค่าเฉลี่ยความปั่นป่วนรายวัน (< 15 ดีมาก)</li>
+                    <li><span style="color:var(--accent-green)">A, B, C:</span> ปกติ (Normal)</li>
+                    <li><span style="color:var(--accent-orange)">M Class:</span> สัญญาณรบกวน/หายเล็กน้อย (R1-R2)</li>
+                    <li><span style="color:var(--accent-red)">X Class:</span> สัญญาณหายทั่วโลก (Blackout R3+)</li>
                 </ul>
 
-                <h3>1. Bz (Interplanetary Magnetic Field)</h3>
+                <h3>★ Kp Index (Geomagnetic)</h3>
                 <ul>
-                    <li><span class="hl-green">↑ Bz เป็นบวก:</span> "Shields UP" - โลกป้องกันดี สัญญาณ HF นิ่ง</li>
-                    <li><span class="hl-red">↓ Bz เป็นลบ:</span> "Shields DOWN" - พลังงานไหลเข้าขั้วโลก (โอกาส 6m Aurora)</li>
+                    <li><span style="color:var(--accent-green)">Kp 0-3:</span> สงบ (Quiet)</li>
+                    <li><span style="color:var(--accent-red)">Kp 5+:</span> พายุ (Storm) ระวัง HF ร่วง</li>
                 </ul>
 
-                <h3>2. Solar Wind & Density</h3>
-                <p>ลมสุริยะปกติ 300-400 km/s หากเกิน <b>500 km/s</b> สัญญาณ HF อาจแกว่ง (QSB)</p>
-
-                <h3>3. TEC Map (Total Electron Content)</h3>
+                <h3>1. Bz (Polarity)</h3>
                 <ul>
-                    <li><b style="color:var(--accent-orange)">สีแดง
+                    <li><span class="hl-green">↑ Bz บวก:</span> "Shields UP" - สัญญาณนิ่ง</li>
+                    <li><span class="hl-red">↓ Bz ลบ:</span> "Shields DOWN" - พายุเข้า (6m Aurora)</li>
+                </ul>
+
+                <h3>2. Solar Wind</h3>
+                <p>หากเกิน <b>500 km/s</b> สัญญาณอาจแกว่ง (QSB)</p>
+                <br>
+                <p style="text-align:center; color:#666; font-size:0.8em;">-- END OF BRIEFING --</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightboxModal" class="modal" onclick="closeModal('lightboxModal')">
+        <span class="close-btn" style="position:absolute; top:20px; right:30px; font-size:40px;">&times;</span>
+        <img class="modal-content-img" id="lightboxImg">
+    </div>
+
+    <div class="footer">IonosTek Monitor V8.8 • Data: NOAA SWPC</div>
+
+    <script>
+        let lastValues = { wind: null, density: null, dst: null, bt: null };
+
+        function openGuide() { document.getElementById("guideModal").style.display = "block"; }
+        function openLightbox(src) {
+            const modal = document.getElementById("lightboxModal");
+            const img = document.getElementById("lightboxImg");
+            img.src = src.split('?')[0] + '?t

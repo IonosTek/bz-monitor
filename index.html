@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V50.0</title>
+    <title>IonosTek Monitor V47.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V49.0 --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -15,16 +14,16 @@
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--accent-purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
+        .version { background: var(--accent-blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
         #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 8px; letter-spacing: 0.5px; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
-        /* Stats Grid */
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        .box:hover { transform: translateY(-3px); }
         .val { font-size: 1.8em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
         .unit { font-size: 0.6em; color: #666; display: block; margin-top: -5px; }
@@ -32,7 +31,6 @@
         @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
 
-        /* Images Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; }
@@ -41,16 +39,19 @@
 
         /* Status Colors */
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
-        .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); } /* Active/Minor Storm */
-        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); } /* Moderate Storm */
-        .c-alert { border-top-color: var(--red) !important; color: var(--red); } /* Critical/Strong Storm */
+        .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
+        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); }
+        .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
-        .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; }
+        .m-content { background: var(--card); width: 90%; max-width: 700px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
         
         /* --- ALERT OVERLAY STYLES --- */
         #alert-overlay {
-            display: none; 
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            display: none; /* Controlled by JS */
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
             z-index: 10000;
             justify-content: center;
             align-items: center;
@@ -61,22 +62,28 @@
             color: white;
             cursor: pointer;
             backdrop-filter: blur(5px);
+            opacity: 0.9;
         }
         @keyframes alert-flash {
-            0%, 100% { background: rgba(255, 0, 0, 0.6); }
-            50% { background: rgba(255, 100, 0, 0.3); }
+            0% { background: rgba(255, 0, 0, 0.5); }
+            50% { background: rgba(255, 100, 0, 0.2); }
+            100% { background: rgba(255, 0, 0, 0.5); }
         }
         .critical-alert {
             animation: alert-flash 1s infinite;
-            border: 5px solid white;
-            padding: 20px;
+            text-shadow: 0 0 15px #ff1744;
+        }
+        .minor-warning {
+            animation: flash-yellow 1.5s infinite;
+            text-shadow: 0 0 8px #ffea00;
+            background: rgba(255, 255, 0, 0.3);
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V50.0</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V57.0</span></h1>
         <div id="status"><span class="blink">●</span> System Active</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -132,7 +139,7 @@
     </div>
 
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V50.0 • Geomagnetic Alert System</div>
+    <div class="footer">IonosTek Monitor V57.0 • Geomagnetic Alert System</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -159,9 +166,9 @@
             }
             // Kp Logic (G-Scale Mapping)
             else if(id=='kp') {
-                if(val >= 7) s = 'c-alert'; // G3+
-                else if(val == 6) s = 'c-mod'; // G2 (Orange)
-                else if(val >= 4) s = 'c-warn'; // G0-Active/G1 (Yellow)
+                if(val >= 7) s = 'c-alert';
+                else if(val == 6) s = 'c-mod';
+                else if(val >= 4) s = 'c-warn';
                 else s = 'c-norm';
             }
             // Bz Logic
@@ -205,7 +212,7 @@
                 return;
             }
 
-            // Warning (Minor/Moderate Storm) (Kp >= 5 or Bz <= -5 or Dst <= -50)
+            // Minor Warning (Kp >= 5 or Bz <= -5 or Dst <= -50)
             if (kp >= 5 || bz <= -5 || dst <= -50) {
                 msgDiv.innerText = `WARNING: STORM CONDITIONS (Kp ${kp}) - QSB POSSIBLE.`;
                 alertDiv.className = 'minor-warning';
@@ -217,7 +224,7 @@
             alertDiv.style.display = 'none';
         }
 
-        // --- FETCH UTILITIES ---
+        // --- FETCH UTILITIES (Keep the robust V45 logic) ---
         async function getData(url) {
             try { const r = await fetch(url + '?t=' + Date.now()); if(r.ok) return await r.json(); } catch(e){}
             try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.json(); } catch(e){ return null; }
@@ -227,11 +234,12 @@
             try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.text(); } catch(e){ return null; }
         }
 
+        // --- Main Update Logic ---
         async function updateAll() {
             let currentKp = 0;
             let currentBz = 0;
             let currentDst = 0;
-            
+
             // Mag
             const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
             if(mag && mag.length > 2) {

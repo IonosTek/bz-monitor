@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V33.0</title>
+    <title>IonosTek Monitor V33.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,19 +12,20 @@
             --red: #ff1744; --blue: #2979ff; --purple: #d500f9;
         }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
+        
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--green); color: #000; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
+        .version { background: var(--accent-orange); color: #000; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
         #status { font-size: 0.9em; color: var(--sub); margin-top: 5px; font-family: monospace; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
-        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; }
+        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 30px; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .box:hover { transform: translateY(-3px); }
-        .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 3px; }
+        .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; }
         
         @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
@@ -53,7 +54,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version">V33.0</span></h1>
+        <h1>IONOSTEK <span class="version" style="background:var(--accent-orange)">V33.1</span></h1>
         <div id="status"><span class="blink">●</span> System Active</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -84,7 +85,7 @@
             <p style="color:#ccc; line-height:1.6">
                 <b>SFI:</b> >100 Good<br>
                 <b>SSN:</b> Higher is Better<br>
-                <b>X-Ray:</b> M/X=Blackout<br>
+                <b>X-Ray:</b> M/X=Blackout Alert<br>
                 <b>Kp:</b> >4 Storm<br>
                 <b>Bz:</b> Negative=Storm<br>
                 <b>Wind:</b> >500 km/s Unstable
@@ -93,7 +94,7 @@
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
 
-    <div class="footer">IonosTek Monitor V33.0 • Final Master</div>
+    <div class="footer">IonosTek Monitor V33.1 • Precision Fix</div>
 
     <script>
         // UI
@@ -116,63 +117,108 @@
 
         // --- Robust Fetcher ---
         async function getData(url) {
-            // 1. Direct
+            // Direct first
             try {
                 const r = await fetch(url + '?t=' + Date.now());
                 if(r.ok) return await r.json();
             } catch(e){}
-            // 2. Proxy
+            // Proxy fallback
             try {
                 const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
                 return await r.json();
             } catch(e){ return null; }
         }
+        
+        async function getText(url) {
+            try {
+                const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
+                return await r.text();
+            } catch(e){ return null; }
+        }
 
         async function updateAll() {
             const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
-            if(mag) {
+            if(mag && mag.length > 2) {
                 const l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', parseFloat(l[1]), parseFloat(l[1])<0?'c-warn':'c-norm', parseFloat(l[1])-parseFloat(p[1]));
                 set('bt', Math.round(l[2]), 'c-norm', parseFloat(l[2])-parseFloat(p[2]));
             }
 
             const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
-            if(plas) {
+            if(plas && plas.length > 2) {
                 const l = plas[plas.length-1], p = plas[plas.length-2];
                 set('wind', Math.round(l[2]), l[2]>500?'c-warn':'c-norm', parseFloat(l[2])-parseFloat(p[2]));
                 set('den', Math.round(l[1]), 'c-norm', parseFloat(l[1])-parseFloat(p[1]));
             }
 
             const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
-            if(kp) {
+            if(kp && kp.length > 2) {
                 const l = kp[kp.length-1], p = kp[kp.length-2];
                 set('kp', l[1], l[1]>=4?'c-warn':'c-norm', parseFloat(l[1])-parseFloat(p[1]));
             }
 
             const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
-            if(dst) {
+            if(dst && dst.length > 2) {
                 const l = dst[dst.length-1], p = dst[dst.length-2];
                 set('dst', l[1], parseInt(l[1])<-50?'c-alert':'c-norm', parseInt(l[1])-parseInt(p[1]));
             }
 
-            // Radio & X-Ray (Use JSON direct/proxy)
-            const radio = await getData('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json');
-            if(radio) {
-                const l = parseInt(radio[radio.length-1][2]);
-                const p = parseInt(radio[radio.length-2][2]);
-                set('sfi', l, l>100?'c-norm':'c-warn', l-p);
-                set('ssn', Math.round((l-63.7)*1.12));
+            // --- FIXED: SFI & SSN Parsing ---
+            const txtSfi = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
+            if(txtSfi) {
+                const lines = txtSfi.trim().split('\n');
+                let curr=null, prev=null;
+                // Find last 2 valid lines starting with 20xx
+                for(let i=lines.length-1; i>=0; i--) {
+                    if(lines[i].trim().startsWith('20')) {
+                        // SPLIT BY WHITESPACE (Regex) to avoid empty strings
+                        let cols = lines[i].trim().split(/\s+/);
+                        if(cols.length > 4) {
+                            if(!curr) curr = cols;
+                            else { prev = cols; break; }
+                        }
+                    }
+                }
+                if(curr) {
+                    let sfiVal = parseInt(curr[3]);
+                    let prevSfi = prev ? parseInt(prev[3]) : sfiVal;
+                    set('sfi', sfiVal, sfiVal>100?'c-norm':'c-warn', sfiVal-prevSfi);
+                    
+                    let ssnVal = parseInt(curr[4]);
+                    let prevSsn = prev ? parseInt(prev[4]) : ssnVal;
+                    set('ssn', ssnVal, 'c-norm', ssnVal-prevSsn);
+                }
             }
 
-            const xray = await getData('https://services.swpc.noaa.gov/products/x-rays-6-hour.json');
-            if(xray) {
-                for(let i=xray.length-1; i>0; i--) {
-                    if(xray[i][3]) {
-                        let v = parseFloat(xray[i][3]);
-                        let c = v<1e-5?'C':(v<1e-4?'M':'X');
-                        if(v<1e-6) c='B'; if(v<1e-7) c='A';
-                        set('xray', c, (c=='M'||c=='X')?'c-alert':'c-norm');
-                        break;
+            // --- FIXED: X-Ray Fallback (Text Scales) ---
+            const txtScale = await getText('https://services.swpc.noaa.gov/text/noaa-scales.txt');
+            let xRayFound = false;
+            if(txtScale) {
+                const lines = txtScale.trim().split('\n');
+                const last = lines[lines.length-1].trim().split(/\s+/);
+                if(last.length > 2) {
+                    const r = parseInt(last[2]); // R Scale
+                    let d="A/B", s="c-norm";
+                    if(r==1){ d="M1+"; s="c-warn"; }
+                    if(r>=2){ d="M5+"; s="c-alert"; }
+                    if(r>=3){ d="X1+"; s="c-alert"; }
+                    set('xray', d, s);
+                    xRayFound = true;
+                }
+            }
+            
+            // JSON Fallback if Text failed
+            if(!xRayFound) {
+                const xray = await getData('https://services.swpc.noaa.gov/products/x-rays-6-hour.json');
+                if(xray) {
+                    for(let i=xray.length-1; i>0; i--) {
+                        if(xray[i][3]) {
+                            let v = parseFloat(xray[i][3]);
+                            let c = v<1e-5?'C':(v<1e-4?'M':'X');
+                            if(v<1e-6) c='B'; if(v<1e-7) c='A';
+                            set('xray', c, (c=='M'||c=='X')?'c-alert':'c-norm');
+                            break;
+                        }
                     }
                 }
             }

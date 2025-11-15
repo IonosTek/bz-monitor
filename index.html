@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V21.0</title>
+    <title>IonosTek Monitor V21.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,18 +13,16 @@
         }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; padding: 15px; user-select: none; }
         
-        /* Header */
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background: var(--accent-orange); color: #000; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
+        .version { background: var(--accent-green); color: #000; font-size: 0.4em; padding: 2px 6px; border-radius: 3px; vertical-align: middle; font-weight: bold; }
         #systemStatus { font-size: 0.9em; color: var(--text-sub); margin-top: 5px; font-family: monospace; }
         .blink { animation: blinker 1s infinite; color: var(--accent-green); }
         @keyframes blinker { 50% { opacity: 0; } }
-
+        
         .btn-guide { background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: 'Chakra Petch', sans-serif; font-size: 0.85em; transition: 0.2s; font-weight: bold; }
         .btn-guide:hover { background: var(--accent-blue); color: #fff; }
         
-        /* Stats */
         .stats-container { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 30px; }
         .stat-box { background: var(--card-bg); padding: 12px 5px; border-radius: 6px; min-width: 110px; flex: 1; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .stat-box:hover { transform: translateY(-2px); }
@@ -32,11 +30,9 @@
         .stat-label { font-size: 0.75em; color: var(--text-sub); text-transform: uppercase; }
         .stat-unit { font-size: 0.65em; color: #555; }
         
-        /* Arrow Animation */
-        @keyframes arrow-move { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
-        .trend-arrow { font-size: 0.6em; animation: arrow-move 2s infinite; }
+        @keyframes arrow-move { 0% { transform: translateY(0); } 50% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
+        .trend-arrow { font-size: 0.6em; animation: arrow-move 2s infinite; display: inline-block; }
 
-        /* Grid */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column; }
         .card-header { background: #202020; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
@@ -44,16 +40,13 @@
         .card-header span { font-size: 0.7em; color: var(--accent-blue); }
         .card-body { background: #000; height: 280px; display: flex; align-items: center; justify-content: center; position: relative; }
         .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s; }
-        .img-loader { position: absolute; color: #444; font-size: 0.8em; }
         
-        /* Colors */
         .s-norm { border-top-color: var(--accent-green) !important; color: var(--accent-green); }
         .s-warn { border-top-color: var(--accent-yellow) !important; color: var(--accent-yellow); }
         .s-mod { border-top-color: var(--accent-orange) !important; color: var(--accent-orange); }
         .s-alert { border-top-color: var(--accent-red) !important; color: var(--accent-red); }
         .s-good { border-top-color: var(--accent-purple) !important; color: var(--accent-purple); }
 
-        /* Modal & Lightbox */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; overflow-y: auto; }
         .modal-content-text { background: var(--card-bg); width: 90%; max-width: 600px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 8px; position: relative; }
         .close-btn { position: absolute; top: 15px; right: 20px; color: #fff; font-size: 30px; cursor: pointer; }
@@ -72,8 +65,8 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version">V21.0</span></h1>
-        <div id="systemStatus"><span class="blink">●</span> Analyzing Trends...</div>
+        <h1>IONOSTEK <span class="version">V21.1</span></h1>
+        <div id="systemStatus"><span class="blink">●</span> System Online</div>
         <button onclick="document.getElementById('guideModal').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
@@ -112,47 +105,35 @@
     </div>
 
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V21.0 • Trend Analysis System</div>
+    <div class="footer">IonosTek Monitor V21.1 • Complete Edition</div>
 
     <script>
         // UI
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
         function tick() { document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
         
-        // Update with Trend Logic
         function update(id, val, type, prevVal) {
             const el = document.getElementById('val-'+id);
             const box = document.getElementById('box-'+id);
             if(!el) return;
             
-            // 1. Render Value
-            let display = val;
-            el.innerHTML = display;
+            el.innerHTML = val;
 
-            // 2. Render Arrow (Check if prevVal exists and is different)
+            // --- V21.1 Trend Logic ---
             if (prevVal !== undefined && prevVal !== null && !isNaN(parseFloat(val)) && !isNaN(parseFloat(prevVal))) {
                 const diff = parseFloat(val) - parseFloat(prevVal);
-                if (Math.abs(diff) > 0.01) { // Filter tiny noise
-                    const arr = diff > 0 ? '&#9650;' : '&#9660;'; // Up or Down
-                    let color = '';
+                if (Math.abs(diff) > 0.01) { 
+                    const arr = diff > 0 ? '&#9650;' : '&#9660;'; 
+                    let color = '#ff1744'; // Default Red if up
                     
-                    // Logic: Is "Higher" Good or Bad?
-                    if (type === 'sfi' || type === 'ssn') {
-                        // Higher is Good (Green)
-                        color = diff > 0 ? '#00e676' : '#ff1744';
-                    } else if (type === 'dst') {
-                        // For Dst, getting closer to 0 (higher) is usually recovery (Good), getting lower (negative) is storm (Bad)
-                        color = diff > 0 ? '#00e676' : '#ff1744';
-                    } else {
-                        // For Wind, Kp, Bz(magnitude), Xray: Higher is usually "Storm/Alert" (Red)
-                        color = diff > 0 ? '#ff1744' : '#00e676';
-                    }
+                    if (type === 'sfi' || type === 'ssn') color = diff > 0 ? '#00e676' : '#ff1744'; // Good if up
+                    else if (type === 'dst') color = diff > 0 ? '#00e676' : '#ff1744'; // Good if closer to 0
+                    else color = diff > 0 ? '#ff1744' : '#00e676'; // Bad if up (Wind/Kp/Bz)
                     
                     el.innerHTML += ` <span class="trend-arrow" style="color:${color}">${arr}</span>`;
                 }
             }
 
-            // 3. Status Color
             let s = 's-norm';
             if(type=='sfi' && val>100) s='s-good';
             if(type=='ssn' && val>100) s='s-good';
@@ -164,18 +145,33 @@
             box.className = 'stat-box ' + s;
         }
 
-        // --- Fetcher (Proxy + Trend History) ---
+        // --- Deep Scan Helper (The Fix) ---
+        // Finds the last 2 valid non-null values in an array of arrays
+        function getTrendData(data, idx) {
+            let vals = [];
+            for(let i=data.length-1; i>=0; i--) {
+                if(vals.length >= 2) break;
+                let v = data[i][idx];
+                if(v !== null && v !== undefined && !isNaN(parseFloat(v))) {
+                    vals.push(parseFloat(v));
+                }
+            }
+            // vals[0] is current, vals[1] is previous
+            if(vals.length >= 2) return { curr: vals[0], prev: vals[1] };
+            if(vals.length == 1) return { curr: vals[0], prev: null };
+            return null;
+        }
+
         const proxy = 'https://api.allorigins.win/raw?url=';
         
         async function getData() {
             const ts = '?t=' + Date.now();
 
-            // 1. Text Data (SFI/SSN) - Get Last 2 lines for Trend
+            // 1. Text Data (SFI/SSN)
             try {
                 const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/text/daily-solar-indices.txt') + ts);
                 const txt = await r.text();
-                const lines = txt.trim().split('\n').filter(l => l.match(/^\d{4}/)); // Only data lines
-                
+                const lines = txt.trim().split('\n').filter(l => l.match(/^\d{4}/));
                 if(lines.length >= 2) {
                     const curr = lines[lines.length-1].trim().split(/\s+/);
                     const prev = lines[lines.length-2].trim().split(/\s+/);
@@ -184,56 +180,57 @@
                 }
             } catch(e){}
 
-            // 2. X-Ray & Kp (Scales)
+            // 2. X-Ray (6-Hour Deep Scan)
             try {
-                // Kp from JSON (Best for trend)
-                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json') + ts);
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/x-rays-6-hour.json') + ts);
                 const d = await r.json();
-                const c = d[d.length-1], p = d[d.length-2];
-                update('kp', c[1], 'kp', p[1]);
-                
-                // X-Ray from 6-hour JSON
-                const r2 = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/x-rays-6-hour.json') + ts);
-                const d2 = await r2.json();
-                // Find last 2 valid points
-                let val1 = null, val2 = null;
-                for(let i=d2.length-1; i>=0; i--) {
-                    if(d2[i][3]) {
-                        if(val1===null) val1 = parseFloat(d2[i][3]);
-                        else { val2 = parseFloat(d2[i][3]); break; }
-                    }
-                }
-                if(val1) {
-                    let cls = val1<1e-7?'A': val1<1e-6?'B': val1<1e-5?'C': val1<1e-4?'M':'X';
-                    let base = val1<1e-7?1e-7: val1<1e-6?1e-6: val1<1e-5?1e-5: val1<1e-4?1e-4:1e-4;
-                    update('xray', cls+(val1/base).toFixed(1), 'xray', (val1-val2)); // Trend based on flux
+                const res = getTrendData(d, 3); // Index 3 is Flux
+                if (res) {
+                    let val = res.curr;
+                    let cls = val<1e-7?'A': val<1e-6?'B': val<1e-5?'C': val<1e-4?'M':'X';
+                    let base = val<1e-7?1e-7: val<1e-6?1e-6: val<1e-5?1e-5: val<1e-4?1e-4:1e-4;
+                    update('xray', cls+(val/base).toFixed(1), 'xray', (res.curr - res.prev));
                 }
             } catch(e){}
 
-            // 3. Solar Wind
+            // 3. Kp
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json') + ts);
+                const d = await r.json();
+                const res = getTrendData(d, 1);
+                if(res) update('kp', res.curr, 'kp', res.prev);
+            } catch(e){}
+
+            // 4. Mag
             try {
                 const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json') + ts);
                 const d = await r.json();
-                const c = d[d.length-1], p = d[d.length-2];
-                const bz = d[0].indexOf('bz_gsm'), bt = d[0].indexOf('bt');
-                update('bz', Math.round(c[bz]), 'bz', p[bz]);
-                update('bt', Math.round(c[bt]), 'bt', p[bt]);
+                const bzI = d[0].indexOf('bz_gsm');
+                const btI = d[0].indexOf('bt');
+                const bz = getTrendData(d, bzI);
+                const bt = getTrendData(d, btI);
+                if(bz) update('bz', Math.round(bz.curr), 'bz', bz.prev);
+                if(bt) update('bt', Math.round(bt.curr), 'bt', bt.prev);
             } catch(e){}
             
+            // 5. Plasma
             try {
                 const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json') + ts);
                 const d = await r.json();
-                const c = d[d.length-1], p = d[d.length-2];
-                const s = d[0].indexOf('speed'), den = d[0].indexOf('density');
-                update('wind', Math.round(c[s]), 'wind', p[s]);
-                update('den', Math.round(c[den]), 'den', p[den]);
+                const spdI = d[0].indexOf('speed');
+                const denI = d[0].indexOf('density');
+                const wind = getTrendData(d, spdI);
+                const den = getTrendData(d, denI);
+                if(wind) update('wind', Math.round(wind.curr), 'wind', wind.prev);
+                if(den) update('den', Math.round(den.curr), 'den', den.prev);
             } catch(e){}
 
+            // 6. Dst
             try {
                 const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/kyoto-dst.json') + ts);
                 const d = await r.json();
-                const c = d[d.length-1], p = d[d.length-2];
-                update('dst', c[1], 'dst', p[1]);
+                const res = getTrendData(d, 1);
+                if(res) update('dst', res.curr, 'dst', res.prev);
             } catch(e){}
         }
 
@@ -242,6 +239,9 @@
         setInterval(tick, 1000);
         setInterval(getData, 60000);
         setInterval(() => { document.querySelectorAll('.card-body img').forEach(i => i.src = i.src.split('?')[0] + '?t=' + Date.now()); }, 300000);
+        
+        document.onkeydown = e => { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; };
+        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V9.4</title>
+    <title>IonosTek Monitor V9.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- CSS Base: V9.x --- */
@@ -32,7 +32,7 @@
         .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 2em; letter-spacing: 1px; }
         .header span.version { 
-            color: #000; background-color: var(--accent-orange); 
+            color: #000; background-color: var(--accent-yellow); 
             font-size: 0.4em; vertical-align: middle; padding: 2px 6px; border-radius: 4px; font-weight: bold;
         }
         
@@ -172,7 +172,7 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.4</span></h1>
+        <h1>IONOSTEK <span style="color:#fff">MONITOR</span> <span class="version">V9.5</span></h1>
         <div id="systemStatus"><span class="blink">●</span> Connecting...</div>
         <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
@@ -185,7 +185,7 @@
         </div>
         <div class="stat-box" id="card-ssn">
             <div class="stat-label">SSN (Sunspot)</div>
-            <div class="stat-value"><span id="val-ssn">--</span></div>
+            <div class="stat-value"><span id="val-ssn">--</span><span id="trend-ssn" class="trend-arrow"></span></div>
             <div class="stat-unit">Hybrid Count</div>
         </div>
         <div class="stat-box" id="card-kp">
@@ -267,7 +267,7 @@
         <img class="modal-content-img" id="lightboxImg">
     </div>
 
-    <div class="footer">IonosTek Monitor V9.4 • Data: NOAA, Kyoto</div>
+    <div class="footer">IonosTek Monitor V9.5 • Data: NOAA, Kyoto</div>
 
     <script>
         function openGuide() { 
@@ -322,15 +322,18 @@
             if (trendId && !isNaN(prevValue) && !isNaN(value)) {
                 const tr = document.getElementById(trendId);
                 const diff = value - prevValue;
-                if (Math.abs(diff) > 0.05) {
+                // Reduce threshold for SSN to make arrow more responsive
+                const threshold = (type === 'ssn') ? 0.1 : 0.05; 
+                if (Math.abs(diff) > threshold) {
                     tr.innerHTML = diff > 0 ? '&#9650;' : '&#9660;';
-                    if(type==='dst' || type==='sfi') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
+                    if(type==='dst' || type==='sfi' || type==='ssn') tr.style.color = diff>0 ? 'var(--accent-green)' : 'var(--accent-red)';
                     else tr.style.color = diff>0 ? 'var(--accent-red)' : 'var(--accent-green)';
                 } else { tr.innerHTML = ''; }
             }
         }
 
         async function fetchData() {
+            // 1. Solar Wind
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json'));
                 const data = await res.json();
@@ -355,6 +358,7 @@
                 }
             } catch(e){}
 
+            // 2. Dst
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
                 const data = await res.json();
@@ -364,6 +368,49 @@
                 }
             } catch(e){}
 
+            // 3. Hybrid SSN Logic (With Arrow)
+            try {
+                // A. Get SFI for Trend Baseline
+                const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
+                const dataSfi = await resSfi.json();
+                
+                let currSfi = 0, prevSfi = 0;
+                if (dataSfi.length > 2) {
+                    currSfi = parseInt(dataSfi[dataSfi.length-1][dataSfi[0].length-1]);
+                    prevSfi = parseInt(dataSfi[dataSfi.length-2][dataSfi[0].length-1]);
+                    renderStat('val-sfi', 'card-sfi', currSfi, 'sfi', 'trend-sfi', prevSfi);
+                }
+
+                // B. Calculate "Previous SSN" from "Previous SFI" (Approximation for Trend Comparison)
+                let prevSSN_calc = Math.round((prevSfi - 63.7) * 1.12);
+                if (prevSSN_calc < 0) prevSSN_calc = 0;
+
+                // C. Get "Real" Current SSN
+                let finalSSN = 0;
+                try {
+                    const resSpots = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-region-summary.json'));
+                    const dataSpots = await resSpots.json();
+                    if (Array.isArray(dataSpots) && dataSpots.length > 0) {
+                        const groups = dataSpots.length;
+                        let spots = 0;
+                        dataSpots.forEach(r => spots += parseInt(r.number_spots));
+                        finalSSN = (10 * groups) + spots; // Real Value
+                    } else {
+                        throw new Error("Empty");
+                    }
+                } catch (spotErr) {
+                    // Fallback: Calc current from SFI
+                    finalSSN = Math.round((currSfi - 63.7) * 1.12);
+                    if (finalSSN < 0) finalSSN = 0;
+                }
+                
+                // Render SSN with Trend (Comparing Final SSN vs Previous Calculated SSN)
+                // Note: Comparing Real vs Calc is acceptable for general trend direction
+                renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn', 'trend-ssn', prevSSN_calc);
+
+            } catch(e){ console.log("SSN Logic Error"); }
+
+            // 4. Kp
             try {
                 const res = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'));
                 const data = await res.json();
@@ -374,44 +421,6 @@
                     renderStat('val-kp', 'card-kp', currKp, 'kp', 'trend-kp', prevKp);
                 }
             } catch(e){}
-
-            // --- Hybrid SSN/SFI Logic ---
-            try {
-                // 1. Fetch SFI First (Use as Base)
-                const resSfi = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'));
-                const dataSfi = await resSfi.json();
-                let currSfi = 0;
-                
-                if (dataSfi.length > 2) {
-                    currSfi = parseInt(dataSfi[dataSfi.length-1][dataSfi[0].length-1]);
-                    const prevSfi = parseInt(dataSfi[dataSfi.length-2][dataSfi[0].length-1]);
-                    renderStat('val-sfi', 'card-sfi', currSfi, 'sfi', 'trend-sfi', prevSfi);
-                }
-
-                // 2. Attempt to Fetch Real SSN
-                let finalSSN = 0;
-                try {
-                    const resSpots = await fetch(getFreshUrl('https://services.swpc.noaa.gov/products/solar-region-summary.json'));
-                    const dataSpots = await resSpots.json();
-                    if (Array.isArray(dataSpots) && dataSpots.length > 0) {
-                        const groups = dataSpots.length;
-                        let spots = 0;
-                        dataSpots.forEach(r => spots += parseInt(r.number_spots));
-                        finalSSN = (10 * groups) + spots; // Wolf Formula
-                    } else {
-                        // Empty array or issue? -> Use Fallback
-                        throw new Error("Empty Spot Data");
-                    }
-                } catch (spotErr) {
-                    // 3. Fallback: Calculate from SFI
-                    console.log("Switching to Hybrid SSN Calculation");
-                    finalSSN = Math.round((currSfi - 63.7) * 1.12);
-                    if (finalSSN < 0) finalSSN = 0;
-                }
-                
-                renderStat('val-ssn', 'card-ssn', finalSSN, 'ssn');
-
-            } catch(e){ console.log("SFI/SSN Core Error"); }
         }
 
         function refreshImages() {

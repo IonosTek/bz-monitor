@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V12.1</title>
+    <title>IonosTek Monitor V12.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Theme --- */
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
@@ -26,13 +25,13 @@
             color: var(--text-main);
             margin: 0;
             padding: 15px;
-            user-select: none; /* กัน Copy */
+            user-select: none;
             -webkit-user-select: none;
         }
 
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        .version { background-color: var(--accent-blue); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
+        .version { background-color: var(--accent-purple); color: #fff; font-size: 0.4em; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
         
         #systemStatus { font-size: 0.9em; color: var(--text-sub); margin-top: 5px; font-family: monospace; }
         .blink { animation: blinker 1s infinite; color: var(--accent-green); }
@@ -46,7 +45,6 @@
         }
         .btn-guide:hover { background: var(--accent-blue); color: #fff; }
 
-        /* Stats Grid */
         .stats-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px; }
         .stat-box {
             background: var(--card-bg); padding: 10px; border-radius: 8px;
@@ -58,11 +56,9 @@
         .stat-label { font-size: 0.7em; color: var(--text-sub); text-transform: uppercase; }
         .stat-unit { font-size: 0.6em; color: #666; }
 
-        /* Arrows */
         @keyframes arrow-pulse { 50% { transform: scale(0.8); opacity: 0.7; } }
         .trend-arrow { font-size: 0.7em; font-weight: bold; animation: arrow-pulse 2s infinite; display: inline-block; margin-left: 5px; }
 
-        /* Image Grid */
         .grid-container {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px; max-width: 1600px; margin: 0 auto;
@@ -84,18 +80,16 @@
         }
         .card-body img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; }
 
-        /* Status Colors */
         .s-norm { border-top-color: var(--accent-green) !important; color: var(--accent-green); }
         .s-warn { border-top-color: var(--accent-yellow) !important; color: var(--accent-yellow); }
         .s-mod { border-top-color: var(--accent-orange) !important; color: var(--accent-orange); }
         .s-alert { border-top-color: var(--accent-red) !important; color: var(--accent-red); }
         .s-good { border-top-color: var(--accent-purple) !important; color: var(--accent-purple); }
 
-        /* Modal (Scroll Fixed) */
         .modal {
             display: none; position: fixed; z-index: 9999; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.95);
-            overflow-y: auto; /* สำคัญมาก: ให้เลื่อนได้ */
+            overflow-y: auto;
         }
         .modal-box {
             background: var(--card-bg); margin: 50px auto; padding: 30px;
@@ -103,9 +97,7 @@
             position: relative;
         }
         .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
-        .close:hover { color: var(--accent-red); }
-
-        /* Lightbox */
+        
         #lightbox {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.98); z-index: 10000;
@@ -124,8 +116,8 @@
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span class="version">V12.1</span></h1>
-        <div id="systemStatus">Initializing...</div>
+        <h1>IONOSTEK <span class="version">V12.2</span></h1>
+        <div id="systemStatus">Initializing Proxy...</div>
         <button onclick="document.getElementById('guide').style.display='block'" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
@@ -189,14 +181,13 @@
         <img id="lb-img">
     </div>
 
-    <div class="footer">IonosTek Monitor V12.1 • Data: NOAA SWPC</div>
+    <div class="footer">IonosTek Monitor V12.2 • Data: NOAA via Proxy</div>
 
     <script>
         // --- Security ---
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = e => { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; };
 
-        // --- Helpers ---
         function view(src) {
             document.getElementById('lb-img').src = src + '?t=' + Date.now();
             document.getElementById('lightbox').style.display = 'flex';
@@ -207,14 +198,11 @@
             const box = document.getElementById('box-'+id);
             if(!el) return;
 
-            // Render Value
             el.innerHTML = val;
             
-            // Render Arrow
             if (trendDiff !== 0 && !isNaN(trendDiff)) {
                 const arrow = trendDiff > 0 ? '&#9650;' : '&#9660;';
                 const color = (type=='dst'||type=='bz') ? (trendDiff>0?'#00e676':'#ff1744') : (trendDiff>0?'#ff1744':'#00e676');
-                // Exception: SFI/SSN up is good
                 if(type=='sfi'||type=='ssn') {
                      el.innerHTML += ` <span class="trend-arrow" style="color:${trendDiff>0?'#00e676':'#ff1744'}">${arrow}</span>`;
                 } else {
@@ -222,7 +210,6 @@
                 }
             }
 
-            // Color Status
             let s = 's-norm';
             if(type=='sfi') { if(val>150) s='s-good'; else if(val<100) s='s-warn'; }
             if(type=='ssn') { if(val>100) s='s-good'; else if(val<50) s='s-warn'; }
@@ -239,11 +226,13 @@
             document.getElementById('systemStatus').innerHTML = '<span class="blink">●</span> ' + now.toUTCString().replace('GMT','UTC');
         }
 
-        // --- Data Fetching (Isolated) ---
-        
+        // --- Proxy Wrapper ---
+        // ใช้ allorigins เพื่อแก้ CORS โดยเฉพาะ
+        const proxy = 'https://api.allorigins.win/raw?url=';
+
         async function getMagPlasma() {
-            try { // Mag
-                const r = await fetch('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json?t='+Date.now());
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json') + '&t=' + Date.now());
                 const d = await r.json();
                 const curr = d[d.length-1];
                 const prev = d[d.length-2];
@@ -251,10 +240,10 @@
                 const btI = d[0].indexOf('bt');
                 updateStat('bz', parseFloat(curr[bzI]), 'bz', parseFloat(curr[bzI])-parseFloat(prev[bzI]));
                 updateStat('bt', parseFloat(curr[btI]), 'bt', parseFloat(curr[btI])-parseFloat(prev[btI]));
-            } catch(e){}
+            } catch(e){ console.log('Mag Err', e); }
 
-            try { // Plasma
-                const r = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json?t='+Date.now());
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json') + '&t=' + Date.now());
                 const d = await r.json();
                 const curr = d[d.length-1];
                 const prev = d[d.length-2];
@@ -262,20 +251,20 @@
                 const denI = d[0].indexOf('density');
                 updateStat('wind', parseFloat(curr[spdI]), 'wind', parseFloat(curr[spdI])-parseFloat(prev[spdI]));
                 updateStat('den', parseFloat(curr[denI]), 'den');
-            } catch(e){}
+            } catch(e){ console.log('Plasma Err', e); }
         }
 
         async function getIndices() {
-            try { // Kp
-                const r = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json?t='+Date.now());
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json') + '&t=' + Date.now());
                 const d = await r.json();
                 const curr = d[d.length-1][1];
                 const prev = d[d.length-2][1];
                 updateStat('kp', curr, 'kp', curr-prev);
             } catch(e){}
 
-            try { // Dst
-                const r = await fetch('https://services.swpc.noaa.gov/products/kyoto-dst.json?t='+Date.now());
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/kyoto-dst.json') + '&t=' + Date.now());
                 const d = await r.json();
                 const curr = d[d.length-1][1];
                 const prev = d[d.length-2][1];
@@ -284,14 +273,13 @@
         }
 
         async function getRadio() {
-            try { // SFI & SSN
-                const r = await fetch('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json?t='+Date.now());
+            try {
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json') + '&t=' + Date.now());
                 const d = await r.json();
                 const currSfi = parseInt(d[d.length-1][d[0].length-1]);
                 const prevSfi = parseInt(d[d.length-2][d[0].length-1]);
                 updateStat('sfi', currSfi, 'sfi', currSfi-prevSfi);
                 
-                // Hybrid SSN
                 let ssn = Math.round((currSfi - 63.7) * 1.12);
                 updateStat('ssn', ssn<0?0:ssn, 'ssn', ssn - Math.round((prevSfi-63.7)*1.12));
             } catch(e){}
@@ -299,10 +287,8 @@
 
         async function getXRay() {
             try {
-                // Use 6-hour file (Stable)
-                const r = await fetch('https://services.swpc.noaa.gov/products/x-rays-6-hour.json?t='+Date.now());
+                const r = await fetch(proxy + encodeURIComponent('https://services.swpc.noaa.gov/products/x-rays-6-hour.json') + '&t=' + Date.now());
                 const d = await r.json();
-                // Scan backwards for valid Long Flux (Index 3 usually)
                 let flux = null;
                 for(let i=d.length-1; i>0; i--) {
                     if(d[i][3] !== null) { flux = parseFloat(d[i][3]); break; }
@@ -316,20 +302,16 @@
                 } else {
                     updateStat('xray', '--', 'xray');
                 }
-            } catch(e){ updateStat('xray', '--', 'xray'); }
+            } catch(e){ console.log('XRay Err', e); updateStat('xray', '--', 'xray'); }
         }
 
-        // Init immediately
         tick(); getMagPlasma(); getIndices(); getRadio(); getXRay();
-        
-        // Intervals
         setInterval(tick, 1000);
         setInterval(getMagPlasma, 60000);
         setInterval(getXRay, 60000);
         setInterval(getIndices, 300000);
         setInterval(getRadio, 300000);
 
-        // Close modal on outside click
         window.onclick = function(e) {
             const m = document.getElementById('guide');
             if(e.target == m) m.style.display = 'none';

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V110.0 (Stable Lock)</title>
+    <title>IonosTek Monitor V111.0 (Total Isolation)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V110.0 --- */
+        /* --- CSS V111.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -174,10 +174,9 @@
                 let box = document.getElementById('b-'+id);
                 if(!el) return;
                 
-                // If value is NaN/null, reset the box and skip further logic for safety
                 if(val === undefined || val === null || isNaN(parseFloat(val))) {
                     el.innerText = "--";
-                    if(box) box.className = 'box'; // Remove color classes
+                    if(box) box.className = 'box'; 
                     return; 
                 }
 
@@ -194,7 +193,7 @@
                          trendHtml = `<span class="trend" style="color:${tColor}">${tSym}</span>`;
                     }
                     el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
-                    let s = bzVal < 0 ? 'c-alert' : 'c-norm'; // Negative = Alert/Red
+                    let s = bzVal < 0 ? 'c-alert' : 'c-norm'; 
                     if(box) box.className = 'box '+s;
                     return; 
                 }
@@ -260,7 +259,7 @@
         async function updateAll() {
             log('Syncing Data...');
             
-            // 1. SFI (Text Parsing)
+            // SFI
             let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -281,7 +280,7 @@
                 }
             }
 
-            // 2. Solar Wind (Using JSON -> Text Fallback logic from V103)
+            // Solar Wind
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
             if(mag && mag.length > 2) {
@@ -324,7 +323,7 @@
                  }
             }
 
-            // 4. Kp & Dst
+            // Kp & Dst
             let kp = await fetchJSON('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 let l = kp[kp.length-1], p = kp[kp.length-2];
@@ -350,12 +349,11 @@
             log('Active');
         }
 
-        // --- MAIN START ---
-        document.addEventListener('DOMContentLoaded', () => {
-            setInterval(updateClock, 1000);
+        window.onload = function() {
+            startClock();
             updateAll();
             setInterval(updateAll, 60000);
-        });
+        };
     </script>
 </body>
 </html>

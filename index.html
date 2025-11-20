@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V72.0 (Rescue)</title>
+    <title>IonosTek Monitor V73.0 (Auto-Switch)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V72.0 --- */
+        /* --- CSS Base V73 --- */
         :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; }
@@ -15,7 +15,7 @@
         @keyframes blinker { 50% { opacity: 0; } }
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; max-width: 1400px; margin: 0 auto 20px; }
-        .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; }
+        .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; transition: transform 0.2s; }
         .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; }
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; }
         .unit { font-size: 0.7em; color: #666; }
@@ -26,16 +26,16 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; }
         
-        /* Status Colors */
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 600px; border: 1px solid #444; }
         #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; align-items: center; justify-content: center; }
         #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
+        
+        #fetch-log { color: var(--orange); font-family: monospace; font-size: 0.8em; }
 
         @media (max-width: 600px) { .header { flex-direction: column; text-align: center; } .stats { grid-template-columns: repeat(2, 1fr); } }
     </style>
@@ -65,13 +65,13 @@
 
     <div class="hf-banner">
         <span style="color:#888; margin-right:10px;">HF ESTIMATE:</span>
-        <span id="hf-cond" style="font-weight:bold;">WAITING...</span>
+        <span id="hf-cond" style="font-weight:bold;">CALCULATING...</span>
     </div>
 
     <div class="grid">
-        <div class="card"><div class="c-head">PROPAGATION (TEC)</div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head">PROPAGATION</div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head">SUNSPOTS</div><div class="c-body"><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head">SOLAR FLARES</div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head">SOLAR FLARES</div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" referrerpolicy="no-referrer" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
         <div class="card"><div class="c-head">AURORA</div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head">BLACKOUT</div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
     </div>
@@ -79,18 +79,21 @@
     <div id="guideModal" class="modal">
         <div class="m-content">
             <h2 style="color:var(--green);">GUIDE</h2>
-            <p><b>Bz Negative (-):</b> STORM ALERT (High Noise)</p>
-            <p><b>Bz Positive (+):</b> QUIET (Good Condx)</p>
+            <p><b>Bz Negative (-):</b> STORM ALERT</p>
             <button onclick="document.getElementById('guideModal').style.display='none'" class="btn-guide">CLOSE</button>
         </div>
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
 
-    <div style="text-align:center; margin-top:30px; color:#444; font-size:0.8em;">V72.0 • Rescue Core</div>
+    <div style="display:flex; justify-content:space-between; margin-top:30px; padding:0 10px;">
+        <span id="fetch-log">Initializing...</span>
+        <span style="color:#444; font-size:0.8em;">V73.0 • Auto-Switch</span>
+    </div>
 
     <script>
-        // JS placed at the end to prevent white screen
+        // Safe UI Logic
         function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
+        function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
         
         function tick() {
             try {
@@ -106,7 +109,11 @@
             try {
                 let el = document.getElementById('v-'+id);
                 let box = document.getElementById('b-'+id);
-                if(el) el.innerText = val;
+                if(el) {
+                    // Validate: If value is "bx_gsm" or NaN, don't show it
+                    if(isNaN(parseFloat(val))) return;
+                    el.innerText = val;
+                }
                 
                 let s = 'c-norm';
                 if(id=='bz' && val < 0) s = 'c-alert';
@@ -116,71 +123,43 @@
             } catch(e){}
         }
 
-        async function update() {
-            // Simple Fetch without AbortSignal (Safe for all browsers)
+        // Smart Fetcher with Fallback
+        async function getJSON(filename1, filename2) {
+            let ts = '?t=' + Date.now();
+            // Try File 1 (Small)
             try {
-                // Mag (2 hour file)
-                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json?t='+Date.now()));
+                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/' + filename1 + ts));
                 if(r.ok) {
                     let d = await r.json();
-                    let l = d[d.length-1];
-                    set('bz', l[1]); set('bt', Math.round(l[2]));
-                }
-            } catch(e){ console.log('Mag error'); }
-
-            try {
-                // Plasma (2 hour file)
-                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json?t='+Date.now()));
-                if(r.ok) {
-                    let d = await r.json();
-                    let l = d[d.length-1];
-                    set('wind', Math.round(l[2])); set('den', Math.round(l[1]));
-                }
-            } catch(e){ console.log('Plas error'); }
-
-            try {
-                // Kp
-                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json?t='+Date.now()));
-                if(r.ok) {
-                    let d = await r.json();
-                    set('kp', d[d.length-1][1]);
-                }
-            } catch(e){}
-
-            try {
-                // SFI
-                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/text/daily-solar-indices.txt'));
-                if(r.ok) {
-                    let t = await r.text();
-                    let lines = t.trim().split('\n');
-                    let cols = lines[lines.length-1].trim().split(/\s+/);
-                    if(cols.length > 3) { set('sfi', cols[3]); set('ssn', cols[4]); }
+                    // Check if valid data (length > 1 means header + data)
+                    if(d && d.length > 1) {
+                        console.log('Used ' + filename1);
+                        return d[d.length-1]; 
+                    }
                 }
             } catch(e){}
             
-            // Dst
-             try {
-                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/products/kyoto-dst.json'));
+            log('Primary empty. Switching to backup source...');
+            
+            // Try File 2 (Big/Backup)
+            try {
+                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/' + filename2 + ts));
                 if(r.ok) {
                     let d = await r.json();
-                    set('dst', parseInt(d[d.length-1][1]));
+                    if(d && d.length > 1) {
+                        console.log('Used ' + filename2);
+                        return d[d.length-1];
+                    }
                 }
             } catch(e){}
-
-            // Forecast Update
-            let kp = parseFloat(document.getElementById('v-kp').innerText)||0;
-            let sfi = parseInt(document.getElementById('v-sfi').innerText)||0;
-            let cond = document.getElementById('hf-cond');
-            if(kp >= 5) { cond.innerText = "STORM WARNING"; cond.style.color = "var(--red)"; }
-            else if(sfi > 100) { cond.innerText = "EXCELLENT"; cond.style.color = "var(--green)"; }
-            else { cond.innerText = "NORMAL"; cond.style.color = "#ccc"; }
+            return null;
         }
 
-        // Safe Start
-        window.addEventListener('load', function() {
-            update();
-            setInterval(update, 60000);
-        });
-    </script>
-</body>
-</html>
+        async function update() {
+            log('Updating...');
+            
+            // Mag (Try 2-hour, failover to 5-minute/24h)
+            let mag = await getJSON('mag-2-hour.json', 'mag-5-minute.json');
+            if(mag) {
+                // CORRECT INDICES: Bz is [3], Bt is [6]
+                set('bz', mag[3]);

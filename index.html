@@ -3,28 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor</title>
+    <title>IonosTek Monitor V64.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V64.1 (Confirmed Stable) --- */
+        /* --- CSS Base: V64.2 (Enhanced) --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
             --red: #ff1744; --blue: #2979ff; --purple: #d500f9;
         }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        /* Version removed from H1 */
         
-        #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 8px; letter-spacing: 0.5px; }
+        /* Header V2: Flexbox for Clock */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; gap: 15px; }
+        .h-left h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; line-height: 1; }
+        .h-right { text-align: right; }
+        
+        #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 5px; letter-spacing: 0.5px; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
-        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
+        
+        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 15px; margin-top: 5px; border-radius: 4px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8em; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
+        /* Clock Styles */
+        #utc-time { font-size: 1.6em; font-weight: 700; color: var(--blue); letter-spacing: 1px; line-height: 1; }
+        #local-time { font-size: 0.85em; color: #666; margin-top: 3px; font-weight: 500; }
+
         /* Stats Grid */
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; max-width: 1400px; margin-left: auto; margin-right: auto; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
         .box:hover { transform: translateY(-3px); }
         .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
@@ -34,6 +41,11 @@
         @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
         .bz-state-arrow { font-size: 1.2em; margin-right: 5px; font-weight: 900; }
+
+        /* HF Estimate Banner */
+        .hf-banner { max-width: 1600px; margin: 0 auto 20px auto; background: #1a1a1a; padding: 12px; border-radius: 6px; text-align: center; border: 1px solid #333; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .hf-label { color: #888; font-size: 0.9em; font-weight: 600; }
+        #hf-cond { font-weight: 700; font-size: 1.1em; letter-spacing: 0.5px; }
 
         /* Grid */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
@@ -68,15 +80,26 @@
         .guide-p { color: #ccc; font-size: 0.9em; line-height: 1.6; }
         .hl-g { color: var(--green); } .hl-r { color: var(--red); } .hl-y { color: var(--yellow); }
 
-        @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } .box { padding: 10px 2px; } .val { font-size: 1.5em; } }
+        @media (max-width: 600px) { 
+            .header { flex-direction: column; text-align: center; } 
+            .h-right { text-align: center; margin-top: 10px; }
+            .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } 
+            .box { padding: 10px 2px; } .val { font-size: 1.5em; } 
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
-        <div id="status"><span class="blink">●</span> System Active</div>
-        <button onclick="openGuideModal()" class="btn-guide">📘 OPERATOR GUIDE</button>
+        <div class="h-left">
+            <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
+            <div id="status"><span class="blink">●</span> System Active</div>
+        </div>
+        <div class="h-right">
+            <div id="utc-time">--:--:-- UTC</div>
+            <div id="local-time">--:-- Local</div>
+            <button onclick="openGuideModal()" class="btn-guide">📘 GUIDE</button>
+        </div>
     </div>
 
     <div class="stats">
@@ -98,11 +121,19 @@
         <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
     </div>
 
+    <div class="hf-banner">
+        <span class="hf-label">HF BAND FORECAST:</span>
+        <span id="hf-cond">INITIALIZING...</span>
+    </div>
+
     <div class="grid">
-        <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
-        <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>PROPAGATION (TEC)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
+        
+        <div class="card"><div class="c-head"><span>SUNSPOTS (SDO/HMI)</span></div><div class="c-body"><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg" onclick="view(this.src)"></div></div>
+        
+        <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
+        <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>RADIO BLACKOUT (D-RAP)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
     </div>
 
     <div id="guideModal" class="modal">
@@ -126,7 +157,7 @@
         </div>
     </div>
     <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor • Stable Core</div>
+    <div class="footer">IonosTek Monitor V64.2 • Enhanced Core</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -135,7 +166,16 @@
         function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
-        function tick() { document.getElementById('status').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
+        
+        // Updated Tick Function (Clock)
+        function tick() { 
+            const d = new Date();
+            // Update Time
+            const utc = d.getUTCHours().toString().padStart(2,'0') + ':' + d.getUTCMinutes().toString().padStart(2,'0') + ':' + d.getUTCSeconds().toString().padStart(2,'0');
+            const loc = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+            document.getElementById('utc-time').innerText = utc + ' UTC';
+            document.getElementById('local-time').innerText = loc + ' Local';
+        }
         
         function set(id, val, diff=0) {
             const el = document.getElementById('v-'+id);
@@ -165,7 +205,7 @@
             }
         }
 
-        // --- Stable Fetcher (V64.1 Logic) ---
+        // --- Stable Fetcher (V64.2 Logic) ---
         async function getData(url) {
             try { const r = await fetch(url + '?t=' + Date.now()); if(r.ok) return await r.json(); } catch(e){}
             try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.json(); } catch(e){ return null; }
@@ -229,6 +269,22 @@
                     set('ssn', ssnVal, ssnVal-prevSsn);
                 }
             }
+
+            // --- NEW: HF Band Logic ---
+            const sfi = parseInt(document.getElementById('v-sfi').innerText) || 70;
+            const kpv = parseFloat(document.getElementById('v-kp').innerText) || 1;
+            const condEl = document.getElementById('hf-cond');
+            
+            let txt = "NORMAL (Stable)";
+            let clr = "#ccc";
+
+            if(kpv >= 5) { txt = "STORM / NOISE WARNING"; clr = "var(--red)"; }
+            else if(kpv >= 4) { txt = "UNSETTLED (Noisy)"; clr = "var(--orange)"; }
+            else if(sfi > 120 && kpv < 3) { txt = "EXCELLENT (High Bands Open)"; clr = "var(--green)"; }
+            else if(sfi > 90 && kpv < 4) { txt = "GOOD (10m-20m Favorable)"; clr = "var(--green)"; }
+            else if(sfi < 75) { txt = "FAIR / POOR (Low MUF)"; clr = "var(--yellow)"; }
+            
+            condEl.innerHTML = `<span style="color:${clr}">${txt}</span>`;
         }
 
         tick(); updateAll();

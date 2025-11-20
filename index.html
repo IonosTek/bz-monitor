@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V109.0 (Execution Vitals)</title>
+    <title>IonosTek Monitor V110.0 (Stable Lock)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V109.0 --- */
+        /* --- CSS V110.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -37,7 +37,6 @@
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
-        /* Arrows */
         .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; position: relative; top: -0.15em; }
         @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         .status-arrow-main { font-size: 1.2em; font-weight: 900; margin-right: 8px; display: inline-block; position: relative; top: -0.05em; }
@@ -79,7 +78,7 @@
         }
     </style>
 </head>
-<body onload="startClock()">
+<body>
     <div class="header">
         <div>
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
@@ -143,9 +142,9 @@
     <div class="footer">
         <div>
             <span id="fetch-log">System Ready</span>
-            <button class="btn-retry" onclick="appStart()">REFRESH</button>
+            <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V103.0 • Lazarus Edition</span>
+        <span style="color:#666;">V108.0 • Operator Sync</span>
     </div>
 
     <script>
@@ -175,9 +174,10 @@
                 let box = document.getElementById('b-'+id);
                 if(!el) return;
                 
-                // If the value is NaN from parsing, skip UI update, let it remain "--"
+                // If value is NaN/null, reset the box and skip further logic for safety
                 if(val === undefined || val === null || isNaN(parseFloat(val))) {
                     el.innerText = "--";
+                    if(box) box.className = 'box'; // Remove color classes
                     return; 
                 }
 
@@ -194,7 +194,7 @@
                          trendHtml = `<span class="trend" style="color:${tColor}">${tSym}</span>`;
                     }
                     el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
-                    let s = bzVal < 0 ? 'c-alert' : 'c-norm';
+                    let s = bzVal < 0 ? 'c-alert' : 'c-norm'; // Negative = Alert/Red
                     if(box) box.className = 'box '+s;
                     return; 
                 }
@@ -233,6 +233,7 @@
                 if(id=='kp' && val >= 5) s = 'c-alert';
                 if(id=='wind' && val > 500) s = 'c-warn';
                 if(id=='den') { if(val > 10) s = 'c-alert'; else if(val > 5) s = 'c-warn'; }
+                
                 if(box) box.className = 'box '+s;
 
             } catch(e){}
@@ -265,9 +266,8 @@
                 let lines = sfiTxt.trim().split('\n');
                 let curr = null, prev = null;
                 for(let i=lines.length-1; i>=0; i--) {
-                    let line = lines[i].trim();
-                    if(line.startsWith('20') && line.length > 10) {
-                        let cols = line.split(/\s+/);
+                    if(lines[i].trim().startsWith('20')) {
+                        let cols = lines[i].trim().split(/\s+/);
                         if(cols.length > 4) {
                             if(!curr) curr = cols; else { prev = cols; break; }
                         }
@@ -281,17 +281,14 @@
                 }
             }
 
-            // 2. Solar Wind (Try JSON -> Text Fallback)
+            // 2. Solar Wind (Using JSON -> Text Fallback logic from V103)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
-            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
-
-            // MAG Data processing
+            if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
                 set('bt', Math.round(l[6]), parseFloat(l[6]) - parseFloat(p[6]));
             } else {
-                 log('MAG JSON failed. Using Text fallback.');
                  let magTxt = await fetchText('https://services.swpc.noaa.gov/text/rtsw/realtime-mag.txt');
                  if(magTxt) {
                     let lines = magTxt.trim().split('\n').filter(l => l.length > 10 && !l.startsWith('#') && !l.startsWith(':'));
@@ -306,13 +303,13 @@
                  }
             }
 
-            // PLASMA Data processing
+            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
+            if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
             if(plas && plas.length > 2) {
                 let l = plas[plas.length-1], p = plas[plas.length-2];
                 set('den', Math.round(l[1]), parseFloat(l[1]) - parseFloat(p[1]));
                 set('wind', Math.round(l[2]), parseFloat(l[2]) - parseFloat(p[2]));
             } else {
-                 log('PLASMA JSON failed. Using Text fallback.');
                  let plasTxt = await fetchText('https://services.swpc.noaa.gov/text/rtsw/realtime-solar-wind.txt');
                  if(plasTxt) {
                     let lines = plasTxt.trim().split('\n').filter(l => l.length > 10 && !l.startsWith('#') && !l.startsWith(':'));
@@ -353,12 +350,12 @@
             log('Active');
         }
 
-        window.onload = function() {
+        // --- MAIN START ---
+        document.addEventListener('DOMContentLoaded', () => {
             setInterval(updateClock, 1000);
-            updateClock();
             updateAll();
             setInterval(updateAll, 60000);
-        };
+        });
     </script>
 </body>
 </html>

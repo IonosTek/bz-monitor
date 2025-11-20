@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V97.1 (Clean Dashboard)</title>
+    <title>IonosTek Monitor V98.0 (BOM Integration)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V97.1 --- */
+        /* --- CSS V98.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -37,7 +37,6 @@
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
-        /* Arrows */
         .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; position: relative; top: -0.15em; }
         @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         .status-arrow-main { font-size: 1.2em; font-weight: 900; margin-right: 8px; display: inline-block; position: relative; top: -0.05em; }
@@ -54,7 +53,6 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 700px; border: 1px solid #444; position: relative; }
         .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
@@ -125,7 +123,8 @@
     </div>
 
     <div class="grid">
-        <div class="card"><div class="c-head"><span>PROPAGATION (TEC)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>GLOBAL MUF (BOM-SWS)</span></div><div class="c-body"><img src="https://www.sws.bom.gov.au/Images/HF%20Systems/Global%20HF/Ionospheric%20Map/World_F2_Layer_MUF.gif" referrerpolicy="no-referrer" onclick="window.open('https://www.sws.bom.gov.au/HF_Systems/Global_HF/Ionospheric_Map', '_blank')" style="cursor:pointer;" title="Click for BOM SWS"></div></div>
+        
         <div class="card"><div class="c-head"><span>SUNSPOTS (SDO/HMI)</span></div><div class="c-body"><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" referrerpolicy="no-referrer" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
         <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
@@ -158,7 +157,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V97.1 • Clean Dashboard</span>
+        <span style="color:#666;">V98.0 • BOM Integration</span>
     </div>
 
     <script>

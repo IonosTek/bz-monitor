@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V107.0 (Operator Sync)</title>
+    <title>IonosTek Monitor V108.0 (Final Fix)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V107.0 --- */
+        /* --- CSS V108.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -65,7 +65,7 @@
         #fetch-log { color: var(--orange); font-family: monospace; }
         .btn-retry { background: #333; border: 1px solid #555; color: #ccc; padding: 2px 10px; cursor: pointer; border-radius: 4px; font-size: 0.9em; margin-left: 10px; }
         
-        /* Guide CSS */
+        /* Guide CSS (Restored) */
         .guide-sec { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333; }
         .guide-h { color: var(--blue); font-weight: 700; margin-bottom: 10px; font-size: 1.1em; }
         .guide-p { color: #ccc; font-size: 0.95em; line-height: 1.6; margin-bottom: 8px; }
@@ -142,11 +142,11 @@
                 <div class="guide-h">★ Understanding Bz (The Switch)</div>
                 <div class="guide-p">
                     <span class="hl-g">Bz Positive (+): "SWITCH CLOSED"</span><br>
-                    Shields UP. HF Quiet.
+                    <span style="color:#aaa; font-size:0.9em;">Shields UP. HF Quiet.</span>
                 </div>
                 <div class="guide-p">
                     <span class="hl-r">Bz Negative (-): "SWITCH OPEN"</span><br>
-                    Shields DOWN. Storm Alert!
+                    <span style="color:#aaa; font-size:0.9em;">Shields DOWN. Storm Alert!</span>
                 </div>
             </div>
 
@@ -166,10 +166,11 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V107.0 • Operator Sync</span>
+        <span style="color:#666;">V108.0 • Complete Fix</span>
     </div>
 
     <script>
+        // --- UI HELPERS ---
         function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
         function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
 
@@ -180,13 +181,12 @@
                 if(!el) return;
                 if(val === undefined || val === null) return;
 
-                // --- BZ LOGIC (Exact Match) ---
+                // Special: Bz Logic
                 if (id === 'bz') {
                     let bzVal = parseFloat(val);
                     let isClosed = bzVal >= 0;
                     let mainArrow = isClosed ? '&#8593;' : '&#8595;';
                     let color = isClosed ? 'var(--green)' : 'var(--red)';
-                    
                     let trendHtml = '';
                     if(diff !== 0 && !isNaN(diff)) {
                          let tColor = diff < 0 ? 'var(--red)' : 'var(--green)';
@@ -194,28 +194,18 @@
                          trendHtml = `<span class="trend" style="color:${tColor}">${tSym}</span>`;
                     }
                     el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
-                    
-                    // STRICT: Negative = Alert
-                    let s = bzVal < 0 ? 'c-alert' : 'c-norm';
+                    let s = bzVal < -5 ? 'c-alert' : (bzVal < 0 ? 'c-warn' : 'c-norm');
                     if(box) box.className = 'box '+s;
                     return; 
                 }
 
-                // --- DST LOGIC (Matched) ---
+                // Special: Dst Logic
                 if (id === 'dst') {
                     let dstVal = parseFloat(val);
                     let mainArrow, color, s;
-                    
-                    if (dstVal < -50) { // Storm
-                        mainArrow = '&#8595;'; color = 'var(--red)'; s = 'c-alert'; 
-                    } 
-                    else if (dstVal <= -20) { // Minor (-20 to -50)
-                        mainArrow = '&#8595;'; color = 'var(--yellow)'; s = 'c-warn'; 
-                    } 
-                    else { // Quiet (> -20)
-                        mainArrow = '&#8593;'; color = 'var(--green)'; s = 'c-norm'; 
-                    }
-
+                    if (dstVal <= -50) { mainArrow = '&#8595;'; color = 'var(--red)'; s = 'c-alert'; } 
+                    else if (dstVal <= -20) { mainArrow = '&#8595;'; color = 'var(--yellow)'; s = 'c-warn'; } 
+                    else { mainArrow = '&#8593;'; color = 'var(--green)'; s = 'c-norm'; }
                     let trendHtml = '';
                     if(diff !== 0 && !isNaN(diff)) {
                          let tColor = diff < 0 ? 'var(--red)' : 'var(--green)';
@@ -227,7 +217,7 @@
                     return;
                 }
 
-                // --- STANDARD LOGIC ---
+                // Standard Logic
                 let arrowHtml = '';
                 if(diff !== 0 && !isNaN(diff)) {
                     let isBad = false;
@@ -241,7 +231,7 @@
                 
                 let s = 'c-norm';
                 if(id=='kp' && val >= 5) s = 'c-alert';
-                if(id=='wind' && val > 500) s = 'c-warn'; // Matches >500 Unstable
+                if(id=='wind' && val > 500) s = 'c-warn';
                 if(id=='den') { if(val > 10) s = 'c-alert'; else if(val > 5) s = 'c-warn'; }
                 
                 if(box) box.className = 'box '+s;

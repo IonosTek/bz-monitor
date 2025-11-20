@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V69.0 (Master Key)</title>
+    <title>IonosTek Monitor V70.0 (Force Stream)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V69.0 --- */
+        /* --- CSS Base: V70.0 --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -67,9 +67,7 @@
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .footer { display: flex; justify-content: space-between; margin-top: 40px; font-size: 0.75em; color: #444; padding: 0 10px; }
-        
-        /* Debug Log Style */
-        #fetch-log { color: var(--orange); font-family: monospace; }
+        #fetch-log { color: var(--orange); font-family: monospace; text-transform: uppercase; }
         
         .guide-sec { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .guide-h { color: var(--blue); font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
@@ -136,12 +134,12 @@
     </div>
     <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
     <div class="footer">
-        <span id="fetch-log">Connecting...</span>
-        <span>IonosTek V69.0 • Master Key</span>
+        <span id="fetch-log">Waiting for connection...</span>
+        <span>IonosTek V70.0 • Force Stream</span>
     </div>
 
     <script>
-        // UI Logic
+        // 1. UI & Clock
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
         function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
@@ -183,35 +181,32 @@
             }
         }
 
-        // --- V69.0: THE MASTER KEY (Failover System) ---
-        async function fetchWithFailover(url, type='json') {
-            const ts = Date.now();
-            // 3 Doors (Proxies)
+        // --- V70.0: Force Stream Fetcher ---
+        async function fetchSmart(url, type='json') {
+            const noise = '&nocache=' + Math.random(); // Force fresh
             const proxies = [
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url + '?t=' + ts)}`, // Door 1: CodeTabs (Best for JSON)
-                `https://corsproxy.io/?${encodeURIComponent(url + '?t=' + ts)}`, // Door 2: CorsProxy (Standard)
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${ts}` // Door 3: AllOrigins (Backup)
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url + noise)}`,
+                `https://corsproxy.io/?${encodeURIComponent(url + noise)}`, 
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&n=${Math.random()}`
             ];
 
             for (let i = 0; i < proxies.length; i++) {
                 try {
-                    log(`Trying Gate ${i+1}...`);
-                    const r = await fetch(proxies[i], { signal: AbortSignal.timeout(5000) }); // 5s Timeout
+                    log(`ATTEMPTING GATE ${i+1}...`);
+                    const r = await fetch(proxies[i], { signal: AbortSignal.timeout(6000) }); 
                     if (r.ok) {
-                        log(`Gate ${i+1} Open!`);
+                        log(`CONNECTED VIA GATE ${i+1}`);
                         return type === 'json' ? await r.json() : await r.text();
                     }
-                } catch (e) {
-                    console.log(`Gate ${i+1} Failed`);
-                }
+                } catch (e) { }
             }
-            log('All Gates Closed (Try Later)');
+            log('CONNECTION FAILED (NOAA/PROXY DOWN)');
             return null;
         }
 
         async function updateAll() {
-            // Mag (Using 2-hour file for speed)
-            const mag = await fetchWithFailover('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json', 'json');
+            // Mag
+            const mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json', 'json');
             if(mag && mag.length > 1) {
                 const l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', parseFloat(l[1]), parseFloat(l[1])-parseFloat(p[1]));
@@ -219,7 +214,7 @@
             }
 
             // Plasma
-            const plas = await fetchWithFailover('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json', 'json');
+            const plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json', 'json');
             if(plas && plas.length > 1) {
                 const l = plas[plas.length-1], p = plas[plas.length-2];
                 set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
@@ -227,21 +222,21 @@
             }
 
             // Kp
-            const kp = await fetchWithFailover('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json', 'json');
+            const kp = await fetchSmart('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json', 'json');
             if(kp && kp.length > 1) {
                 const l = kp[kp.length-1], p = kp[kp.length-2];
                 set('kp', l[1], parseFloat(l[1])-parseFloat(p[1]));
             }
 
             // Dst
-            const dst = await fetchWithFailover('https://services.swpc.noaa.gov/products/kyoto-dst.json', 'json');
+            const dst = await fetchSmart('https://services.swpc.noaa.gov/products/kyoto-dst.json', 'json');
             if(dst && dst.length > 1) {
                 const l = dst[dst.length-1], p = dst[dst.length-2];
                 set('dst', parseInt(l[1]), 0);
             }
 
-            // SFI (Text)
-            const txt = await fetchWithFailover('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
+            // SFI
+            const txt = await fetchSmart('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
             if(txt) {
                 const lines = txt.trim().split('\n');
                 let curr=null;
@@ -257,7 +252,7 @@
                 }
             }
 
-            // Forecast
+            // Forecast Logic
             const sfi = parseInt(document.getElementById('v-sfi').innerText) || 70;
             const kpv = parseFloat(document.getElementById('v-kp').innerText) || 1;
             const condEl = document.getElementById('hf-cond');
@@ -268,8 +263,6 @@
             else if(sfi > 90 && kpv < 4) { t = "GOOD (10m-20m Favorable)"; c = "var(--green)"; }
             else if(sfi < 75) { t = "FAIR / POOR (Low MUF)"; c = "var(--yellow)"; }
             condEl.innerHTML = `<span style="color:${c}">${t}</span>`;
-            
-            setTimeout(() => log('System Ready (Monitoring)'), 2000);
         }
 
         setInterval(tick, 1000);

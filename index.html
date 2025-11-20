@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V111.0 (Total Isolation)</title>
+    <title>IonosTek Monitor V112.0 (Final Baseline)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V111.0 --- */
+        /* --- CSS V112.0 (Stable Core) --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -23,10 +23,6 @@
         .blink-colon { animation: blinker 1s infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
         
-        .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; }
-        .dot-blink { animation: fade 2s infinite; color: var(--green); }
-        @keyframes fade { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
@@ -37,6 +33,7 @@
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
+        /* Arrows */
         .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; position: relative; top: -0.15em; }
         @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         .status-arrow-main { font-size: 1.2em; font-weight: 900; margin-right: 8px; display: inline-block; position: relative; top: -0.05em; }
@@ -53,6 +50,7 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
+        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 600px; border: 1px solid #444; position: relative; }
         .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
@@ -174,6 +172,7 @@
                 let box = document.getElementById('b-'+id);
                 if(!el) return;
                 
+                // If value is NaN/null, reset the box and skip further logic for safety
                 if(val === undefined || val === null || isNaN(parseFloat(val))) {
                     el.innerText = "--";
                     if(box) box.className = 'box'; 
@@ -193,7 +192,7 @@
                          trendHtml = `<span class="trend" style="color:${tColor}">${tSym}</span>`;
                     }
                     el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
-                    let s = bzVal < 0 ? 'c-alert' : 'c-norm'; 
+                    let s = bzVal < 0 ? 'c-alert' : 'c-norm'; // Strict: Negative = Alert
                     if(box) box.className = 'box '+s;
                     return; 
                 }
@@ -349,6 +348,7 @@
             log('Active');
         }
 
+        // --- MAIN START ---
         window.onload = function() {
             startClock();
             updateAll();

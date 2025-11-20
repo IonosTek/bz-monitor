@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V67.0</title>
+    <title>IonosTek Monitor V66.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V64.1 (Stable) --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -15,7 +14,7 @@
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
-        /* Version removed from H1, visible in Title only */
+        
         #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 8px; letter-spacing: 0.5px; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
         @keyframes blinker { 50% { opacity: 0; } }
@@ -66,7 +65,7 @@
     <div class="header">
         <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
         <div id="status"><span class="blink">●</span> System Active</div>
-        <button onclick="openGuide()" class="btn-guide">📘 OPERATOR GUIDE</button>
+        <button onclick="openGuideModal()" class="btn-guide">📘 OPERATOR GUIDE</button>
     </div>
 
     <div class="stats">
@@ -88,18 +87,25 @@
 
     <div class="grid">
         <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
+        
+        <div class="card"><div class="c-head"><span>TROPOSPHERE</span><span>Southeast Asia</span></div><div class="c-body">
+            <img src="https://www.dxinfocentre.com/images/seas.jpg" 
+                 onclick="view(this.src)" 
+                 onerror="this.src='https://via.placeholder.com/600x300.png?text=VHF/UHF+Map+Unavailable'">
+        </div></div>
+
         <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
+        
         <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>BLACKOUT</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
     </div>
 
     <div id="guideModal" class="modal">
         <div class="m-content">
-            <span class="close" onclick="closeModal()">&times;</span>
+            <span class="close" onclick="closeModal('guideModal')">&times;</span>
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             
             <div style="margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
-                <h3 style="color:var(--blue); margin-bottom:10px;">★ Bz Logic (The Switch)</h3>
+                <h3 style="color:var(--blue); margin-bottom:10px;">★ Understanding Bz (The Switch)</h3>
                 <p style="color:#ccc; line-height:1.6; font-size:0.9em;">
                     <span style="color:var(--green)">Bz Positive (+): "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.<br>
                     <span style="color:var(--red)">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!
@@ -113,23 +119,16 @@
         </div>
     </div>
 
-    <div id="lightbox" onclick="closeModal()"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V67.0 • Restored Stable Core</div>
+    <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
+    <div class="footer">IonosTek Monitor V66.1 • Tropospheric Integration</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
 
-        // --- UI Functions ---
-        function openGuide() { document.getElementById('guideModal').style.display = 'flex'; }
-        function closeModal() { 
-            document.getElementById('guideModal').style.display = 'none'; 
-            document.getElementById('lightbox').style.display = 'none';
-        }
-        function view(src) { 
-            document.getElementById('lb-img').src = src + '?t=' + Date.now(); 
-            document.getElementById('lightbox').style.display = 'flex'; 
-        }
+        function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
         function tick() { document.getElementById('status').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
         
         function set(id, val, diff=0) {
@@ -201,7 +200,7 @@
             if(plas && plas.length > 2) {
                 const l = plas[plas.length-1], p = plas[plas.length-2];
                 set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
-                set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[2]));
+                set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
             }
 
             // Kp
@@ -217,7 +216,7 @@
                 const l = dst[dst.length-1], p = dst[dst.length-2];
                 const val = parseInt(l[1]);
                 let color = (val < -50) ? 'c-alert' : (val < -20 ? 'c-warn' : 'c-norm');
-                set('dst', val, val-parseInt(p[1]));
+                set('dst', val, color, val-parseInt(p[1]));
             }
 
             // SFI/SSN

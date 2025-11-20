@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V64.5</title>
+    <title>IonosTek Monitor V65.0 (Stable)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V64.5 (Poly-Proxy Core) --- */
+        /* --- CSS Base: V65.0 (Emergency Recovery) --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -52,6 +52,8 @@
         .card { overflow: hidden; background: var(--card); border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
         .c-body { background: #000; height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 0; }
+        
+        /* V65 Fix: Add referrerpolicy to fix blocked images */
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
         /* Modal */
@@ -117,4 +119,162 @@
     </div>
 
     <div class="grid">
-        <div class="card"><div class="c-head"><span>PROPAGATION (TEC)</span></div><div class="c-body"><img src="
+        <div class="card"><div class="c-head"><span>PROPAGATION (TEC)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>SUNSPOTS (SDO/HMI)</span></div><div class="c-body"><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" referrerpolicy="no-referrer" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
+        <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>RADIO BLACKOUT (D-RAP)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
+    </div>
+
+    <div id="guideModal" class="modal">
+        <div class="m-content">
+            <span class="close" onclick="closeModal('guideModal')">&times;</span>
+            <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
+            <div class="guide-sec"><div class="guide-h">★ Bz (The Switch)</div><div class="guide-p"><p><span class="hl-g">Positive (+):</span> Quiet</p><p><span class="hl-r">Negative (-):</span> STORM ALERT!</p></div></div>
+        </div>
+    </div>
+    <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
+    <div class="footer">IonosTek Monitor V65.0 • Stable Recovery</div>
+
+    <script>
+        // Start Script safely
+        window.addEventListener('load', function() {
+            
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
+            
+            function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
+            window.closeModal = function(modalId) { document.getElementById(modalId).style.display = 'none'; }
+            window.view = function(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
+            
+            function tick() { 
+                try {
+                    const d = new Date();
+                    const utc = d.getUTCHours().toString().padStart(2,'0') + ':' + d.getUTCMinutes().toString().padStart(2,'0') + ':' + d.getUTCSeconds().toString().padStart(2,'0');
+                    const loc = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+                    const uEl = document.getElementById('utc-time');
+                    const lEl = document.getElementById('local-time');
+                    if(uEl) uEl.innerText = utc + ' UTC';
+                    if(lEl) lEl.innerText = loc + ' Local';
+                } catch(e) { console.log('Tick Error'); }
+            }
+
+            function set(id, val, diff=0) {
+                const el = document.getElementById('v-'+id);
+                const box = document.getElementById('b-'+id);
+                if(!el) return;
+                el.innerText = val; 
+                let s = 'c-norm';
+                if(id=='dst') { if(val < -100) s = 'c-alert'; else if(val < -50) s = 'c-mod'; else if(val < -20) s = 'c-warn'; else s = 'c-norm'; }
+                else if(id=='kp') { if(val >= 7) s = 'c-alert'; else if(val == 6) s = 'c-mod'; else if(val >= 4) s = 'c-warn'; else s = 'c-norm'; }
+                else if(id=='bz') {
+                    if(val < -5) s = 'c-alert'; else if(val < 0) s = 'c-warn'; else s = 'c-norm';
+                    const stateEl = document.getElementById('bz-state');
+                    if (stateEl) { if (val >= 0) { stateEl.innerHTML = '&#8593;'; stateEl.style.color = 'var(--green)'; } else { stateEl.innerHTML = '&#8595;'; stateEl.style.color = 'var(--red)'; } }
+                }
+                else if(id=='sfi') s = val>150?'c-good':(val>100?'c-norm':'c-warn');
+                else if(id=='wind') s = val>700?'c-alert':(val>500?'c-warn':'c-norm');
+                box.className = 'box '+s;
+                if(diff !== 0 && !isNaN(diff)) {
+                    let c = diff>0 ? 'var(--red)' : 'var(--green)';
+                    if(['sfi','ssn','dst','bz'].includes(id)) c = diff > 0 ? 'var(--green)' : 'var(--red)';
+                    else c = diff > 0 ? 'var(--red)' : 'var(--green)'; 
+                    el.innerHTML += ` <span class="trend" style="color:${c}">${diff>0?'▲':'▼'}</span>`;
+                }
+            }
+
+            // --- V65.0: Hybrid Proxy Fetcher ---
+            async function getData(url, useHeavyProxy = false) {
+                const ts = '?t=' + Date.now();
+                
+                // Strategy: Heavy files (Solar Wind) use CorsProxy first. Small files use AllOrigins.
+                if(useHeavyProxy) {
+                    try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + ts)); if(r.ok) return await r.json(); } catch(e){}
+                    try { const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url) + ts); if(r.ok) return await r.json(); } catch(e){}
+                } else {
+                    try { const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url) + ts); if(r.ok) return await r.json(); } catch(e){}
+                    try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + ts)); if(r.ok) return await r.json(); } catch(e){}
+                }
+                return null;
+            }
+            
+            async function getText(url) {
+                const ts = '?t=' + Date.now();
+                try { const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url) + ts); return await r.text(); } catch(e){}
+                try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + ts)); return await r.text(); } catch(e){ return null; }
+            }
+
+            async function updateAll() {
+                // Heavy Files: Mag & Plasma -> Use Heavy Proxy (true)
+                const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json', true);
+                if(mag && mag.length > 2) {
+                    const l = mag[mag.length-1], p = mag[mag.length-2];
+                    set('bz', parseFloat(l[1]), parseFloat(l[1])-parseFloat(p[1]));
+                    set('bt', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
+                }
+                
+                const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json', true);
+                if(plas && plas.length > 2) {
+                    const l = plas[plas.length-1], p = plas[plas.length-2];
+                    set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
+                    set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
+                }
+
+                // Light Files: Kp, Dst -> Use Light Proxy (false)
+                const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json', false);
+                if(kp && kp.length > 2) {
+                    const l = kp[kp.length-1], p = kp[kp.length-2];
+                    set('kp', l[1], parseFloat(l[1])-parseFloat(p[1]));
+                }
+                
+                const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json', false);
+                if(dst && dst.length > 2) {
+                    const l = dst[dst.length-1], p = dst[dst.length-2];
+                    const val = parseInt(l[1]);
+                    let color = (val < -50) ? 'c-alert' : (val < -20 ? 'c-warn' : 'c-norm');
+                    set('dst', val, color, val-parseInt(p[1]));
+                }
+                
+                const txtSfi = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
+                if(txtSfi) {
+                    const lines = txtSfi.trim().split('\n');
+                    let curr=null, prev=null;
+                    for(let i=lines.length-1; i>=0; i--) {
+                        if(lines[i].trim().startsWith('20')) {
+                            let cols = lines[i].trim().split(/\s+/);
+                            if(cols.length > 4) {
+                                if(!curr) curr = cols; else { prev = cols; break; }
+                            }
+                        }
+                    }
+                    if(curr) {
+                        let sfiVal = parseInt(curr[3]), prevSfi = prev ? parseInt(prev[3]) : sfiVal;
+                        set('sfi', sfiVal, sfiVal-prevSfi);
+                        let ssnVal = parseInt(curr[4]), prevSsn = prev ? parseInt(prev[4]) : ssnVal;
+                        set('ssn', ssnVal, ssnVal-prevSsn);
+                    }
+                }
+
+                // Update Forecast
+                const sfi = parseInt(document.getElementById('v-sfi').innerText) || 70;
+                const kpv = parseFloat(document.getElementById('v-kp').innerText) || 1;
+                const condEl = document.getElementById('hf-cond');
+                let txt = "NORMAL (Stable)"; let clr = "#ccc";
+                if(kpv >= 5) { txt = "STORM / NOISE WARNING"; clr = "var(--red)"; }
+                else if(kpv >= 4) { txt = "UNSETTLED (Noisy)"; clr = "var(--orange)"; }
+                else if(sfi > 120 && kpv < 3) { txt = "EXCELLENT (High Bands Open)"; clr = "var(--green)"; }
+                else if(sfi > 90 && kpv < 4) { txt = "GOOD (10m-20m Favorable)"; clr = "var(--green)"; }
+                else if(sfi < 75) { txt = "FAIR / POOR (Low MUF)"; clr = "var(--yellow)"; }
+                condEl.innerHTML = `<span style="color:${clr}">${txt}</span>`;
+            }
+
+            // Run
+            tick(); 
+            updateAll();
+            setInterval(tick, 1000);
+            setInterval(updateAll, 60000);
+            setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
+        });
+    </script>
+</body>
+</html>

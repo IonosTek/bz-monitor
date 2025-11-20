@@ -3,15 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V105.0 (Ultimate Fallback)</title>
+    <title>IonosTek Monitor V106.0 (Pure Core)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V105.0 --- */
-        :root { 
-            --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
-            --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
-            --red: #ff1744; --blue: #2979ff; 
-        }
+        /* --- CSS Base (V64 Original Style) --- */
+        :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; }
@@ -23,29 +19,217 @@
         .blink-colon { animation: blinker 1s infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
         
-        .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; }
-        .dot-blink { animation: fade 2s infinite; color: var(--green); }
-        @keyframes fade { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
+        .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
+        /* Grid System */
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; max-width: 1400px; margin: 0 auto 20px; }
-        .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; transition: transform 0.2s; }
-        .box:hover { transform: translateY(-3px); }
+        .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; justify-content: center; align-items: center; gap: 5px; white-space: nowrap; }
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
-        .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; position: relative; top: -0.15em; }
+        .hf-banner { background: #1a1a1a; padding: 12px; text-align: center; border: 1px solid #333; margin-bottom: 20px; border-radius: 6px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
+        .card { background: var(--card); border-radius: 8px; border: 1px solid #333; overflow: hidden; }
+        .c-head { background: #202020; padding: 10px 15px; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
+        .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; }
+
+        /* Arrows */
+        .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; position: relative; top: -0.2em; }
         @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         .status-arrow-main { font-size: 1.2em; font-weight: 900; margin-right: 8px; display: inline-block; position: relative; top: -0.05em; }
 
+        /* Colors */
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
-        .hf-banner { background: #1a1a1a; padding: 12px; text-align: center; border: 1px solid #333; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
+        .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 700px; border: 1px solid #444; position: relative; }
+        .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
+        #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; align-items: center; justify-content: center; }
+        #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
-        .card { background: var(--card); border-radius: 8px; border: 1px solid #333; overflow: hidden; box-shadow: 0 4px 10px
+        .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; padding: 20px 0; border-top: 1px solid #222; }
+
+        @media (max-width: 600px) { 
+            .header { flex-direction: column; text-align: center; gap:10px; } 
+            .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } 
+            .clock-box { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
+            <div style="color:#aaa; font-size:0.9em; margin-top:5px;"><span style="color:var(--green)">●</span> System Active</div>
+        </div>
+        <div class="clock-box">
+            <div class="utc-time"><span id="u-h">00</span><span class="blink-colon">:</span><span id="u-m">00</span> UTC</div>
+            <div class="local-time" id="local-clock">--:-- Local</div>
+            <button onclick="document.getElementById('guideModal').style.display='flex'" class="btn-guide">📘 OPERATOR GUIDE</button>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div><span class="unit">F10.7cm</span></div>
+        <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
+        <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
+        <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
+        <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div><span class="unit">nT</span></div>
+        <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
+        <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
+        <div class="box" id="b-den"><div class="lbl">Density</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
+    </div>
+
+    <div class="hf-banner">
+        <span style="color:#888; margin-right:10px; font-size:0.9em;">HF ESTIMATE:</span>
+        <span id="hf-cond" style="font-weight:bold;">INITIALIZING...</span>
+    </div>
+
+    <div class="grid">
+        <div class="card"><div class="c-head"><span>PROPAGATION (TEC)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>SUNSPOTS (SDO/HMI)</span></div><div class="c-body"><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
+        <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>RADIO BLACKOUT (D-RAP)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>EME FORECAST (MMMonVHF)</span></div><div class="c-body"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" onclick="window.open('https://www.mmmonvhf.de/eme.php', '_blank')" style="cursor:pointer;"></div></div>
+    </div>
+
+    <div id="guideModal" class="modal">
+        <div class="m-content">
+            <span class="close" onclick="document.getElementById('guideModal').style.display='none'">&times;</span>
+            <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
+            <p><b>Bz Positive (+):</b> Switch CLOSED (Quiet)</p>
+            <p><b>Bz Negative (-):</b> Switch OPEN (Storm Risk)</p>
+        </div>
+    </div>
+    <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
+
+    <div class="footer">V106.0 • Pure Core (Stable)</div>
+
+    <script>
+        function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
+
+        // 1. Simple Clock (No complex logic)
+        function tick() {
+            const d = new Date();
+            document.getElementById('u-h').innerText = d.getUTCHours().toString().padStart(2,'0');
+            document.getElementById('u-m').innerText = d.getUTCMinutes().toString().padStart(2,'0');
+            const lH = d.getHours().toString().padStart(2,'0');
+            const lM = d.getMinutes().toString().padStart(2,'0');
+            document.getElementById('local-clock').innerText = `${lH}:${lM} Local`;
+        }
+        setInterval(tick, 1000); tick();
+
+        // 2. UI Updater (Safe Set)
+        function set(id, val, diff=0) {
+            const el = document.getElementById('v-'+id);
+            const box = document.getElementById('b-'+id);
+            if(!el) return;
+            
+            // Bz Special Logic
+            if(id === 'bz') {
+                let bzVal = parseFloat(val);
+                let isClosed = bzVal >= 0;
+                let mainArrow = isClosed ? '&#8593;' : '&#8595;';
+                let color = isClosed ? 'var(--green)' : 'var(--red)';
+                let trendHtml = (diff !== 0) ? `<span class="trend" style="color:${diff<0?'var(--red)':'var(--green)'}">${diff>0?'▲':'▼'}</span>` : '';
+                
+                el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
+                box.className = 'box ' + (bzVal < -5 ? 'c-alert' : (bzVal < 0 ? 'c-warn' : 'c-norm'));
+                return;
+            }
+
+            // Standard Logic
+            let trendHtml = (diff !== 0) ? `<span class="trend" style="color:${(id=='kp'||id=='wind'||id=='den'?diff>0:diff<0)?'var(--red)':'var(--green)'}">${diff>0?'▲':'▼'}</span>` : '';
+            el.innerHTML = val + trendHtml;
+
+            // Colors
+            let s = 'c-norm';
+            if(id=='kp' && val >= 5) s = 'c-alert';
+            if(id=='wind' && val > 500) s = 'c-warn';
+            if(id=='dst' && val < -50) s = 'c-alert';
+            if(box) box.className = 'box '+s;
+        }
+
+        // 3. Simple Fetcher (The V64 Logic)
+        async function getData(url) {
+            try {
+                // Use simple CorsProxy directly
+                const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
+                if(r.ok) return await r.json();
+            } catch(e){}
+            return null;
+        }
+        
+        async function getText(url) {
+             try {
+                const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
+                if(r.ok) return await r.text();
+            } catch(e){}
+            return null;
+        }
+
+        async function updateAll() {
+            // Solar Wind (Using 2-hour for stability)
+            const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
+            if(mag && mag.length > 2) {
+                const l = mag[mag.length-1], p = mag[mag.length-2];
+                set('bz', l[3], parseFloat(l[3])-parseFloat(p[3]));
+                set('bt', Math.round(l[6]), parseFloat(l[6])-parseFloat(p[6]));
+            }
+
+            const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
+            if(plas && plas.length > 2) {
+                const l = plas[plas.length-1], p = plas[plas.length-2];
+                set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
+                set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
+            }
+
+            // Kp & Dst
+            const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
+            if(kp) set('kp', kp[kp.length-1][1], parseFloat(kp[kp.length-1][1])-parseFloat(kp[kp.length-2][1]));
+
+            const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
+            if(dst) set('dst', parseInt(dst[dst.length-1][1]), parseInt(dst[dst.length-1][1])-parseInt(dst[dst.length-2][1]));
+
+            // SFI
+            const sfiTxt = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
+            if(sfiTxt) {
+                const lines = sfiTxt.trim().split('\n');
+                let curr = null, prev = null;
+                for(let i=lines.length-1; i>=0; i--) {
+                    if(lines[i].startsWith('20') && lines[i].length > 10) {
+                        let cols = lines[i].trim().split(/\s+/);
+                        if(cols.length > 4) {
+                            if(!curr) curr = cols; else { prev = cols; break; }
+                        }
+                    }
+                }
+                if(curr) {
+                    set('sfi', curr[3], parseInt(curr[3])-parseInt(prev[3]));
+                    set('ssn', curr[4], parseInt(curr[4])-parseInt(prev[4]));
+                }
+            }
+            
+            // Estimate
+            let sfi = parseInt(document.getElementById('v-sfi').innerText)||0;
+            let kpV = parseFloat(document.getElementById('v-kp').innerText)||0;
+            let txt = "NORMAL"; let c = "#ccc";
+            if(kpV >= 5) { txt = "STORM"; c = "var(--red)"; }
+            else if(sfi > 100) { txt = "EXCELLENT"; c = "var(--green)"; }
+            document.getElementById('hf-cond').innerText = txt;
+            document.getElementById('hf-cond').style.color = c;
+        }
+
+        updateAll();
+        setInterval(updateAll, 60000);
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V71.0</title>
+    <title>IonosTek Monitor V72.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- Theme --- */
@@ -33,7 +33,7 @@
         @keyframes arrow { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
 
-        /* Image Grid (4 Cards) - STRICT SIZING */
+        /* Image Grid (4 Cards) */
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column; }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
@@ -42,16 +42,16 @@
             background: #000; 
             height: 300px; 
             width: 100%; 
-            overflow: hidden; /* CLIP EVERYTHING */
+            overflow: hidden; 
             display: flex; 
             align-items: center; 
             justify-content: center;
             position: relative;
         }
         .c-body img { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; /* Force fit inside */
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
         }
 
         /* Modal */
@@ -107,9 +107,9 @@
     <div class="grid">
         <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
         
-        <div class="card"><div class="c-head"><span>TROPOSPHERE</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/global-water-vapor.gif" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>ATMOSPHERE</span></div><div class="c-body"><img src="https://cdn.star.nesdis.noaa.gov/GOES16/ABI/SECTOR/taw/13/1000x1000.jpg" onclick="view(this.src)"></div></div>
 
-        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)"></div></div>
+        <div class="card"><div class="c-head"><span>SOLAR FLARES</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/x-ray-flux-3-day.gif" onclick="view(this.src)"></div></div>
         
         <div class="card"><div class="c-head"><span>AURORA</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
     </div>
@@ -131,10 +131,15 @@
         </div>
     </div>
 
-    <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V71.0 • Final Absolute Fix</div>
+    <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
+    <div class="footer">IonosTek Monitor V72.0 • Final Asset Lock</div>
 
     <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
+
+        function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
         function tick() { document.getElementById('status').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
         
@@ -147,13 +152,11 @@
             
             let s = 'c-norm';
             if(id=='dst') { if(val < -100) s = 'c-alert'; else if(val < -50) s = 'c-mod'; else if(val < -20) s = 'c-warn'; }
-            else if(id=='kp') { if(val >= 7) s = 'c-alert'; else if(val >= 4) s = 'c-warn'; }
+            else if(id=='kp') { if(val >= 7) s = 'c-alert'; else if(val == 6) s = 'c-mod'; else if(val >= 4) s = 'c-warn'; }
             else if(id=='bz') { 
                 if(val < -5) s = 'c-alert'; else if(val < 0) s = 'c-warn';
-                // Arrow Logic for Bz
-                if(val>=0) el.innerHTML += ' <span style="color:var(--green)">&#9650;</span>';
-                else el.innerHTML += ' <span style="color:var(--red)">&#9660;</span>';
-                diff = 0; // Disable standard diff arrow for Bz
+                // Note: Bz arrow logic removed here as requested to keep simple, relying on diff arrow below if needed
+                // or just color.
             }
             else if(id=='sfi') s = val>150?'c-good':(val>100?'c-norm':'c-warn');
             else if(id=='wind') s = val>700?'c-alert':(val>500?'c-warn':'c-norm');
@@ -163,16 +166,18 @@
 
             if(diff !== 0 && !isNaN(diff)) {
                 let c = diff>0 ? 'var(--red)' : 'var(--green)';
-                if(['sfi','ssn','dst'].includes(id)) c = diff > 0 ? 'var(--green)' : 'var(--red)';
+                if(['sfi','ssn','dst','bz'].includes(id)) c = diff > 0 ? 'var(--green)' : 'var(--red)';
+                else c = diff > 0 ? 'var(--red)' : 'var(--green)'; 
                 el.innerHTML += ` <span class="trend" style="color:${c}">${diff>0?'▲':'▼'}</span>`;
             }
         }
 
-        // --- Fetcher ---
+        // --- Multi-Proxy Fetcher ---
         async function getData(url) {
             try { const r = await fetch(url + '?t=' + Date.now()); if(r.ok) return await r.json(); } catch(e){}
             try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.json(); } catch(e){ return null; }
         }
+        
         async function getText(url) {
             try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.text(); } catch(e){ return null; }
         }
@@ -185,6 +190,7 @@
                 set('bz', parseFloat(l[1]), parseFloat(l[1])-parseFloat(p[1]));
                 set('bt', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
             }
+
             // Plasma
             const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
             if(plas && plas.length > 2) {
@@ -192,71 +198,15 @@
                 set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
                 set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
             }
+
             // Kp
             const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 const l = kp[kp.length-1], p = kp[kp.length-2];
                 set('kp', l[1], parseFloat(l[1])-parseFloat(p[1]));
             }
+
             // Dst
             const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
             if(dst && dst.length > 2) {
-                const l = dst[dst.length-1], p = dst[dst.length-2];
-                set('dst', parseInt(l[1]), parseInt(l[1])-parseInt(p[1]));
-            }
-            // SFI/SSN
-            const txtSfi = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
-            if(txtSfi) {
-                const lines = txtSfi.trim().split('\n');
-                let curr=null, prev=null;
-                for(let i=lines.length-1; i>=0; i--) {
-                    if(lines[i].includes('20')) {
-                        let cols = lines[i].trim().split(/\s+/);
-                        if(cols.length > 4) {
-                            if(!curr) curr = cols;
-                            else { prev = cols; break; }
-                        }
-                    }
-                }
-                if(curr) {
-                    let sfiVal = parseInt(curr[3]), prevSfi = prev ? parseInt(prev[3]) : sfiVal;
-                    set('sfi', sfiVal, sfiVal-prevSfi);
-                    let ssnVal = parseInt(curr[4]), prevSsn = prev ? parseInt(prev[4]) : ssnVal;
-                    set('ssn', ssnVal, ssnVal-prevSsn);
-                }
-            }
-            
-            // X-Ray (Simple Text Scale)
-            const txtScale = await getText('https://services.swpc.noaa.gov/text/noaa-scales.txt');
-            if(txtScale) {
-                const lines = txtScale.trim().split('\n');
-                let found = false;
-                for(let i=lines.length-1; i>=0; i--) {
-                   // Look for date format e.g. 2025
-                   if(lines[i].includes('20')) {
-                        const cols = lines[i].trim().split(/\s+/);
-                        // Date Time R S G
-                        if(cols.length >= 5) {
-                            let r = parseInt(cols[2]);
-                            let d="A/B", s="c-norm";
-                            if(r==1){ d="M1+"; s="c-warn"; }
-                            if(r>=2){ d="M5+"; s="c-alert"; }
-                            if(r>=3){ d="X1+"; s="c-alert"; }
-                            set('xray', d, 0);
-                            found = true; break;
-                        }
-                   }
-                }
-                if(!found) set('xray', 'Active', 0);
-            } else {
-                 set('xray', '--', 0);
-            }
-        }
-
-        tick(); updateAll();
-        setInterval(tick, 1000);
-        setInterval(updateAll, 60000);
-        setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
-    </script>
-</body>
-</html>
+                const l = dst[dst.length-

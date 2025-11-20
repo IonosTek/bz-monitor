@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V106.0 (Pure Core)</title>
+    <title>IonosTek Monitor V107.0 (Dual-Arrow Standard)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base (V64 Original Style) --- */
+        /* --- CSS V107.0 --- */
         :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         
@@ -22,12 +22,40 @@
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
-        /* Grid System */
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; max-width: 1400px; margin: 0 auto 20px; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        
+        /* Value Container */
         .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; justify-content: center; align-items: center; gap: 5px; white-space: nowrap; }
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
+        
+        /* ARROWS */
+        /* Trend Arrow (Right) - Small & Animated */
+        .trend { 
+            font-size: 0.5em; 
+            font-weight: 900; 
+            display: inline-block; 
+            margin-left: 5px; 
+            animation: arrow-bounce 2s infinite; 
+            position: relative; 
+            top: -0.2em; 
+        }
+        @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        
+        /* Status Arrow (Left) - Big & Static */
+        .status-arrow-main { 
+            font-size: 1.2em; 
+            font-weight: 900; 
+            margin-right: 8px; 
+            display: inline-block; 
+            position: relative; 
+            top: -0.05em; 
+        }
+
+        .c-norm { border-top-color: var(--green) !important; color: var(--green); }
+        .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
+        .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .hf-banner { background: #1a1a1a; padding: 12px; text-align: center; border: 1px solid #333; margin-bottom: 20px; border-radius: 6px; }
         
@@ -37,17 +65,6 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; }
 
-        /* Arrows */
-        .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; position: relative; top: -0.2em; }
-        @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        .status-arrow-main { font-size: 1.2em; font-weight: 900; margin-right: 8px; display: inline-block; position: relative; top: -0.05em; }
-
-        /* Colors */
-        .c-norm { border-top-color: var(--green) !important; color: var(--green); }
-        .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
-        .c-alert { border-top-color: var(--red) !important; color: var(--red); }
-        
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 700px; border: 1px solid #444; position: relative; }
         .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
@@ -80,8 +97,11 @@
         <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div><span class="unit">F10.7cm</span></div>
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
+        
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
+        
         <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div><span class="unit">nT</span></div>
+        
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Density</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
@@ -107,16 +127,20 @@
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             <p><b>Bz Positive (+):</b> Switch CLOSED (Quiet)</p>
             <p><b>Bz Negative (-):</b> Switch OPEN (Storm Risk)</p>
+            <hr style="border:0; border-top:1px solid #444; margin:15px 0;">
+            <p><b>Dst > -20:</b> Quiet</p>
+            <p><b>Dst -20 to -50:</b> Minor Storm</p>
+            <p><b>Dst < -50:</b> Major Storm</p>
         </div>
     </div>
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
 
-    <div class="footer">V106.0 • Pure Core (Stable)</div>
+    <div class="footer">V107.0 • Dual-Arrow Standard</div>
 
     <script>
         function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
 
-        // 1. Simple Clock (No complex logic)
+        // Clock
         function tick() {
             const d = new Date();
             document.getElementById('u-h').innerText = d.getUTCHours().toString().padStart(2,'0');
@@ -127,17 +151,17 @@
         }
         setInterval(tick, 1000); tick();
 
-        // 2. UI Updater (Safe Set)
+        // Logic Set
         function set(id, val, diff=0) {
             const el = document.getElementById('v-'+id);
             const box = document.getElementById('b-'+id);
             if(!el) return;
             
-            // Bz Special Logic
+            // --- BZ LOGIC (Status + Trend) ---
             if(id === 'bz') {
                 let bzVal = parseFloat(val);
                 let isClosed = bzVal >= 0;
-                let mainArrow = isClosed ? '&#8593;' : '&#8595;';
+                let mainArrow = isClosed ? '&#8593;' : '&#8595;'; // Up/Down
                 let color = isClosed ? 'var(--green)' : 'var(--red)';
                 let trendHtml = (diff !== 0) ? `<span class="trend" style="color:${diff<0?'var(--red)':'var(--green)'}">${diff>0?'▲':'▼'}</span>` : '';
                 
@@ -146,7 +170,23 @@
                 return;
             }
 
-            // Standard Logic
+            // --- DST LOGIC (Status + Trend) ---
+            if(id === 'dst') {
+                let dstVal = parseFloat(val);
+                let mainArrow, color, s;
+                
+                if (dstVal <= -50) { mainArrow = '&#8595;'; color = 'var(--red)'; s = 'c-alert'; }
+                else if (dstVal <= -20) { mainArrow = '&#8595;'; color = 'var(--yellow)'; s = 'c-warn'; }
+                else { mainArrow = '&#8593;'; color = 'var(--green)'; s = 'c-norm'; }
+
+                let trendHtml = (diff !== 0) ? `<span class="trend" style="color:${diff<0?'var(--red)':'var(--green)'}">${diff>0?'▲':'▼'}</span>` : '';
+                
+                el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
+                box.className = 'box ' + s;
+                return;
+            }
+
+            // --- STANDARD LOGIC ---
             let trendHtml = (diff !== 0) ? `<span class="trend" style="color:${(id=='kp'||id=='wind'||id=='den'?diff>0:diff<0)?'var(--red)':'var(--green)'}">${diff>0?'▲':'▼'}</span>` : '';
             el.innerHTML = val + trendHtml;
 
@@ -154,14 +194,12 @@
             let s = 'c-norm';
             if(id=='kp' && val >= 5) s = 'c-alert';
             if(id=='wind' && val > 500) s = 'c-warn';
-            if(id=='dst' && val < -50) s = 'c-alert';
             if(box) box.className = 'box '+s;
         }
 
-        // 3. Simple Fetcher (The V64 Logic)
+        // Fetcher
         async function getData(url) {
             try {
-                // Use simple CorsProxy directly
                 const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
                 if(r.ok) return await r.json();
             } catch(e){}
@@ -177,7 +215,6 @@
         }
 
         async function updateAll() {
-            // Solar Wind (Using 2-hour for stability)
             const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(mag && mag.length > 2) {
                 const l = mag[mag.length-1], p = mag[mag.length-2];
@@ -192,14 +229,12 @@
                 set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
             }
 
-            // Kp & Dst
             const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp) set('kp', kp[kp.length-1][1], parseFloat(kp[kp.length-1][1])-parseFloat(kp[kp.length-2][1]));
 
             const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
             if(dst) set('dst', parseInt(dst[dst.length-1][1]), parseInt(dst[dst.length-1][1])-parseInt(dst[dst.length-2][1]));
 
-            // SFI
             const sfiTxt = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(sfiTxt) {
                 const lines = sfiTxt.trim().split('\n');
@@ -218,7 +253,6 @@
                 }
             }
             
-            // Estimate
             let sfi = parseInt(document.getElementById('v-sfi').innerText)||0;
             let kpV = parseFloat(document.getElementById('v-kp').innerText)||0;
             let txt = "NORMAL"; let c = "#ccc";

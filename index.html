@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V73.0 (Auto-Switch)</title>
+    <title>IonosTek Monitor V74.0 (New Road)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base V73 --- */
+        /* --- CSS V74.0 --- */
         :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; }
@@ -65,7 +65,7 @@
 
     <div class="hf-banner">
         <span style="color:#888; margin-right:10px;">HF ESTIMATE:</span>
-        <span id="hf-cond" style="font-weight:bold;">CALCULATING...</span>
+        <span id="hf-cond" style="font-weight:bold;">CONNECTING...</span>
     </div>
 
     <div class="grid">
@@ -86,15 +86,12 @@
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
 
     <div style="display:flex; justify-content:space-between; margin-top:30px; padding:0 10px;">
-        <span id="fetch-log">Initializing...</span>
-        <span style="color:#444; font-size:0.8em;">V73.0 • Auto-Switch</span>
+        <span id="fetch-log">System Start</span>
+        <span style="color:#444; font-size:0.8em;">V74.0 • New Road</span>
     </div>
 
     <script>
-        // Safe UI Logic
-        function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
-        function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
-        
+        // --- 1. Clock (Indestructible) ---
         function tick() {
             try {
                 let d = new Date();
@@ -105,16 +102,18 @@
         }
         setInterval(tick, 1000); tick();
 
+        // --- 2. UI Helpers ---
+        function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
+        function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
+
         function set(id, val) {
             try {
                 let el = document.getElementById('v-'+id);
                 let box = document.getElementById('b-'+id);
                 if(el) {
-                    // Validate: If value is "bx_gsm" or NaN, don't show it
-                    if(isNaN(parseFloat(val))) return;
+                    if(val === undefined || val === null || isNaN(parseFloat(val))) return;
                     el.innerText = val;
                 }
-                
                 let s = 'c-norm';
                 if(id=='bz' && val < 0) s = 'c-alert';
                 if(id=='kp' && val >= 5) s = 'c-alert';
@@ -123,43 +122,82 @@
             } catch(e){}
         }
 
-        // Smart Fetcher with Fallback
-        async function getJSON(filename1, filename2) {
-            let ts = '?t=' + Date.now();
-            // Try File 1 (Small)
+        // --- 3. New Data Engine (AllOrigins First) ---
+        async function getData(url, type='json') {
+            let target = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url + '?t=' + Date.now());
             try {
-                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/' + filename1 + ts));
+                let r = await fetch(target);
                 if(r.ok) {
-                    let d = await r.json();
-                    // Check if valid data (length > 1 means header + data)
-                    if(d && d.length > 1) {
-                        console.log('Used ' + filename1);
-                        return d[d.length-1]; 
+                    let data = await r.json();
+                    if(data.contents) {
+                        if(type==='json') return JSON.parse(data.contents);
+                        return data.contents;
                     }
                 }
-            } catch(e){}
-            
-            log('Primary empty. Switching to backup source...');
-            
-            // Try File 2 (Big/Backup)
-            try {
-                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/products/solar-wind/' + filename2 + ts));
-                if(r.ok) {
-                    let d = await r.json();
-                    if(d && d.length > 1) {
-                        console.log('Used ' + filename2);
-                        return d[d.length-1];
-                    }
-                }
-            } catch(e){}
+            } catch(e) { console.log('Proxy error: ' + url); }
             return null;
         }
 
         async function update() {
-            log('Updating...');
+            log('Connecting via New Route...');
             
-            // Mag (Try 2-hour, failover to 5-minute/24h)
-            let mag = await getJSON('mag-2-hour.json', 'mag-5-minute.json');
-            if(mag) {
-                // CORRECT INDICES: Bz is [3], Bt is [6]
-                set('bz', mag[3]);
+            // Mag (Try 2-hour)
+            let mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json', 'json');
+            if(mag && mag.length > 1) {
+                let l = mag[mag.length-1];
+                // Index: [time, bx, by, bz, lon, lat, bt]
+                set('bz', l[3]); 
+                set('bt', Math.round(l[6]));
+            }
+
+            // Plasma (Try 2-hour)
+            let plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json', 'json');
+            if(plas && plas.length > 1) {
+                let l = plas[plas.length-1];
+                // Index: [time, den, speed, temp]
+                set('den', Math.round(l[1]));
+                set('wind', Math.round(l[2]));
+            }
+
+            // Kp
+            let kpData = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json', 'json');
+            if(kpData && kpData.length > 1) {
+                set('kp', kpData[kpData.length-1][1]);
+            }
+
+            // Dst
+            let dstData = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json', 'json');
+            if(dstData && dstData.length > 1) {
+                set('dst', parseInt(dstData[dstData.length-1][1]));
+            }
+
+            // SFI
+            let sfiText = await getData('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
+            if(sfiText) {
+                let lines = sfiText.trim().split('\n');
+                let cols = lines[lines.length-1].trim().split(/\s+/);
+                if(cols.length > 3) { set('sfi', cols[3]); set('ssn', cols[4]); }
+            }
+
+            // Forecast
+            let kp = parseFloat(document.getElementById('v-kp').innerText)||0;
+            let sfi = parseInt(document.getElementById('v-sfi').innerText)||0;
+            let cond = document.getElementById('hf-cond');
+            let txt = "NORMAL"; let c = "#ccc";
+            
+            if(kp >= 5) { txt = "STORM WARNING"; c = "var(--red)"; }
+            else if(sfi > 120) { txt = "EXCELLENT"; c = "var(--green)"; }
+            else if(sfi > 90) { txt = "GOOD"; c = "var(--green)"; }
+            
+            cond.innerText = txt; cond.style.color = c;
+            log('Active');
+        }
+
+        // Run
+        window.addEventListener('load', function() {
+            update();
+            setInterval(update, 60000);
+        });
+    </script>
+</body>
+</html>

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V87.2 (Big Arrow Fix)</title>
+    <title>IonosTek Monitor V87.3 (Dst Enhanced)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V87.2 --- */
+        /* --- CSS V87.3 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -39,21 +39,9 @@
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
-        /* --- ARROW ADJUSTMENTS (V87.2) --- */
-        
-        /* 1. Big Left Arrow (Status) - Moved UP to center */
-        .bz-arrow-main { 
-            font-size: 1.2em; 
-            font-weight: 900; 
-            margin-right: 8px;
-            display: inline-block;
-            position: relative;
-            top: -0.1em; /* ดันขึ้นไปนิดนึงให้อยู่กลางตัวเลข */
-        }
-
-        /* 2. Small Right Arrow (Trend) - Kept centered */
+        /* Arrows */
         .trend { 
-            font-size: 0.6em; 
+            font-size: 0.5em; 
             font-weight: 900; 
             display: inline-block; 
             margin-left: 5px; 
@@ -62,6 +50,16 @@
             top: -0.2em;
         }
         @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        
+        /* Status Arrow (Big Left Arrow) */
+        .status-arrow-main { 
+            font-size: 1.2em; 
+            font-weight: 900; 
+            margin-right: 8px;
+            display: inline-block;
+            position: relative;
+            top: -0.1em;
+        }
 
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
@@ -85,14 +83,6 @@
         .footer { display: flex; justify-content: space-between; margin-top: 40px; font-size: 0.75em; color: #444; padding: 0 10px; border-top: 1px solid #222; padding-top: 20px; }
         #fetch-log { color: var(--orange); font-family: monospace; }
         .btn-retry { background: #333; border: 1px solid #555; color: #ccc; padding: 2px 10px; cursor: pointer; border-radius: 4px; font-size: 0.9em; margin-left: 10px; }
-
-        /* Guide CSS */
-        .guide-sec { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333; }
-        .guide-h { color: var(--blue); font-weight: 700; margin-bottom: 10px; font-size: 1.1em; }
-        .guide-p { color: #ccc; font-size: 0.95em; line-height: 1.6; margin-bottom: 8px; }
-        .hl-g { color: var(--green); font-weight:bold; }
-        .hl-r { color: var(--red); font-weight:bold; }
-        .hl-y { color: var(--yellow); font-weight:bold; }
 
         @media (max-width: 600px) { 
             .header { flex-direction: column; text-align: center; gap:10px; } 
@@ -132,7 +122,12 @@
         <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div><span class="unit">F10.7cm</span></div>
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
-        <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
+        
+        <div class="box" id="b-dst">
+            <div class="lbl">Dst</div>
+            <div class="val" id="v-dst">--</div>
+            <span class="unit">nT</span>
+        </div>
         
         <div class="box" id="b-bz">
             <div class="lbl">Bz</div>
@@ -183,10 +178,11 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V87.2 • Big Arrow Fix</span>
+        <span style="color:#666;">V87.3 • Dst Enhanced</span>
     </div>
 
     <script>
+        // --- 2. UI HELPERS ---
         function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
         function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
 
@@ -197,7 +193,7 @@
                 if(!el) return;
                 if(val === undefined || val === null || isNaN(parseFloat(val))) return;
                 
-                // Bz Logic
+                // === SPECIAL 1: Bz Logic (The Switch) ===
                 if (id === 'bz') {
                     let bzVal = parseFloat(val);
                     let isClosed = bzVal >= 0;
@@ -210,15 +206,48 @@
                          let tSym = diff > 0 ? '▲' : '▼';
                          trendHtml = `<span class="trend" style="color:${tColor}">${tSym}</span>`;
                     }
-                    // Apply CSS Class for Big Left Arrow
-                    el.innerHTML = `<span class="bz-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
-                    
+                    el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
                     let s = bzVal < -5 ? 'c-alert' : (bzVal < 0 ? 'c-warn' : 'c-norm');
                     if(box) box.className = 'box '+s;
                     return; 
                 }
 
-                // Standard Logic
+                // === SPECIAL 2: Dst Logic (Storm Monitor) ===
+                if (id === 'dst') {
+                    let dstVal = parseFloat(val);
+                    // Thresholds: > -20 (Green), -20 to -50 (Yellow), < -50 (Red)
+                    let mainArrow, color, s;
+                    
+                    if (dstVal <= -50) {
+                        // Storm
+                        mainArrow = '&#8595;'; // Down
+                        color = 'var(--red)';
+                        s = 'c-alert';
+                    } else if (dstVal <= -20) {
+                        // Minor
+                        mainArrow = '&#8595;'; // Down
+                        color = 'var(--yellow)';
+                        s = 'c-warn';
+                    } else {
+                        // Quiet
+                        mainArrow = '&#8593;'; // Up
+                        color = 'var(--green)';
+                        s = 'c-norm';
+                    }
+
+                    let trendHtml = '';
+                    if(diff !== 0 && !isNaN(diff)) {
+                         let tColor = diff < 0 ? 'var(--red)' : 'var(--green)';
+                         let tSym = diff > 0 ? '▲' : '▼';
+                         trendHtml = `<span class="trend" style="color:${tColor}">${tSym}</span>`;
+                    }
+
+                    el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
+                    if(box) box.className = 'box '+s;
+                    return;
+                }
+
+                // === STANDARD LOGIC (Others) ===
                 let arrowHtml = '';
                 if(diff !== 0 && !isNaN(diff)) {
                     let isBad = false;
@@ -232,14 +261,13 @@
                 
                 let s = 'c-norm';
                 if(id=='kp' && val >= 5) s = 'c-alert';
-                if(id=='dst' && val < -50) s = 'c-alert';
                 if(id=='wind' && val > 500) s = 'c-warn';
                 if(box) box.className = 'box '+s;
 
             } catch(e){}
         }
 
-        // --- DATA FETCHING ---
+        // --- 3. DATA FETCHING ---
         async function fetchSmart(url, type='json') {
             try {
                 let r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url + '?t=' + Date.now()));

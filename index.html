@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V74.0 (New Road)</title>
+    <title>IonosTek Monitor V75.0 (Text Parser)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V74.0 --- */
+        /* --- CSS V75.0 --- */
         :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; }
@@ -36,6 +36,7 @@
         #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
         
         #fetch-log { color: var(--orange); font-family: monospace; font-size: 0.8em; }
+        .btn-retry { background: #333; border: 1px solid #555; color: #ccc; padding: 2px 10px; cursor: pointer; border-radius: 4px; font-size: 0.8em; margin-left: 10px; }
 
         @media (max-width: 600px) { .header { flex-direction: column; text-align: center; } .stats { grid-template-columns: repeat(2, 1fr); } }
     </style>
@@ -65,7 +66,7 @@
 
     <div class="hf-banner">
         <span style="color:#888; margin-right:10px;">HF ESTIMATE:</span>
-        <span id="hf-cond" style="font-weight:bold;">CONNECTING...</span>
+        <span id="hf-cond" style="font-weight:bold;">INITIALIZING...</span>
     </div>
 
     <div class="grid">
@@ -86,12 +87,17 @@
     <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
 
     <div style="display:flex; justify-content:space-between; margin-top:30px; padding:0 10px;">
-        <span id="fetch-log">System Start</span>
-        <span style="color:#444; font-size:0.8em;">V74.0 • New Road</span>
+        <div>
+            <span id="fetch-log">Starting...</span>
+            <button class="btn-retry" onclick="updateAll()">RETRY</button>
+        </div>
+        <span style="color:#444; font-size:0.8em;">V75.0 • Text Parser</span>
     </div>
 
     <script>
-        // --- 1. Clock (Indestructible) ---
+        function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
+        function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
+
         function tick() {
             try {
                 let d = new Date();
@@ -101,10 +107,6 @@
             } catch(e){}
         }
         setInterval(tick, 1000); tick();
-
-        // --- 2. UI Helpers ---
-        function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
-        function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
 
         function set(id, val) {
             try {
@@ -122,81 +124,90 @@
             } catch(e){}
         }
 
-        // --- 3. New Data Engine (AllOrigins First) ---
-        async function getData(url, type='json') {
-            let target = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url + '?t=' + Date.now());
+        // --- V75.0: Text Parsing Engine ---
+        async function fetchText(url) {
+            // Use AllOrigins for text files (Works best)
+            let target = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url + '?t=' + Date.now());
             try {
                 let r = await fetch(target);
-                if(r.ok) {
-                    let data = await r.json();
-                    if(data.contents) {
-                        if(type==='json') return JSON.parse(data.contents);
-                        return data.contents;
-                    }
-                }
-            } catch(e) { console.log('Proxy error: ' + url); }
+                if(r.ok) return await r.text();
+            } catch(e) { console.log('Text fetch error'); }
             return null;
         }
 
-        async function update() {
-            log('Connecting via New Route...');
+        // Backup: Try JSON if Text fails
+        async function fetchJson(url) {
+            try {
+                let r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
+                if(r.ok) return await r.json();
+            } catch(e){}
+            return null;
+        }
+
+        async function updateAll() {
+            log('Fetching Raw Data...');
             
-            // Mag (Try 2-hour)
-            let mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json', 'json');
-            if(mag && mag.length > 1) {
-                let l = mag[mag.length-1];
-                // Index: [time, bx, by, bz, lon, lat, bt]
-                set('bz', l[3]); 
-                set('bt', Math.round(l[6]));
-            }
-
-            // Plasma (Try 2-hour)
-            let plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json', 'json');
-            if(plas && plas.length > 1) {
-                let l = plas[plas.length-1];
-                // Index: [time, den, speed, temp]
-                set('den', Math.round(l[1]));
-                set('wind', Math.round(l[2]));
-            }
-
-            // Kp
-            let kpData = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json', 'json');
-            if(kpData && kpData.length > 1) {
-                set('kp', kpData[kpData.length-1][1]);
-            }
-
-            // Dst
-            let dstData = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json', 'json');
-            if(dstData && dstData.length > 1) {
-                set('dst', parseInt(dstData[dstData.length-1][1]));
-            }
-
-            // SFI
-            let sfiText = await getData('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
-            if(sfiText) {
-                let lines = sfiText.trim().split('\n');
+            // 1. SFI (Text)
+            let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
+            if(sfiTxt) {
+                let lines = sfiTxt.trim().split('\n');
                 let cols = lines[lines.length-1].trim().split(/\s+/);
                 if(cols.length > 3) { set('sfi', cols[3]); set('ssn', cols[4]); }
             }
 
-            // Forecast
-            let kp = parseFloat(document.getElementById('v-kp').innerText)||0;
-            let sfi = parseInt(document.getElementById('v-sfi').innerText)||0;
-            let cond = document.getElementById('hf-cond');
-            let txt = "NORMAL"; let c = "#ccc";
+            // 2. Solar Wind (Mag) - Try JSON first (Standard), then Text? No, try JSON first as V74 worked partially
+            let mag = await fetchJson('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
+            if(mag && mag.length > 1) {
+                let l = mag[mag.length-1];
+                set('bz', l[3]); set('bt', Math.round(l[6]));
+            } else {
+                // Fallback: Try 6-hour file (Sometimes 2-hour is empty)
+                log('Retry: 6hr Mag...');
+                let mag6 = await fetchJson('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
+                if(mag6 && mag6.length > 1) {
+                    let l = mag6[mag6.length-1];
+                    set('bz', l[3]); set('bt', Math.round(l[6]));
+                }
+            }
+
+            // 3. Plasma - Same strategy
+            let plas = await fetchJson('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
+            if(plas && plas.length > 1) {
+                let l = plas[plas.length-1];
+                set('den', Math.round(l[1])); set('wind', Math.round(l[2]));
+            } else {
+                log('Retry: 6hr Plasma...');
+                let plas6 = await fetchJson('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
+                if(plas6 && plas6.length > 1) {
+                    let l = plas6[plas6.length-1];
+                    set('den', Math.round(l[1])); set('wind', Math.round(l[2]));
+                }
+            }
+
+            // 4. Kp & Dst (These are stable)
+            let kp = await fetchJson('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
+            if(kp) set('kp', kp[kp.length-1][1]);
             
-            if(kp >= 5) { txt = "STORM WARNING"; c = "var(--red)"; }
-            else if(sfi > 120) { txt = "EXCELLENT"; c = "var(--green)"; }
-            else if(sfi > 90) { txt = "GOOD"; c = "var(--green)"; }
+            let dst = await fetchJson('https://services.swpc.noaa.gov/products/kyoto-dst.json');
+            if(dst) set('dst', parseInt(dst[dst.length-1][1]));
+
+            // Forecast Logic
+            let kpv = parseFloat(document.getElementById('v-kp').innerText)||0;
+            let sfiv = parseInt(document.getElementById('v-sfi').innerText)||0;
+            let cond = document.getElementById('hf-cond');
+            let txt = "NORMAL", c = "#ccc";
+            
+            if(kpv >= 5) { txt = "STORM WARNING"; c = "var(--red)"; }
+            else if(sfiv > 120) { txt = "EXCELLENT"; c = "var(--green)"; }
+            else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
             
             cond.innerText = txt; cond.style.color = c;
-            log('Active');
+            log('Monitoring Active');
         }
 
-        // Run
         window.addEventListener('load', function() {
-            update();
-            setInterval(update, 60000);
+            updateAll();
+            setInterval(updateAll, 60000);
         });
     </script>
 </body>

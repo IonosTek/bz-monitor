@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V66.0</title>
+    <title>IonosTek Monitor V67.0 (Bulletproof)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V66.0 (Smart Unpack Core) --- */
+        /* --- CSS Base: V67.0 --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -52,6 +52,8 @@
         .card { overflow: hidden; background: var(--card); border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
         .c-body { background: #000; height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 0; }
+        
+        /* Vital Fix for Images */
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
         /* Modal */
@@ -133,29 +135,137 @@
     </div>
     <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
     <div class="footer">
-        <span id="fetch-log">Initializing...</span>
-        <span>IonosTek Monitor V66.0 • Stable</span>
+        <span id="fetch-log">System Ready</span>
+        <span>IonosTek Monitor V67.0 • Bulletproof</span>
     </div>
 
     <script>
-        window.addEventListener('load', function() {
-            document.addEventListener('contextmenu', e => e.preventDefault());
-            document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
-            
-            function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
-            window.closeModal = function(modalId) { document.getElementById(modalId).style.display = 'none'; }
-            window.view = function(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
-            
-            function log(msg) { document.getElementById('fetch-log').innerText = msg; }
+        // 1. UI & Clock Functions (Isolated - Always Safe)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
+        function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
+        function log(msg) { try{ document.getElementById('fetch-log').innerText = msg; }catch(e){} }
 
-            function tick() { 
-                try {
-                    const d = new Date();
-                    const utc = d.getUTCHours().toString().padStart(2,'0') + ':' + d.getUTCMinutes().toString().padStart(2,'0') + ':' + d.getUTCSeconds().toString().padStart(2,'0');
-                    const loc = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
-                    const uEl = document.getElementById('utc-time');
-                    const lEl = document.getElementById('local-time');
-                    if(uEl) uEl.innerText = utc + ' UTC';
-                    if(lEl) lEl.innerText = loc + ' Local';
-                } catch(e) {}
+        function tick() {
+            try {
+                const d = new Date();
+                const utc = d.getUTCHours().toString().padStart(2,'0') + ':' + d.getUTCMinutes().toString().padStart(2,'0') + ':' + d.getUTCSeconds().toString().padStart(2,'0');
+                const loc = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+                document.getElementById('utc-time').innerText = utc + ' UTC';
+                document.getElementById('local-time').innerText = loc + ' Local';
+            } catch(e) { console.error(e); }
+        }
+
+        function set(id, val, diff=0) {
+            const el = document.getElementById('v-'+id);
+            const box = document.getElementById('b-'+id);
+            if(!el) return;
+            el.innerText = val; 
+            let s = 'c-norm';
+            if(id=='dst') { if(val < -100) s = 'c-alert'; else if(val < -50) s = 'c-mod'; else if(val < -20) s = 'c-warn'; else s = 'c-norm'; }
+            else if(id=='kp') { if(val >= 7) s = 'c-alert'; else if(val == 6) s = 'c-mod'; else if(val >= 4) s = 'c-warn'; else s = 'c-norm'; }
+            else if(id=='bz') {
+                if(val < -5) s = 'c-alert'; else if(val < 0) s = 'c-warn'; else s = 'c-norm';
+                const stateEl = document.getElementById('bz-state');
+                if (stateEl) { if (val >= 0) { stateEl.innerHTML = '&#8593;'; stateEl.style.color = 'var(--green)'; } else { stateEl.innerHTML = '&#8595;'; stateEl.style.color = 'var(--red)'; } }
             }
+            else if(id=='sfi') s = val>150?'c-good':(val>100?'c-norm':'c-warn');
+            else if(id=='wind') s = val>700?'c-alert':(val>500?'c-warn':'c-norm');
+            box.className = 'box '+s;
+            if(diff !== 0 && !isNaN(diff)) {
+                let c = diff>0 ? 'var(--red)' : 'var(--green)';
+                if(['sfi','ssn','dst','bz'].includes(id)) c = diff > 0 ? 'var(--green)' : 'var(--red)';
+                else c = diff > 0 ? 'var(--red)' : 'var(--green)'; 
+                el.innerHTML += ` <span class="trend" style="color:${c}">${diff>0?'▲':'▼'}</span>`;
+            }
+        }
+
+        // 2. Data Fetcher (Robust)
+        async function fetchData(url) {
+            const ts = '&t=' + Date.now();
+            try {
+                const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + ts));
+                if(r.ok) return await r.json();
+            } catch(e) { console.log('Fetch Error:', url); }
+            return null;
+        }
+
+        async function updateAll() {
+            log('Updating Data...');
+            
+            // Mag
+            const mag = await fetchData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json?');
+            if(mag && mag.length > 2) {
+                const l = mag[mag.length-1], p = mag[mag.length-2];
+                set('bz', parseFloat(l[1]), parseFloat(l[1])-parseFloat(p[1]));
+                set('bt', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
+            }
+
+            // Plasma
+            const plas = await fetchData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json?');
+            if(plas && plas.length > 2) {
+                const l = plas[plas.length-1], p = plas[plas.length-2];
+                set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
+                set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
+            }
+
+            // Kp
+            const kp = await fetchData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json?');
+            if(kp && kp.length > 2) {
+                const l = kp[kp.length-1], p = kp[kp.length-2];
+                set('kp', l[1], parseFloat(l[1])-parseFloat(p[1]));
+            }
+
+            // Dst
+            const dst = await fetchData('https://services.swpc.noaa.gov/products/kyoto-dst.json?');
+            if(dst && dst.length > 2) {
+                const l = dst[dst.length-1], p = dst[dst.length-2];
+                set('dst', parseInt(l[1]), 0);
+            }
+
+            // SFI Text
+            try {
+                const r = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://services.swpc.noaa.gov/text/daily-solar-indices.txt?t='+Date.now()));
+                const txt = await r.text();
+                if(txt) {
+                    const lines = txt.trim().split('\n');
+                    let curr=null;
+                    for(let i=lines.length-1; i>=0; i--) {
+                        if(lines[i].trim().startsWith('20')) {
+                            let cols = lines[i].trim().split(/\s+/);
+                            if(cols.length > 4) { curr = cols; break; }
+                        }
+                    }
+                    if(curr) {
+                        set('sfi', parseInt(curr[3]));
+                        set('ssn', parseInt(curr[4]));
+                    }
+                }
+            } catch(e){}
+
+            // Forecast Logic
+            const sfi = parseInt(document.getElementById('v-sfi').innerText) || 70;
+            const kpv = parseFloat(document.getElementById('v-kp').innerText) || 1;
+            const condEl = document.getElementById('hf-cond');
+            let txt = "NORMAL (Stable)"; let clr = "#ccc";
+            if(kpv >= 5) { txt = "STORM / NOISE WARNING"; clr = "var(--red)"; }
+            else if(kpv >= 4) { txt = "UNSETTLED (Noisy)"; clr = "var(--orange)"; }
+            else if(sfi > 120 && kpv < 3) { txt = "EXCELLENT (High Bands Open)"; clr = "var(--green)"; }
+            else if(sfi > 90 && kpv < 4) { txt = "GOOD (10m-20m Favorable)"; clr = "var(--green)"; }
+            else if(sfi < 75) { txt = "FAIR / POOR (Low MUF)"; clr = "var(--yellow)"; }
+            condEl.innerHTML = `<span style="color:${clr}">${txt}</span>`;
+            
+            log('System Ready');
+        }
+
+        // Start
+        setInterval(tick, 1000);
+        tick();
+        setTimeout(updateAll, 500); // Wait 0.5s for DOM
+        setInterval(updateAll, 60000);
+        setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
+    </script>
+</body>
+</html>

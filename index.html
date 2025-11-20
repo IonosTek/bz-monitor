@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V112.0 (Final Baseline)</title>
+    <title>IonosTek Monitor V109.0 (Proton Inclusion)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V112.0 (Stable Core) --- */
+        /* --- CSS V109.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -23,6 +23,9 @@
         .blink-colon { animation: blinker 1s infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
         
+        .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; }
+        .dot-blink { animation: fade 2s infinite; color: var(--green); }
+
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
@@ -40,9 +43,10 @@
 
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
+        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
-        .hf-banner { background: #1a1a1a; padding: 12px; text-align: center; border: 1px solid #333; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .hf-banner { background: #1a1a1a; padding: 12px; text-align: center; border: 1px solid #333; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { background: var(--card); border-radius: 8px; border: 1px solid #333; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
@@ -75,8 +79,22 @@
             .clock-box { text-align: center; }
         }
     </style>
+    <script>
+        function updateClock() {
+            try {
+                const d = new Date();
+                if(document.getElementById('u-h')) {
+                    document.getElementById('u-h').innerText = d.getUTCHours().toString().padStart(2,'0');
+                    document.getElementById('u-m').innerText = d.getUTCMinutes().toString().padStart(2,'0');
+                    const lH = d.getHours().toString().padStart(2,'0');
+                    const lM = d.getMinutes().toString().padStart(2,'0');
+                    document.getElementById('local-clock').innerText = `${lH}:${lM} Local`;
+                }
+            } catch(e){}
+        }
+    </script>
 </head>
-<body>
+<body onload="startClock(); appStart();">
     <div class="header">
         <div>
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
@@ -99,6 +117,7 @@
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Density</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
+        <div class="box" id="b-proton"><div class="lbl">Proton</div><div class="val" id="v-proton">--</div><span class="unit">pfu</span></div>
     </div>
 
     <div class="hf-banner">
@@ -192,7 +211,7 @@
                          trendHtml = `<span class="trend" style="color:${tColor}">${tSym}</span>`;
                     }
                     el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
-                    let s = bzVal < 0 ? 'c-alert' : 'c-norm'; // Strict: Negative = Alert
+                    let s = bzVal < 0 ? 'c-alert' : 'c-norm'; 
                     if(box) box.className = 'box '+s;
                     return; 
                 }
@@ -212,6 +231,25 @@
                     }
                     el.innerHTML = `<span class="status-arrow-main" style="color:${color}">${mainArrow}</span> ${val} ${trendHtml}`;
                     if(box) box.className = 'box '+s;
+                    return;
+                }
+                
+                // Proton Logic
+                if (id === 'proton') {
+                    let pfu = parseFloat(val);
+                    let s = 'c-norm';
+                    if (pfu >= 1000) s = 'c-alert';
+                    else if (pfu >= 100) s = 'c-mod';
+                    else if (pfu >= 10) s = 'c-warn';
+                    
+                    let arrowHtml = '';
+                    if(diff !== 0 && !isNaN(diff)) {
+                        let tColor = diff > 0 ? 'var(--red)' : 'var(--green)';
+                        let symbol = diff > 0 ? '▲' : '▼';
+                        arrowHtml = `<span class="trend" style="color:${tColor}">${symbol}</span>`;
+                    }
+                    el.innerHTML = val + arrowHtml;
+                    if (box) box.className = 'box ' + s;
                     return;
                 }
 
@@ -256,9 +294,9 @@
         }
 
         async function updateAll() {
-            log('Syncing Data...');
+            log('Syncing...');
             
-            // SFI
+            // 1. SFI (Text Parsing)
             let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -279,9 +317,14 @@
                 }
             }
 
-            // Solar Wind
+            // 2. Solar Wind (Try JSON -> Text Fallback)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
+            
+            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
+            if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
+
+            // MAG Data processing
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
@@ -301,8 +344,7 @@
                  }
             }
 
-            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
-            if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
+            // PLASMA Data processing
             if(plas && plas.length > 2) {
                 let l = plas[plas.length-1], p = plas[plas.length-2];
                 set('den', Math.round(l[1]), parseFloat(l[1]) - parseFloat(p[1]));
@@ -322,7 +364,7 @@
                  }
             }
 
-            // Kp & Dst
+            // 4. Kp & Dst
             let kp = await fetchJSON('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 let l = kp[kp.length-1], p = kp[kp.length-2];
@@ -348,7 +390,6 @@
             log('Active');
         }
 
-        // --- MAIN START ---
         window.onload = function() {
             startClock();
             updateAll();

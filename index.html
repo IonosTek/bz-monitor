@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V64.3</title>
+    <title>IonosTek Monitor V64.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V64.3 (Stable Core) --- */
+        /* --- CSS Base: V64.4 (Turbo Fetch) --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -14,7 +14,7 @@
         }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         
-        /* Header V2 */
+        /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; gap: 15px; }
         .h-left h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; line-height: 1; }
         .h-right { text-align: right; }
@@ -26,7 +26,7 @@
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 15px; margin-top: 5px; border-radius: 4px; cursor: pointer; font-family: inherit; font-weight: bold; font-size: 0.8em; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
-        /* Clock Styles */
+        /* Clock */
         #utc-time { font-size: 1.6em; font-weight: 700; color: var(--blue); letter-spacing: 1px; line-height: 1; }
         #local-time { font-size: 0.85em; color: #666; margin-top: 3px; font-weight: 500; }
 
@@ -42,7 +42,7 @@
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
         .bz-state-arrow { font-size: 1.2em; margin-right: 5px; font-weight: 900; }
 
-        /* HF Estimate Banner */
+        /* HF Banner */
         .hf-banner { max-width: 1600px; margin: 0 auto 20px auto; background: #1a1a1a; padding: 12px; border-radius: 6px; text-align: center; border: 1px solid #333; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .hf-label { color: #888; font-size: 0.9em; font-weight: 600; }
         #hf-cond { font-weight: 700; font-size: 1.1em; letter-spacing: 0.5px; }
@@ -51,18 +51,13 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { overflow: hidden; background: var(--card); border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
-        
-        .c-body { 
-            background: #000; height: 300px; overflow: hidden; 
-            display: flex; align-items: center; justify-content: center; padding: 0; 
-        }
+        .c-body { background: #000; height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 0; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
         /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; overflow-y: auto; align-items: center; justify-content: center; }
         .m-content { background: var(--card); width: 90%; max-width: 700px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; z-index: 100; }
-        
         #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
         #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
 
@@ -73,8 +68,6 @@
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
-
-        /* Guide Styling */
         .guide-sec { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .guide-h { color: var(--blue); font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
         .guide-p { color: #ccc; font-size: 0.9em; line-height: 1.6; }
@@ -89,7 +82,6 @@
     </style>
 </head>
 <body>
-
     <div class="header">
         <div class="h-left">
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
@@ -105,7 +97,6 @@
     <div class="stats">
         <div class="box" id="b-sfi"><div class="lbl">SFI</div><div class="val" id="v-sfi">--</div><span class="unit">F10.7cm</span></div>
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
-        
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-bz"><div class="lbl">Bz</div>
@@ -116,7 +107,6 @@
             <span class="unit">nT</span>
         </div>
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
-        
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
     </div>
@@ -128,9 +118,7 @@
 
     <div class="grid">
         <div class="card"><div class="c-head"><span>PROPAGATION (TEC)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
-        
         <div class="card"><div class="c-head"><span>SUNSPOTS (SDO/HMI)</span></div><div class="c-body"><img src="https://sdo.gsfc.nasa.gov/assets/img/latest/latest_1024_HMIIC.jpg" onclick="view(this.src)"></div></div>
-        
         <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
         <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>RADIO BLACKOUT (D-RAP)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" onclick="view(this.src)"></div></div>
@@ -140,29 +128,15 @@
         <div class="m-content">
             <span class="close" onclick="closeModal('guideModal')">&times;</span>
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
-            <div class="guide-sec">
-                <div class="guide-h">★ Understanding Bz (The Switch)</div>
-                <div class="guide-p">
-                    <p><span class="hl-g">Bz Positive (+): "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.</p>
-                    <p><span class="hl-r">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!</p>
-                </div>
-            </div>
-            <div class="guide-sec">
-                <div class="guide-h">★ Reading Values</div>
-                <div class="guide-p">
-                    <b class="hl-g">Dst > -20 nT:</b> Quiet | <b class="hl-y">-20 to -50 nT:</b> Minor | <b class="hl-r">< -50 nT:</b> Storm<br>
-                    <b>Kp:</b> 0-3 Quiet, 5+ Storm | <b>Wind:</b> >500 Unstable
-                </div>
-            </div>
+            <div class="guide-sec"><div class="guide-h">★ Bz (The Switch)</div><div class="guide-p"><p><span class="hl-g">Positive (+):</span> Quiet</p><p><span class="hl-r">Negative (-):</span> STORM ALERT!</p></div></div>
         </div>
     </div>
     <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V64.3 • Resilient Core</div>
+    <div class="footer">IonosTek Monitor V64.4 • Turbo Fetch</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) { if(e.keyCode == 123 || (e.ctrlKey && e.keyCode == 85)) return false; }
-
         function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
@@ -174,7 +148,7 @@
             document.getElementById('utc-time').innerText = utc + ' UTC';
             document.getElementById('local-time').innerText = loc + ' Local';
         }
-        
+
         function set(id, val, diff=0) {
             const el = document.getElementById('v-'+id);
             const box = document.getElementById('b-'+id);
@@ -199,26 +173,22 @@
             }
         }
 
-        // --- V64.3: Robust Multi-Proxy Fetcher ---
+        // --- V64.4: Turbo Fetch (Swapped Priority) ---
         async function getData(url) {
             const ts = '?t=' + Date.now();
-            // 1. Try Direct (Fastest)
-            try { 
-                const r = await fetch(url + ts, { signal: AbortSignal.timeout(3000) }); 
-                if(r.ok) return await r.json(); 
-            } catch(e){}
-            
-            // 2. Try AllOrigins (Reliable for JSON)
-            try { 
-                const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url) + ts); 
-                if(r.ok) return await r.json(); 
-            } catch(e){}
-
-            // 3. Try CorsProxy.io (Backup)
+            // 1. Try CorsProxy (Best for JSON)
             try { 
                 const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + ts)); 
                 if(r.ok) return await r.json(); 
-            } catch(e){ console.log('Fetch failed: '+url); return null; }
+            } catch(e){ console.log('Proxy 1 failed'); }
+
+            // 2. Try AllOrigins (Backup)
+            try { 
+                const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url) + ts); 
+                if(r.ok) return await r.json(); 
+            } catch(e){ console.log('Proxy 2 failed'); }
+            
+            return null;
         }
         
         async function getText(url) {
@@ -228,30 +198,23 @@
         }
 
         async function updateAll() {
-            // Mag
             const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
             if(mag && mag.length > 2) {
                 const l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', parseFloat(l[1]), parseFloat(l[1])-parseFloat(p[1]));
                 set('bt', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
             }
-
-            // Plasma
             const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
             if(plas && plas.length > 2) {
                 const l = plas[plas.length-1], p = plas[plas.length-2];
                 set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
                 set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
             }
-
-            // Kp
             const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 const l = kp[kp.length-1], p = kp[kp.length-2];
                 set('kp', l[1], parseFloat(l[1])-parseFloat(p[1]));
             }
-
-            // Dst
             const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
             if(dst && dst.length > 2) {
                 const l = dst[dst.length-1], p = dst[dst.length-2];
@@ -259,8 +222,6 @@
                 let color = (val < -50) ? 'c-alert' : (val < -20 ? 'c-warn' : 'c-norm');
                 set('dst', val, color, val-parseInt(p[1]));
             }
-
-            // SFI/SSN
             const txtSfi = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(txtSfi) {
                 const lines = txtSfi.trim().split('\n');
@@ -269,8 +230,7 @@
                     if(lines[i].trim().startsWith('20')) {
                         let cols = lines[i].trim().split(/\s+/);
                         if(cols.length > 4) {
-                            if(!curr) curr = cols;
-                            else { prev = cols; break; }
+                            if(!curr) curr = cols; else { prev = cols; break; }
                         }
                     }
                 }
@@ -281,13 +241,10 @@
                     set('ssn', ssnVal, ssnVal-prevSsn);
                 }
             }
-
             const sfi = parseInt(document.getElementById('v-sfi').innerText) || 70;
             const kpv = parseFloat(document.getElementById('v-kp').innerText) || 1;
             const condEl = document.getElementById('hf-cond');
-            
-            let txt = "NORMAL (Stable)";
-            let clr = "#ccc";
+            let txt = "NORMAL (Stable)"; let clr = "#ccc";
             if(kpv >= 5) { txt = "STORM / NOISE WARNING"; clr = "var(--red)"; }
             else if(kpv >= 4) { txt = "UNSETTLED (Noisy)"; clr = "var(--orange)"; }
             else if(sfi > 120 && kpv < 3) { txt = "EXCELLENT (High Bands Open)"; clr = "var(--green)"; }
@@ -295,7 +252,6 @@
             else if(sfi < 75) { txt = "FAIR / POOR (Low MUF)"; clr = "var(--yellow)"; }
             condEl.innerHTML = `<span style="color:${clr}">${txt}</span>`;
         }
-
         tick(); updateAll();
         setInterval(tick, 1000);
         setInterval(updateAll, 60000);

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V81.0 (The Switch Return)</title>
+    <title>IonosTek Monitor V82.0 (Dual Arrow)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V81.0 --- */
+        /* --- CSS V82.0 --- */
         :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         
@@ -35,11 +35,9 @@
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
-        /* Generic Trend Arrow */
-        .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; }
-        
-        /* Bz Switch Arrow (Special) */
-        .bz-switch { font-size: 1.0em; margin-right: 8px; font-weight: 900; }
+        /* Arrows */
+        .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; vertical-align: middle; }
+        .status-arrow { font-size: 0.8em; margin-right: 8px; font-weight: 900; vertical-align: middle; }
 
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
@@ -88,9 +86,7 @@
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
-        
         <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div><span class="unit">nT</span></div>
-        
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
@@ -115,8 +111,8 @@
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             <div style="margin-bottom:20px;">
                 <h3 style="color:var(--blue);">★ Bz (The Switch)</h3>
-                <p style="color:#ccc;"><span style="color:var(--green); font-size:1.2em;">▲</span> <b>Positive:</b> Switch CLOSED (Shields Up)</p>
-                <p style="color:#ccc;"><span style="color:var(--red); font-size:1.2em;">▼</span> <b>Negative:</b> Switch OPEN (Storm Risk!)</p>
+                <p style="color:#ccc;"><span style="color:var(--green); font-size:1.2em;">▲</span> <b>Positive (+):</b> Quiet / Closed</p>
+                <p style="color:#ccc;"><span style="color:var(--red); font-size:1.2em;">▼</span> <b>Negative (-):</b> Storm Alert / Open</p>
             </div>
         </div>
     </div>
@@ -127,7 +123,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V81.0 • The Switch Return</span>
+        <span style="color:#666;">V82.0 • Dual Arrow System</span>
     </div>
 
     <script>
@@ -154,43 +150,41 @@
                 if(!el) return;
                 if(val === undefined || val === null || isNaN(parseFloat(val))) return;
                 
-                // SPECIAL LOGIC FOR BZ (The Switch)
-                if (id === 'bz') {
-                    let bzVal = parseFloat(val);
-                    let isClosed = bzVal >= 0;
-                    let arrow = isClosed ? '▲' : '▼';
-                    let color = isClosed ? 'var(--green)' : 'var(--red)';
-                    // Put Arrow BEFORE value for Bz
-                    el.innerHTML = `<span class="bz-switch" style="color:${color}">${arrow}</span>${val}`;
-                    
-                    let s = isClosed ? 'c-norm' : (bzVal < -5 ? 'c-alert' : 'c-warn');
-                    if(box) box.className = 'box '+s;
-                    return; // Exit special handler
-                }
-
-                // Standard Trend Logic for others
-                let arrowHtml = '';
+                // 1. Calculate TREND Arrow (Right Side) - For ALL boxes
+                let trendHtml = '';
                 if(diff !== 0 && !isNaN(diff)) {
                     let isBad = false;
                     if(['kp','wind','den'].includes(id)) isBad = (diff > 0);
                     else isBad = (diff < 0);
                     let color = isBad ? 'var(--red)' : 'var(--green)';
                     let symbol = diff > 0 ? '▲' : '▼';
-                    arrowHtml = `<span class="trend" style="color:${color}">${symbol}</span>`;
+                    trendHtml = `<span class="trend" style="color:${color}">${symbol}</span>`;
                 }
-                el.innerHTML = val + arrowHtml;
+
+                // 2. Calculate STATUS Arrow (Left Side) - Bz ONLY
+                let statusHtml = '';
+                if (id === 'bz') {
+                    let bzVal = parseFloat(val);
+                    let isClosed = bzVal >= 0;
+                    let arrow = isClosed ? '▲' : '▼';
+                    let color = isClosed ? 'var(--green)' : 'var(--red)';
+                    statusHtml = `<span class="status-arrow" style="color:${color}">${arrow}</span>`;
+                }
+
+                // 3. Combine
+                el.innerHTML = statusHtml + val + trendHtml;
                 
                 // Box Colors
                 let s = 'c-norm';
+                if(id=='bz' && val < 0) s = 'c-alert';
                 if(id=='kp' && val >= 5) s = 'c-alert';
                 if(id=='dst' && val < -50) s = 'c-alert';
                 if(id=='wind' && val > 500) s = 'c-warn';
                 if(box) box.className = 'box '+s;
-
             } catch(e){}
         }
 
-        // 2. DATA ENGINE (V77 Proven Logic)
+        // 2. DATA ENGINE (AllOrigins + CorsProxy Backup)
         async function fetchSmart(url, type='json') {
             try {
                 let r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url + '?t=' + Date.now()));
@@ -210,14 +204,13 @@
                     return await r.text();
                 }
             } catch(e) {}
-            
             return null;
         }
 
         async function updateAll() {
-            log('Updating...');
+            log('Updating Data...');
             
-            // SFI
+            // SFI (Text)
             let sfiTxt = await fetchSmart('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -238,16 +231,16 @@
                 }
             }
 
-            // Solar Wind
+            // Solar Wind (JSON 2-hour)
             let mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json', 'json');
             if(!mag) mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json', 'json');
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
-                set('bz', l[3]); // No diff for Bz, strict switch logic
+                set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
                 set('bt', Math.round(l[6]), parseFloat(l[6]) - parseFloat(p[6]));
             }
 
-            // Plasma
+            // Plasma (JSON 2-hour)
             let plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json', 'json');
             if(!plas) plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json', 'json');
             if(plas && plas.length > 2) {
@@ -279,7 +272,7 @@
             else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
             cond.innerText = txt; cond.style.color = c;
             
-            log('Live Data Active');
+            log('Monitoring Active');
         }
 
         window.addEventListener('load', function() {

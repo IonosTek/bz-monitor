@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V80.0 (Golden Standard)</title>
+    <title>IonosTek Monitor V81.0 (The Switch Return)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V80.0 --- */
+        /* --- CSS V81.0 --- */
         :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         
-        /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; }
         h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
         
-        /* Clock (Fixed Blinking) */
+        /* Clock */
         .clock-box { text-align: right; }
         .utc-time { font-size: 1.6em; font-weight: 700; color: var(--blue); line-height: 1; }
         .local-time { font-size: 0.85em; color: #888; margin-top: 4px; font-weight: 500; }
         .blink-colon { animation: blinker 1s infinite; }
-        @keyframes blinker { 50% { opacity: 0.3; } } /* Just dim, don't hide */
+        @keyframes blinker { 50% { opacity: 0.3; } }
         
         .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; }
         .dot-blink { animation: fade 2s infinite; color: var(--green); }
@@ -31,11 +30,17 @@
         /* Stats Grid */
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; max-width: 1400px; margin: 0 auto 20px; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; transition: transform 0.2s; }
+        .box:hover { transform: translateY(-3px); }
         .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; justify-content: center; align-items: center; gap: 5px; }
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
+        
+        /* Generic Trend Arrow */
         .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; }
         
+        /* Bz Switch Arrow (Special) */
+        .bz-switch { font-size: 1.0em; margin-right: 8px; font-weight: 900; }
+
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
@@ -72,9 +77,7 @@
             <div class="sys-active"><span class="dot-blink">●</span> System Active</div>
         </div>
         <div class="clock-box">
-            <div class="utc-time">
-                <span id="u-h">00</span><span class="blink-colon">:</span><span id="u-m">00</span> UTC
-            </div>
+            <div class="utc-time"><span id="u-h">00</span><span class="blink-colon">:</span><span id="u-m">00</span> UTC</div>
             <div class="local-time" id="local-clock">--:-- Local</div>
             <button onclick="document.getElementById('guideModal').style.display='flex'" class="btn-guide">📘 GUIDE</button>
         </div>
@@ -85,7 +88,9 @@
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
+        
         <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div><span class="unit">nT</span></div>
+        
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
@@ -110,8 +115,8 @@
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             <div style="margin-bottom:20px;">
                 <h3 style="color:var(--blue);">★ Bz (The Switch)</h3>
-                <p style="color:#ccc;"><b>Positive (+):</b> Shields UP (Quiet)</p>
-                <p style="color:#ccc;"><b>Negative (-):</b> Shields DOWN (Storm Risk)</p>
+                <p style="color:#ccc;"><span style="color:var(--green); font-size:1.2em;">▲</span> <b>Positive:</b> Switch CLOSED (Shields Up)</p>
+                <p style="color:#ccc;"><span style="color:var(--red); font-size:1.2em;">▼</span> <b>Negative:</b> Switch OPEN (Storm Risk!)</p>
             </div>
         </div>
     </div>
@@ -122,7 +127,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V80.0 • Golden Standard</span>
+        <span style="color:#666;">V81.0 • The Switch Return</span>
     </div>
 
     <script>
@@ -149,6 +154,21 @@
                 if(!el) return;
                 if(val === undefined || val === null || isNaN(parseFloat(val))) return;
                 
+                // SPECIAL LOGIC FOR BZ (The Switch)
+                if (id === 'bz') {
+                    let bzVal = parseFloat(val);
+                    let isClosed = bzVal >= 0;
+                    let arrow = isClosed ? '▲' : '▼';
+                    let color = isClosed ? 'var(--green)' : 'var(--red)';
+                    // Put Arrow BEFORE value for Bz
+                    el.innerHTML = `<span class="bz-switch" style="color:${color}">${arrow}</span>${val}`;
+                    
+                    let s = isClosed ? 'c-norm' : (bzVal < -5 ? 'c-alert' : 'c-warn');
+                    if(box) box.className = 'box '+s;
+                    return; // Exit special handler
+                }
+
+                // Standard Trend Logic for others
                 let arrowHtml = '';
                 if(diff !== 0 && !isNaN(diff)) {
                     let isBad = false;
@@ -160,18 +180,18 @@
                 }
                 el.innerHTML = val + arrowHtml;
                 
+                // Box Colors
                 let s = 'c-norm';
-                if(id=='bz' && val < 0) s = 'c-alert';
                 if(id=='kp' && val >= 5) s = 'c-alert';
                 if(id=='dst' && val < -50) s = 'c-alert';
                 if(id=='wind' && val > 500) s = 'c-warn';
                 if(box) box.className = 'box '+s;
+
             } catch(e){}
         }
 
-        // 2. DATA ENGINE: V77 Logic (Proven Working)
+        // 2. DATA ENGINE (V77 Proven Logic)
         async function fetchSmart(url, type='json') {
-            // Try AllOrigins (Primary)
             try {
                 let r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url + '?t=' + Date.now()));
                 if(r.ok) {
@@ -183,7 +203,6 @@
                 }
             } catch(e) { console.log('Proxy 1 Fail'); }
 
-            // Try CorsProxy (Backup)
             try {
                 let r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
                 if(r.ok) {
@@ -196,9 +215,9 @@
         }
 
         async function updateAll() {
-            log('Updating Data...');
+            log('Updating...');
             
-            // SFI (Text)
+            // SFI
             let sfiTxt = await fetchSmart('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -219,16 +238,16 @@
                 }
             }
 
-            // Solar Wind (JSON 2-hour)
+            // Solar Wind
             let mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json', 'json');
             if(!mag) mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json', 'json');
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
-                set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
+                set('bz', l[3]); // No diff for Bz, strict switch logic
                 set('bt', Math.round(l[6]), parseFloat(l[6]) - parseFloat(p[6]));
             }
 
-            // Plasma (JSON 2-hour)
+            // Plasma
             let plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json', 'json');
             if(!plas) plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json', 'json');
             if(plas && plas.length > 2) {
@@ -250,7 +269,7 @@
                 set('dst', parseInt(l[1]), parseInt(l[1]) - parseInt(p[1]));
             }
 
-            // Forecast Logic
+            // Forecast
             let kpv = parseFloat(document.getElementById('v-kp').innerText)||0;
             let sfiv = parseInt(document.getElementById('v-sfi').innerText)||0;
             let cond = document.getElementById('hf-cond');
@@ -260,7 +279,7 @@
             else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
             cond.innerText = txt; cond.style.color = c;
             
-            log('Monitoring Active');
+            log('Live Data Active');
         }
 
         window.addEventListener('load', function() {

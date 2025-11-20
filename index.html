@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V108.1 (Proton Upgrade)</title>
+    <title>IonosTek Monitor V112.0 (Proton Stability)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V108.1 --- */
+        /* --- CSS V112.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -44,7 +44,7 @@
 
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
-        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); }
+        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); } /* Orange for S2 */
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .hf-banner { background: #1a1a1a; padding: 12px; text-align: center; border: 1px solid #333; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
@@ -55,7 +55,6 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 600px; border: 1px solid #444; position: relative; }
         .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
@@ -192,7 +191,6 @@
                 let box = document.getElementById('b-'+id);
                 if(!el) return;
                 
-                // If value is NaN/null, reset the box and skip further logic for safety
                 if(val === undefined || val === null || isNaN(parseFloat(val))) {
                     el.innerText = "--";
                     if(box) box.className = 'box'; 
@@ -241,7 +239,7 @@
                     let s = 'c-norm';
                     if (pfu >= 1000) s = 'c-alert';
                     else if (pfu >= 100) s = 'c-mod';
-                    else if (pffu >= 10) s = 'c-warn';
+                    else if (pfu >= 10) s = 'c-warn';
                     
                     let arrowHtml = '';
                     if(diff !== 0 && !isNaN(diff)) {
@@ -318,9 +316,10 @@
                 }
             }
 
-            // 2. Solar Wind (Mag)
+            // 2. Solar Wind (JSON/Text Fallback)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
+            
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
@@ -340,7 +339,6 @@
                  }
             }
 
-            // 3. Plasma
             let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
             if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
             if(plas && plas.length > 2) {
@@ -362,14 +360,15 @@
                  }
             }
 
-            // 4. Proton Flux (NEW)
+            // 3. Proton Flux (NEW)
             let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
             if(proton && proton.length > 2) {
                 let l = proton[proton.length-1], p = proton[proton.length-2];
+                // Index 1 is 10 MeV flux (pfu)
                 set('proton', l[1], parseFloat(l[1]) - parseFloat(p[1]));
             }
             
-            // 5. Kp & Dst
+            // 4. Kp & Dst
             let kp = await fetchJSON('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 let l = kp[kp.length-1], p = kp[kp.length-2];
@@ -395,6 +394,7 @@
             log('Active');
         }
 
+        // --- MAIN START ---
         window.onload = function() {
             startClock();
             updateAll();

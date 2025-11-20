@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V76.0 (Complete)</title>
+    <title>IonosTek Monitor V77.0 (AllOrigins)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V76.0 --- */
+        /* --- CSS V77.0 --- */
         :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; }
@@ -94,7 +94,7 @@
             <span id="fetch-log">Starting...</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#444; font-size:0.8em;">V76.0 • Complete</span>
+        <span style="color:#444; font-size:0.8em;">V77.0 • AllOrigins Core</span>
     </div>
 
     <script>
@@ -122,19 +122,16 @@
                 let arrowHtml = '';
                 if(diff !== 0 && !isNaN(diff)) {
                     let isBad = false;
-                    // Kp, Wind, Den: Increasing is Bad (Red)
                     if(['kp','wind','den'].includes(id)) isBad = (diff > 0);
-                    // SFI, SSN, Bz, Dst: Decreasing is Bad (Red)
                     else isBad = (diff < 0);
                     
                     let color = isBad ? 'var(--red)' : 'var(--green)';
                     let symbol = diff > 0 ? '▲' : '▼';
                     arrowHtml = `<span class="trend" style="color:${color}">${symbol}</span>`;
                 }
-                
                 el.innerHTML = val + arrowHtml;
                 
-                // Box Color Logic
+                // Colors
                 let s = 'c-norm';
                 if(id=='bz' && val < 0) s = 'c-alert';
                 if(id=='kp' && val >= 5) s = 'c-alert';
@@ -144,39 +141,45 @@
             } catch(e){}
         }
 
-        // Smart Fetchers
-        async function fetchText(url) {
-            let target = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url + '?t=' + Date.now());
+        // --- UNIFIED FETCHER: ALLORIGINS ---
+        async function fetchSmart(url, type='json') {
+            // Try AllOrigins (Stable)
             try {
-                let r = await fetch(target);
-                if(r.ok) return await r.text();
-            } catch(e) { console.log('Text fetch error'); }
-            return null;
-        }
+                let r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url + '?t=' + Date.now()));
+                if(r.ok) {
+                    let data = await r.json();
+                    if(data.contents) {
+                        if(type === 'json') return JSON.parse(data.contents);
+                        return data.contents;
+                    }
+                }
+            } catch(e) { console.log('AllOrigins Fail, Try Backup'); }
 
-        async function fetchJson(url) {
+            // Backup: CorsProxy (Just in case)
             try {
                 let r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
-                if(r.ok) return await r.json();
-            } catch(e){}
+                if(r.ok) {
+                    if(type === 'json') return await r.json();
+                    return await r.text();
+                }
+            } catch(e) {}
+            
             return null;
         }
 
         async function updateAll() {
-            log('Updating...');
+            log('Fetching via AllOrigins...');
             
             // 1. SFI (Text)
-            let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
+            let sfiTxt = await fetchSmart('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
-                // Get Current and Previous
                 let curr = null, prev = null;
                 for(let i=lines.length-1; i>=0; i--) {
                     if(lines[i].trim().startsWith('20')) {
                         let cols = lines[i].trim().split(/\s+/);
                         if(cols.length > 4) {
-                            if(!curr) curr = cols;
-                            else { prev = cols; break; }
+                            if(!curr) curr = cols; else { prev = cols; break; }
                         }
                     }
                 }
@@ -188,54 +191,51 @@
                 }
             }
 
-            // 2. Solar Wind (Mag)
-            let mag = await fetchJson('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
-            if(!mag) mag = await fetchJson('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
+            // 2. Solar Wind (Mag) - Try 2hr -> 6hr -> 24hr
+            let mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json', 'json');
+            if(!mag) mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json', 'json');
             
             if(mag && mag.length > 2) {
-                let l = mag[mag.length-1];
-                let p = mag[mag.length-2];
+                let l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
                 set('bt', Math.round(l[6]), parseFloat(l[6]) - parseFloat(p[6]));
             }
 
-            // 3. Plasma
-            let plas = await fetchJson('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
-            if(!plas) plas = await fetchJson('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
+            // 3. Plasma - Try 2hr -> 6hr
+            let plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json', 'json');
+            if(!plas) plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json', 'json');
             
             if(plas && plas.length > 2) {
-                let l = plas[plas.length-1];
-                let p = plas[plas.length-2];
+                let l = plas[plas.length-1], p = plas[plas.length-2];
                 set('den', Math.round(l[1]), parseFloat(l[1]) - parseFloat(p[1]));
                 set('wind', Math.round(l[2]), parseFloat(l[2]) - parseFloat(p[2]));
             }
 
             // 4. Kp
-            let kp = await fetchJson('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
+            let kp = await fetchSmart('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json', 'json');
             if(kp && kp.length > 2) {
                 let l = kp[kp.length-1], p = kp[kp.length-2];
                 set('kp', l[1], parseFloat(l[1]) - parseFloat(p[1]));
             }
             
             // 5. Dst
-            let dst = await fetchJson('https://services.swpc.noaa.gov/products/kyoto-dst.json');
+            let dst = await fetchSmart('https://services.swpc.noaa.gov/products/kyoto-dst.json', 'json');
             if(dst && dst.length > 2) {
                 let l = dst[dst.length-1], p = dst[dst.length-2];
                 set('dst', parseInt(l[1]), parseInt(l[1]) - parseInt(p[1]));
             }
 
-            // Forecast Logic
+            // Forecast
             let kpv = parseFloat(document.getElementById('v-kp').innerText)||0;
             let sfiv = parseInt(document.getElementById('v-sfi').innerText)||0;
             let cond = document.getElementById('hf-cond');
             let txt = "NORMAL", c = "#ccc";
-            
             if(kpv >= 5) { txt = "STORM WARNING"; c = "var(--red)"; }
             else if(sfiv > 120) { txt = "EXCELLENT"; c = "var(--green)"; }
             else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
-            
             cond.innerText = txt; cond.style.color = c;
-            log('Live Data');
+            
+            log('Monitoring Active');
         }
 
         window.addEventListener('load', function() {

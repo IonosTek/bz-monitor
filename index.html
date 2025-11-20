@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V82.0 (Dual Arrow)</title>
+    <title>IonosTek Monitor V84.0 (Original Structure)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V82.0 --- */
+        /* --- CSS V84.0 (Restored Original Layout) --- */
         :root { --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --green: #00e676; --yellow: #ffea00; --orange: #ff9100; --red: #ff1744; --blue: #2979ff; }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         
@@ -31,13 +31,18 @@
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; max-width: 1400px; margin: 0 auto 20px; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; transition: transform 0.2s; }
         .box:hover { transform: translateY(-3px); }
+        
+        /* Value Container */
         .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; justify-content: center; align-items: center; gap: 5px; }
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
         /* Arrows */
-        .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; vertical-align: middle; }
-        .status-arrow { font-size: 0.8em; margin-right: 8px; font-weight: 900; vertical-align: middle; }
+        .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; }
+        @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        
+        /* Special Bz Layout (Original Style) */
+        .bz-state-arrow { font-size: 1.0em; margin-right: 8px; font-weight: 900; }
 
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
@@ -86,7 +91,16 @@
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
-        <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div><span class="unit">nT</span></div>
+        
+        <div class="box" id="b-bz">
+            <div class="lbl">Bz</div>
+            <div class="val" id="v-bz-container">
+                <span id="bz-state" class="bz-state-arrow"></span>
+                <span id="v-bz">--</span>
+            </div>
+            <span class="unit">nT</span>
+        </div>
+        
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
@@ -111,8 +125,13 @@
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             <div style="margin-bottom:20px;">
                 <h3 style="color:var(--blue);">★ Bz (The Switch)</h3>
-                <p style="color:#ccc;"><span style="color:var(--green); font-size:1.2em;">▲</span> <b>Positive (+):</b> Quiet / Closed</p>
-                <p style="color:#ccc;"><span style="color:var(--red); font-size:1.2em;">▼</span> <b>Negative (-):</b> Storm Alert / Open</p>
+                <p style="color:#ccc;"><span style="color:var(--green); font-size:1.2em;">▲</span> <b>Positive:</b> Switch CLOSED (Shields Up)</p>
+                <p style="color:#ccc;"><span style="color:var(--red); font-size:1.2em;">▼</span> <b>Negative:</b> Switch OPEN (Storm Risk!)</p>
+            </div>
+            <div>
+                <h3 style="color:var(--blue);">★ Thresholds</h3>
+                <p style="color:#ccc;"><b>Kp:</b> 0-3 Quiet | 5+ Storm</p>
+                <p style="color:#ccc;"><b>Wind:</b> >500 km/s High Speed</p>
             </div>
         </div>
     </div>
@@ -123,11 +142,11 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V82.0 • Dual Arrow System</span>
+        <span style="color:#666;">V84.0 • Original Structure</span>
     </div>
 
     <script>
-        // 1. UI & Clock
+        // --- 1. UI & Clock ---
         function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
         function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
 
@@ -145,46 +164,70 @@
 
         function set(id, val, diff=0) {
             try {
+                // Special Handling for Bz (Original V64 Logic)
+                if (id === 'bz') {
+                    let el = document.getElementById('v-bz');
+                    let box = document.getElementById('b-bz');
+                    let stateEl = document.getElementById('bz-state');
+                    
+                    if(!el) return;
+                    if(val === undefined || val === null || isNaN(parseFloat(val))) return;
+
+                    el.innerText = val;
+
+                    // 1. Status Arrow (Left - Separate ID)
+                    let bzVal = parseFloat(val);
+                    if (bzVal >= 0) { 
+                        stateEl.innerHTML = '&#9650;'; // Up Triangle
+                        stateEl.style.color = 'var(--green)'; 
+                    } else { 
+                        stateEl.innerHTML = '&#9660;'; // Down Triangle
+                        stateEl.style.color = 'var(--red)'; 
+                    }
+
+                    // 2. Trend Arrow (Right - Appended)
+                    if(diff !== 0 && !isNaN(diff)) {
+                         let color = diff < 0 ? 'var(--red)' : 'var(--green)'; // Decreasing Bz is generally bad/neutral
+                         let symbol = diff > 0 ? '▲' : '▼';
+                         el.innerHTML += `<span class="trend" style="color:${color}">${symbol}</span>`;
+                    }
+
+                    // Box Color
+                    let s = 'c-norm';
+                    if(bzVal < -5) s = 'c-alert';
+                    else if(bzVal < 0) s = 'c-warn';
+                    if(box) box.className = 'box '+s;
+                    
+                    return; // Done for Bz
+                }
+
+                // Standard Logic for Others
                 let el = document.getElementById('v-'+id);
                 let box = document.getElementById('b-'+id);
                 if(!el) return;
                 if(val === undefined || val === null || isNaN(parseFloat(val))) return;
                 
-                // 1. Calculate TREND Arrow (Right Side) - For ALL boxes
-                let trendHtml = '';
+                let arrowHtml = '';
                 if(diff !== 0 && !isNaN(diff)) {
                     let isBad = false;
                     if(['kp','wind','den'].includes(id)) isBad = (diff > 0);
                     else isBad = (diff < 0);
                     let color = isBad ? 'var(--red)' : 'var(--green)';
                     let symbol = diff > 0 ? '▲' : '▼';
-                    trendHtml = `<span class="trend" style="color:${color}">${symbol}</span>`;
+                    arrowHtml = `<span class="trend" style="color:${color}">${symbol}</span>`;
                 }
-
-                // 2. Calculate STATUS Arrow (Left Side) - Bz ONLY
-                let statusHtml = '';
-                if (id === 'bz') {
-                    let bzVal = parseFloat(val);
-                    let isClosed = bzVal >= 0;
-                    let arrow = isClosed ? '▲' : '▼';
-                    let color = isClosed ? 'var(--green)' : 'var(--red)';
-                    statusHtml = `<span class="status-arrow" style="color:${color}">${arrow}</span>`;
-                }
-
-                // 3. Combine
-                el.innerHTML = statusHtml + val + trendHtml;
+                el.innerHTML = val + arrowHtml;
                 
-                // Box Colors
                 let s = 'c-norm';
-                if(id=='bz' && val < 0) s = 'c-alert';
                 if(id=='kp' && val >= 5) s = 'c-alert';
                 if(id=='dst' && val < -50) s = 'c-alert';
                 if(id=='wind' && val > 500) s = 'c-warn';
                 if(box) box.className = 'box '+s;
+
             } catch(e){}
         }
 
-        // 2. DATA ENGINE (AllOrigins + CorsProxy Backup)
+        // --- 2. DATA ENGINE (Robust) ---
         async function fetchSmart(url, type='json') {
             try {
                 let r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url + '?t=' + Date.now()));
@@ -208,9 +251,9 @@
         }
 
         async function updateAll() {
-            log('Updating Data...');
+            log('Syncing...');
             
-            // SFI (Text)
+            // SFI
             let sfiTxt = await fetchSmart('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -231,7 +274,7 @@
                 }
             }
 
-            // Solar Wind (JSON 2-hour)
+            // Solar Wind
             let mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json', 'json');
             if(!mag) mag = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json', 'json');
             if(mag && mag.length > 2) {
@@ -240,7 +283,7 @@
                 set('bt', Math.round(l[6]), parseFloat(l[6]) - parseFloat(p[6]));
             }
 
-            // Plasma (JSON 2-hour)
+            // Plasma
             let plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json', 'json');
             if(!plas) plas = await fetchSmart('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json', 'json');
             if(plas && plas.length > 2) {
@@ -272,7 +315,7 @@
             else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
             cond.innerText = txt; cond.style.color = c;
             
-            log('Monitoring Active');
+            log('Active');
         }
 
         window.addEventListener('load', function() {

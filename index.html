@@ -3,31 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V75.0</title>
+    <title>IonosTek Monitor V76.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: Stable V64.1 --- */
+        /* --- CSS Base: V64.1 (Stable) --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
             --red: #ff1744; --blue: #2979ff; --purple: #d500f9;
         }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
-        
         .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .header h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; }
         
         #status { font-family: 'Chakra Petch', sans-serif; font-weight: 500; font-size: 0.95em; color: #aaa; margin-top: 8px; letter-spacing: 0.5px; }
         .blink { animation: blinker 1s infinite; color: var(--green); }
+        .blink-red { animation: blinker 1s infinite; color: var(--red); } /* New Alert Style */
         @keyframes blinker { 50% { opacity: 0; } }
         
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 5px 20px; margin-top: 10px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition:0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
-        /* Stats Grid (8 Boxes Auto-Fit) */
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 30px; max-width: 1400px; margin-left: auto; margin-right: auto; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s; }
-        .box:hover { transform: translateY(-3px); }
         .val { font-size: 1.8em; font-weight: 700; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .lbl { font-size: 0.7em; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px; }
         .unit { font-size: 0.6em; color: #666; display: block; margin-top: -5px; }
@@ -36,25 +34,15 @@
         .trend { font-size: 0.6em; animation: arrow 2s infinite; display: inline-block; }
         .bz-state-arrow { font-size: 1.2em; margin-right: 5px; font-weight: 900; }
 
-        /* Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }
         .card { overflow: hidden; background: var(--card); border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         .c-head { background: #202020; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.9em; color: #ccc; border-bottom: 1px solid #333; }
-        
-        .c-body { 
-            background: #000; height: 300px; overflow: hidden; 
-            display: flex; align-items: center; justify-content: center; padding: 0; 
-        }
-        .c-body img { 
-            width: 100%; height: 100%; object-fit: contain; 
-            cursor: pointer; transition: opacity 0.3s; 
-        }
+        .c-body { background: #000; height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 0; }
+        .card-body img { width: 100%; max-height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 99999; overflow-y: auto; align-items: center; justify-content: center; }
         .m-content { background: var(--card); width: 90%; max-width: 700px; margin: 50px auto; padding: 30px; border: 1px solid #444; border-radius: 10px; position: relative; }
         .close { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; z-index: 10; }
-        
         #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; align-items: center; justify-content: center; }
         #lightbox img { max-width: 98%; max-height: 95vh; border: 2px solid #333; }
 
@@ -64,14 +52,6 @@
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .footer { text-align: center; margin-top: 40px; font-size: 0.75em; color: #444; }
-        
-        /* Guide Styles */
-        .guide-sec { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .guide-h { color: var(--blue); font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
-        .guide-p { color: #ccc; font-size: 0.9em; line-height: 1.6; }
-        .hl-g { color: var(--green); } .hl-r { color: var(--red); } .hl-y { color: var(--yellow); }
-
-        @media (max-width: 600px) { .stats { grid-template-columns: repeat(2, 1fr); gap: 10px; } .box { padding: 10px 2px; } .val { font-size: 1.5em; } }
     </style>
 </head>
 <body>
@@ -99,7 +79,7 @@
         
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Den</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
-        </div>
+    </div>
 
     <div class="grid">
         <div class="card"><div class="c-head"><span>PROPAGATION</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/ctipe/tec/latest.png" onclick="view(this.src)"></div></div>
@@ -113,24 +93,23 @@
             <span class="close" onclick="closeModal('guideModal')">&times;</span>
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px;">OPERATOR GUIDE</h2>
             
-            <div class="guide-sec">
-                <div class="guide-h">★ Understanding Bz (The Switch)</div>
-                <div class="guide-p">
-                    <p><span style="color:var(--green)">Bz Positive (+): "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.</p>
-                    <p><span style="color:var(--red)">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!</p>
-                </div>
+            <div style="margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px;">
+                <h3 style="color:var(--blue); margin-bottom:10px;">★ Understanding Bz (The Switch)</h3>
+                <p style="color:#ccc; line-height:1.6; font-size:0.9em;">
+                    <span style="color:var(--green)">Bz Positive (+): "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.<br>
+                    <span style="color:var(--red)">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!
+                </p>
             </div>
-            <div class="guide-sec">
-                <div class="guide-h">★ Reading Values</div>
-                <div class="guide-p">
-                    <b style="color:var(--green)">Dst > -20 nT:</b> Quiet | <b style="color:var(--yellow)">-20 to -50 nT:</b> Minor | <b style="color:var(--red)">< -50 nT:</b> Storm<br>
-                    <b>Kp:</b> 0-3 Quiet, 5+ Storm | <b>Wind:</b> >500 Unstable
-                </div>
+            <div style="color:#ccc; line-height:1.6; font-size:0.9em;">
+                <h3 style="color:var(--blue); margin-bottom:10px;">★ Reading Values</h3>
+                <b style="color:var(--green)">Dst > -20 nT:</b> Quiet | <b style="color:var(--yellow)">-20 to -50 nT:</b> Minor | <b style="color:var(--red)">< -50 nT:</b> Storm<br>
+                <b>Kp:</b> 0-3 Quiet, 5+ Storm | <b>Wind:</b> >500 Unstable
             </div>
         </div>
     </div>
+
     <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V75.0 • Streamlined Core</div>
+    <div class="footer">IonosTek Monitor V76.0 • Fail-Safe Mode</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -139,7 +118,14 @@
         function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
-        function tick() { document.getElementById('status').innerHTML = '<span class="blink">●</span> ' + new Date().toUTCString().replace('GMT', 'UTC'); }
+        function tick() { 
+            let now = new Date().toUTCString().replace('GMT', 'UTC');
+            if(document.getElementById('status').innerHTML.includes("OFFLINE")) {
+                 document.getElementById('status').innerHTML = '<span class="blink-red">●</span> OFFLINE MODE (Last Known) - ' + now;
+            } else {
+                 document.getElementById('status').innerHTML = '<span class="blink">●</span> System Active - ' + now;
+            }
+        }
         
         function set(id, val, diff=0) {
             const el = document.getElementById('v-'+id);
@@ -162,10 +148,10 @@
             box.className = 'box '+s;
 
             if(diff !== 0 && !isNaN(diff)) {
-                let c = diff>0 ? 'var(--red)' : 'var(--green)';
-                if(['sfi','ssn','dst','bz'].includes(id)) c = diff > 0 ? 'var(--green)' : 'var(--red)';
-                else c = diff > 0 ? 'var(--red)' : 'var(--green)'; 
-                el.innerHTML += ` <span class="trend" style="color:${c}">${diff>0?'▲':'▼'}</span>`;
+                let arrColor = 'var(--red)'; 
+                if(['sfi','ssn','dst','bz'].includes(id)) arrColor = diff > 0 ? 'var(--green)' : 'var(--red)';
+                else arrColor = diff > 0 ? 'var(--red)' : 'var(--green)'; 
+                el.innerHTML += ` <span class="trend" style="color:${arrColor}">${diff>0?'▲':'▼'}</span>`;
             }
         }
 
@@ -177,26 +163,92 @@
         async function getText(url) {
             try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.text(); } catch(e){ return null; }
         }
+        
+        // --- Emergency Mock Data (Last Known Good Values) ---
+        // Used only if ALL fetches fail to keep UI alive
+        const FALLBACK = {
+            sfi: 145, ssn: 114, kp: 2.00, dst: -46,
+            bz: 4.62, bt: 5, wind: 554, den: 2
+        };
 
         async function updateAll() {
+            let success = false;
+            
             // Mag
             const mag = await getData('https://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json');
             if(mag && mag.length > 2) {
                 const l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', parseFloat(l[1]), parseFloat(l[1])-parseFloat(p[1]));
                 set('bt', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
+                success = true;
             }
+
             // Plasma
             const plas = await getData('https://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json');
             if(plas && plas.length > 2) {
                 const l = plas[plas.length-1], p = plas[plas.length-2];
                 set('wind', Math.round(l[2]), parseFloat(l[2])-parseFloat(p[2]));
                 set('den', Math.round(l[1]), parseFloat(l[1])-parseFloat(p[1]));
+                success = true;
             }
+
             // Kp
             const kp = await getData('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 const l = kp[kp.length-1], p = kp[kp.length-2];
                 set('kp', l[1], parseFloat(l[1])-parseFloat(p[1]));
+                success = true;
             }
-            //
+
+            // Dst
+            const dst = await getData('https://services.swpc.noaa.gov/products/kyoto-dst.json');
+            if(dst && dst.length > 2) {
+                const l = dst[dst.length-1], p = dst[dst.length-2];
+                set('dst', parseInt(l[1]), parseInt(l[1])-parseInt(p[1]));
+                success = true;
+            }
+
+            // SFI/SSN
+            const txtSfi = await getText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
+            if(txtSfi) {
+                const lines = txtSfi.trim().split('\n');
+                let curr=null, prev=null;
+                for(let i=lines.length-1; i>=0; i--) {
+                    if(lines[i].trim().startsWith('20')) {
+                        let cols = lines[i].trim().split(/\s+/);
+                        if(cols.length > 4) {
+                            if(!curr) curr = cols;
+                            else { prev = cols; break; }
+                        }
+                    }
+                }
+                if(curr) {
+                    let sfiVal = parseInt(curr[3]), prevSfi = prev ? parseInt(prev[3]) : sfiVal;
+                    set('sfi', sfiVal, sfiVal-prevSfi);
+                    let ssnVal = parseInt(curr[4]), prevSsn = prev ? parseInt(prev[4]) : ssnVal;
+                    set('ssn', ssnVal, ssnVal-prevSsn);
+                    success = true;
+                }
+            }
+            
+            // --- EMERGENCY FALLBACK ACTIVATION ---
+            // If network failed completely, load saved values to prevent empty screen
+            if (!success) {
+                document.getElementById('status').innerHTML = '<span class="blink-red">●</span> OFFLINE MODE';
+                set('sfi', FALLBACK.sfi); set('ssn', FALLBACK.ssn);
+                set('kp', FALLBACK.kp); set('dst', FALLBACK.dst);
+                set('bz', FALLBACK.bz); set('bt', FALLBACK.bt);
+                set('wind', FALLBACK.wind); set('den', FALLBACK.den);
+            } else {
+                // Clear offline status if success
+                 document.getElementById('status').innerHTML = '<span class="blink">●</span> System Active';
+            }
+        }
+
+        tick(); updateAll();
+        setInterval(tick, 1000);
+        setInterval(updateAll, 60000);
+        setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000);
+    </script>
+</body>
+</html>

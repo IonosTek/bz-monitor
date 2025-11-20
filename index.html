@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V87.0 (GitHub Fix)</title>
+    <title>IonosTek Monitor V87.1 (Bz Arrow Align)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V87.0 --- */
+        /* --- CSS V87.1 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -40,7 +40,16 @@
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
         /* Arrows */
-        .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; }
+        .trend { 
+            font-size: 0.5em; 
+            font-weight: 900; 
+            display: inline-block; 
+            margin-left: 5px; 
+            animation: arrow-bounce 2s infinite;
+            /* --- V87.1 Adjustment --- */
+            position: relative; /* เปิดการใช้งาน top/bottom */
+            top: -0.2em;      /* ดันขึ้นไป 0.2 เท่าของขนาดตัวอักษร */
+        }
         @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         .bz-state-arrow { font-size: 1.0em; margin-right: 8px; font-weight: 900; }
 
@@ -164,7 +173,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V87.0 • GitHub Fix</span>
+        <span style="color:#666;">V87.1 • Bz Arrow Align</span>
     </div>
 
     <script>
@@ -321,3 +330,4 @@
     </script>
 </body>
 </html>
+```http://googleusercontent.com/image_generation_content/0

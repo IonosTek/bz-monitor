@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V64.2</title>
+    <title>IonosTek Monitor V64.3</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Base: V64.2 (Enhanced) --- */
+        /* --- CSS Base: V64.3 (Stable Core) --- */
         :root {
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; --sub: #888;
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100;
@@ -14,7 +14,7 @@
         }
         body { font-family: 'Chakra Petch', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; user-select: none; }
         
-        /* Header V2: Flexbox for Clock */
+        /* Header V2 */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap; gap: 15px; }
         .h-left h1 { margin: 0; font-weight: 700; font-size: 1.8em; letter-spacing: 1px; line-height: 1; }
         .h-right { text-align: right; }
@@ -157,7 +157,7 @@
         </div>
     </div>
     <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
-    <div class="footer">IonosTek Monitor V64.2 • Enhanced Core</div>
+    <div class="footer">IonosTek Monitor V64.3 • Resilient Core</div>
 
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
@@ -167,10 +167,8 @@
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function view(src) { document.getElementById('lb-img').src = src + '?t=' + Date.now(); document.getElementById('lightbox').style.display = 'flex'; }
         
-        // Updated Tick Function (Clock)
         function tick() { 
             const d = new Date();
-            // Update Time
             const utc = d.getUTCHours().toString().padStart(2,'0') + ':' + d.getUTCMinutes().toString().padStart(2,'0') + ':' + d.getUTCSeconds().toString().padStart(2,'0');
             const loc = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
             document.getElementById('utc-time').innerText = utc + ' UTC';
@@ -181,9 +179,7 @@
             const el = document.getElementById('v-'+id);
             const box = document.getElementById('b-'+id);
             if(!el) return;
-            
             el.innerText = val; 
-            
             let s = 'c-norm';
             if(id=='dst') { if(val < -100) s = 'c-alert'; else if(val < -50) s = 'c-mod'; else if(val < -20) s = 'c-warn'; else s = 'c-norm'; }
             else if(id=='kp') { if(val >= 7) s = 'c-alert'; else if(val == 6) s = 'c-mod'; else if(val >= 4) s = 'c-warn'; else s = 'c-norm'; }
@@ -194,9 +190,7 @@
             }
             else if(id=='sfi') s = val>150?'c-good':(val>100?'c-norm':'c-warn');
             else if(id=='wind') s = val>700?'c-alert':(val>500?'c-warn':'c-norm');
-
             box.className = 'box '+s;
-
             if(diff !== 0 && !isNaN(diff)) {
                 let c = diff>0 ? 'var(--red)' : 'var(--green)';
                 if(['sfi','ssn','dst','bz'].includes(id)) c = diff > 0 ? 'var(--green)' : 'var(--red)';
@@ -205,14 +199,32 @@
             }
         }
 
-        // --- Stable Fetcher (V64.2 Logic) ---
+        // --- V64.3: Robust Multi-Proxy Fetcher ---
         async function getData(url) {
-            try { const r = await fetch(url + '?t=' + Date.now()); if(r.ok) return await r.json(); } catch(e){}
-            try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.json(); } catch(e){ return null; }
+            const ts = '?t=' + Date.now();
+            // 1. Try Direct (Fastest)
+            try { 
+                const r = await fetch(url + ts, { signal: AbortSignal.timeout(3000) }); 
+                if(r.ok) return await r.json(); 
+            } catch(e){}
+            
+            // 2. Try AllOrigins (Reliable for JSON)
+            try { 
+                const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url) + ts); 
+                if(r.ok) return await r.json(); 
+            } catch(e){}
+
+            // 3. Try CorsProxy.io (Backup)
+            try { 
+                const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + ts)); 
+                if(r.ok) return await r.json(); 
+            } catch(e){ console.log('Fetch failed: '+url); return null; }
         }
         
         async function getText(url) {
-            try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now())); return await r.text(); } catch(e){ return null; }
+            const ts = '?t=' + Date.now();
+            try { const r = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(url) + ts); return await r.text(); } catch(e){}
+            try { const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + ts)); return await r.text(); } catch(e){ return null; }
         }
 
         async function updateAll() {
@@ -270,20 +282,17 @@
                 }
             }
 
-            // --- NEW: HF Band Logic ---
             const sfi = parseInt(document.getElementById('v-sfi').innerText) || 70;
             const kpv = parseFloat(document.getElementById('v-kp').innerText) || 1;
             const condEl = document.getElementById('hf-cond');
             
             let txt = "NORMAL (Stable)";
             let clr = "#ccc";
-
             if(kpv >= 5) { txt = "STORM / NOISE WARNING"; clr = "var(--red)"; }
             else if(kpv >= 4) { txt = "UNSETTLED (Noisy)"; clr = "var(--orange)"; }
             else if(sfi > 120 && kpv < 3) { txt = "EXCELLENT (High Bands Open)"; clr = "var(--green)"; }
             else if(sfi > 90 && kpv < 4) { txt = "GOOD (10m-20m Favorable)"; clr = "var(--green)"; }
             else if(sfi < 75) { txt = "FAIR / POOR (Low MUF)"; clr = "var(--yellow)"; }
-            
             condEl.innerHTML = `<span style="color:${clr}">${txt}</span>`;
         }
 

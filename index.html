@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V96.0 (Solar Focus)</title>
+    <title>IonosTek Monitor V97.0 (Full Dashboard)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V96.0 --- */
+        /* --- CSS V97.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -30,11 +30,9 @@
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
 
-        /* Adjusted Grid for 7 boxes */
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 20px; max-width: 1400px; margin: 0 auto 20px; }
         .box { background: var(--card); padding: 15px 5px; border-radius: 6px; text-align: center; border-top: 3px solid #444; transition: transform 0.2s; }
         .box:hover { transform: translateY(-3px); }
-        
         .val { font-size: 2.0em; font-weight: 700; margin: 5px 0; display: flex; justify-content: center; align-items: center; gap: 5px; white-space: nowrap; }
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
@@ -113,7 +111,6 @@
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
-        
         <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
@@ -131,6 +128,9 @@
         <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" referrerpolicy="no-referrer" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
         <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>RADIO BLACKOUT (D-RAP)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
+        
+        <div class="card"><div class="c-head"><span>EME FORECAST (MMMonVHF)</span></div><div class="c-body"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" referrerpolicy="no-referrer" onclick="window.open('https://www.mmmonvhf.de/eme.php', '_blank')" style="cursor:pointer;" title="Click for EME Data"></div></div>
+
         <div class="card"><div class="c-head"><span>SPACE WEATHER OVERVIEW</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" referrerpolicy="no-referrer" onclick="window.open('https://www.swpc.noaa.gov/products/overview-plot', '_blank')" style="cursor:pointer;" title="Click for full overview"></div></div>
     </div>
 
@@ -140,15 +140,14 @@
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px; margin-top:0;">OPERATOR GUIDE</h2>
             <div class="guide-sec">
                 <div class="guide-h">★ Understanding Bz (The Switch)</div>
-                <div class="guide-p"><span class="hl-g">Bz Positive (+): "SHIELD CLOSED"</span><br>HF Quiet. Good for DX.</div>
-                <div class="guide-p"><span class="hl-r">Bz Negative (-): "SHIELD OPEN"</span><br>Geomagnetic Storm Alert! HF unstable.</div>
+                <div class="guide-p"><span class="hl-g">Bz Positive (+): "SWITCH CLOSED"</span><br>Shields UP. HF Quiet.</div>
+                <div class="guide-p"><span class="hl-r">Bz Negative (-): "SWITCH OPEN"</span><br>Shields DOWN. Storm Alert!</div>
             </div>
             <div>
                 <div class="guide-h">★ Reading Values</div>
                 <div class="guide-p">
-                    <span class="hl-g">Dst > -20 nT:</span> Quiet | <span class="hl-y">-20 to -50 nT:</span> Minor Storm | <span class="hl-r">< -50 nT:</span> Major Storm<br>
-                    <b>Kp:</b> 0-3 Quiet, 5+ Storm | <b>Wind:</b> <span class="hl-g">< 400 km/s Quiet</span>, <span class="hl-y">400-600 km/s Elevated</span>, <span class="hl-r">> 600 km/s Stormy</span><br>
-                    <b>Density:</b> <span class="hl-g">< 5 p/cm³ Quiet</span>, <span class="hl-y">5-10 p/cm³ Elevated</span>, <span class="hl-r">> 10 p/cm³ Stormy</span>
+                    <span class="hl-g">Dst > -20 nT:</span> Quiet | <span class="hl-y">-20 to -50 nT:</span> Minor | <span class="hl-r">< -50 nT:</span> Storm<br>
+                    <b>Kp:</b> 0-3 Quiet, 5+ Storm | <b>Wind:</b> >500 Unstable
                 </div>
             </div>
         </div>
@@ -160,7 +159,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V96.0 • Solar Focus</span>
+        <span style="color:#666;">V97.0 • Full Dashboard</span>
     </div>
 
     <script>
@@ -175,7 +174,7 @@
                 if(!el) return;
                 if(val === undefined || val === null) return;
 
-                // Special: Bz Logic
+                // Bz Logic
                 if (id === 'bz') {
                     let bzVal = parseFloat(val);
                     let isClosed = bzVal >= 0;
@@ -193,7 +192,7 @@
                     return; 
                 }
 
-                // Special: Dst Logic
+                // Dst Logic
                 if (id === 'dst') {
                     let dstVal = parseFloat(val);
                     let mainArrow, color, s;
@@ -211,15 +210,12 @@
                     return;
                 }
 
-                // Standard Logic for SFI, SSN, Kp, Bt, Wind, Den
+                // Standard Logic
                 let arrowHtml = '';
                 if(diff !== 0 && !isNaN(diff)) {
                     let isBad = false;
-                    // Kp, Wind, Den: Bad if increasing
                     if(['kp','wind','den'].includes(id)) isBad = (diff > 0);
-                    // SFI, SSN, Bt: Bad if decreasing
                     else isBad = (diff < 0);
-                    
                     let color = isBad ? 'var(--red)' : 'var(--green)';
                     let symbol = diff > 0 ? '▲' : '▼';
                     arrowHtml = `<span class="trend" style="color:${color}">${symbol}</span>`;
@@ -227,11 +223,10 @@
                 el.innerHTML = val + arrowHtml;
                 
                 let s = 'c-norm';
-                // Additional color coding for non-arrow boxes
-                if(id === 'kp') { if(val >= 5) s = 'c-alert'; }
-                if(id === 'wind') { if(val > 600) s = 'c-alert'; else if(val > 400) s = 'c-warn'; }
-                if(id === 'den') { if(val > 10) s = 'c-alert'; else if(val > 5) s = 'c-warn'; }
-
+                if(id=='kp' && val >= 5) s = 'c-alert';
+                if(id=='wind' && val > 500) s = 'c-warn';
+                if(id=='den') { if(val > 10) s = 'c-alert'; else if(val > 5) s = 'c-warn'; }
+                
                 if(box) box.className = 'box '+s;
 
             } catch(e){}
@@ -262,7 +257,7 @@
         async function updateAll() {
             log('Syncing...');
             
-            // --- SOLAR DATA ---
+            // Solar Data
             let sfiTxt = await fetchSmart('https://services.swpc.noaa.gov/text/daily-solar-indices.txt', 'text');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -311,7 +306,7 @@
                 set('dst', parseInt(l[1]), parseInt(l[1]) - parseInt(p[1]));
             }
 
-            // HF Forecast Logic
+            // Forecast Logic
             let kpv = parseFloat(document.getElementById('v-kp').innerText)||0;
             let sfiv = parseInt(document.getElementById('v-sfi').innerText)||0;
             let cond = document.getElementById('hf-cond');
@@ -328,9 +323,8 @@
             setInterval(updateClock, 1000);
             updateClock();
             updateAll();
-            setInterval(updateAll, 60000); // Update every 1 minute
+            setInterval(updateAll, 60000);
         });
     </script>
 </body>
 </html>
-```http://googleusercontent.com/image_generation_content/1

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V109.0 (Proton Inclusion)</title>
+    <title>IonosTek Monitor V108.1 (Proton Upgrade)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V109.0 --- */
+        /* --- CSS V108.1 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -25,6 +25,7 @@
         
         .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; }
         .dot-blink { animation: fade 2s infinite; color: var(--green); }
+        @keyframes fade { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
@@ -94,7 +95,7 @@
         }
     </script>
 </head>
-<body onload="startClock(); appStart();">
+<body onload="startClock()">
     <div class="header">
         <div>
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
@@ -161,7 +162,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V108.0 • Operator Sync</span>
+        <span style="color:#666;">V109.0 • Proton Inclusion</span>
     </div>
 
     <script>
@@ -240,7 +241,7 @@
                     let s = 'c-norm';
                     if (pfu >= 1000) s = 'c-alert';
                     else if (pfu >= 100) s = 'c-mod';
-                    else if (pfu >= 10) s = 'c-warn';
+                    else if (pffu >= 10) s = 'c-warn';
                     
                     let arrowHtml = '';
                     if(diff !== 0 && !isNaN(diff)) {
@@ -294,9 +295,9 @@
         }
 
         async function updateAll() {
-            log('Syncing...');
+            log('Syncing Data...');
             
-            // 1. SFI (Text Parsing)
+            // 1. SFI
             let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -317,14 +318,9 @@
                 }
             }
 
-            // 2. Solar Wind (Try JSON -> Text Fallback)
+            // 2. Solar Wind (Mag)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
-            
-            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
-            if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
-
-            // MAG Data processing
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
@@ -344,7 +340,9 @@
                  }
             }
 
-            // PLASMA Data processing
+            // 3. Plasma
+            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
+            if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
             if(plas && plas.length > 2) {
                 let l = plas[plas.length-1], p = plas[plas.length-2];
                 set('den', Math.round(l[1]), parseFloat(l[1]) - parseFloat(p[1]));
@@ -364,7 +362,14 @@
                  }
             }
 
-            // 4. Kp & Dst
+            // 4. Proton Flux (NEW)
+            let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
+            if(proton && proton.length > 2) {
+                let l = proton[proton.length-1], p = proton[proton.length-2];
+                set('proton', l[1], parseFloat(l[1]) - parseFloat(p[1]));
+            }
+            
+            // 5. Kp & Dst
             let kp = await fetchJSON('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 let l = kp[kp.length-1], p = kp[kp.length-2];

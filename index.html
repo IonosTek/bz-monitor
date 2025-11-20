@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V112.0 (Proton Stability)</title>
+    <title>IonosTek Monitor V112.0 (GOES-R Protocol)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- CSS V112.0 --- */
@@ -44,7 +44,7 @@
 
         .c-norm { border-top-color: var(--green) !important; color: var(--green); }
         .c-warn { border-top-color: var(--yellow) !important; color: var(--yellow); }
-        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); } /* Orange for S2 */
+        .c-mod { border-top-color: var(--orange) !important; color: var(--orange); }
         .c-alert { border-top-color: var(--red) !important; color: var(--red); }
         
         .hf-banner { background: #1a1a1a; padding: 12px; text-align: center; border: 1px solid #333; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
@@ -79,22 +79,8 @@
             .clock-box { text-align: center; }
         }
     </style>
-    <script>
-        function updateClock() {
-            try {
-                const d = new Date();
-                if(document.getElementById('u-h')) {
-                    document.getElementById('u-h').innerText = d.getUTCHours().toString().padStart(2,'0');
-                    document.getElementById('u-m').innerText = d.getUTCMinutes().toString().padStart(2,'0');
-                    const lH = d.getHours().toString().padStart(2,'0');
-                    const lM = d.getMinutes().toString().padStart(2,'0');
-                    document.getElementById('local-clock').innerText = `${lH}:${lM} Local`;
-                }
-            } catch(e){}
-        }
-    </script>
 </head>
-<body onload="startClock()">
+<body onload="startClock(); appStart();">
     <div class="header">
         <div>
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
@@ -161,7 +147,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V109.0 • Proton Inclusion</span>
+        <span style="color:#666;">V110.0 • Final Stability</span>
     </div>
 
     <script>
@@ -191,6 +177,7 @@
                 let box = document.getElementById('b-'+id);
                 if(!el) return;
                 
+                // If value is NaN/null, reset the box and skip further logic for safety
                 if(val === undefined || val === null || isNaN(parseFloat(val))) {
                     el.innerText = "--";
                     if(box) box.className = 'box'; 
@@ -316,10 +303,14 @@
                 }
             }
 
-            // 2. Solar Wind (JSON/Text Fallback)
+            // 2. Solar Wind (MAG + PLASMA) - Using text fallback logic
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
             
+            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
+            if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
+
+            // MAG Data processing
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
@@ -339,8 +330,7 @@
                  }
             }
 
-            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
-            if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
+            // PLASMA Data processing
             if(plas && plas.length > 2) {
                 let l = plas[plas.length-1], p = plas[plas.length-2];
                 set('den', Math.round(l[1]), parseFloat(l[1]) - parseFloat(p[1]));
@@ -360,12 +350,14 @@
                  }
             }
 
-            // 3. Proton Flux (NEW)
+            // 3. Proton Flux
             let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
             if(proton && proton.length > 2) {
                 let l = proton[proton.length-1], p = proton[proton.length-2];
-                // Index 1 is 10 MeV flux (pfu)
                 set('proton', l[1], parseFloat(l[1]) - parseFloat(p[1]));
+            } else {
+                // If JSON fails, the box remains '--'. This is the current issue.
+                console.log('Proton fetch failed via JSON/Proxy.');
             }
             
             // 4. Kp & Dst

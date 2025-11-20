@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V97.0 (Full Dashboard)</title>
+    <title>IonosTek Monitor V97.1 (Clean Dashboard)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V97.0 --- */
+        /* --- CSS V97.1 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -54,6 +54,7 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
+        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 700px; border: 1px solid #444; position: relative; }
         .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
@@ -111,6 +112,7 @@
         <div class="box" id="b-ssn"><div class="lbl">SSN</div><div class="val" id="v-ssn">--</div><span class="unit">Count</span></div>
         <div class="box" id="b-kp"><div class="lbl">Kp</div><div class="val" id="v-kp">--</div><span class="unit">Index</span></div>
         <div class="box" id="b-dst"><div class="lbl">Dst</div><div class="val" id="v-dst">--</div><span class="unit">nT</span></div>
+        
         <div class="box" id="b-bz"><div class="lbl">Bz</div><div class="val" id="v-bz">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
@@ -128,10 +130,7 @@
         <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" referrerpolicy="no-referrer" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
         <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>RADIO BLACKOUT (D-RAP)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
-        
-        <div class="card"><div class="c-head"><span>EME FORECAST (MMMonVHF)</span></div><div class="c-body"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" referrerpolicy="no-referrer" onclick="window.open('https://www.mmmonvhf.de/eme.php', '_blank')" style="cursor:pointer;" title="Click for EME Data"></div></div>
-
-        <div class="card"><div class="c-head"><span>SPACE WEATHER OVERVIEW</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/swx-overview-small.gif" referrerpolicy="no-referrer" onclick="window.open('https://www.swpc.noaa.gov/products/overview-plot', '_blank')" style="cursor:pointer;" title="Click for full overview"></div></div>
+        <div class="card"><div class="c-head"><span>EME FORECAST (MMMonVHF)</span></div><div class="c-body"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" referrerpolicy="no-referrer" onclick="window.open('https://www.mmmonvhf.de/eme.php', '_blank')" style="cursor:pointer;" title="Click to open EME Chart"></div></div>
     </div>
 
     <div id="guideModal" class="modal">
@@ -159,7 +158,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V97.0 • Full Dashboard</span>
+        <span style="color:#666;">V97.1 • Clean Dashboard</span>
     </div>
 
     <script>
@@ -174,7 +173,7 @@
                 if(!el) return;
                 if(val === undefined || val === null) return;
 
-                // Bz Logic
+                // Special: Bz Logic
                 if (id === 'bz') {
                     let bzVal = parseFloat(val);
                     let isClosed = bzVal >= 0;
@@ -192,7 +191,7 @@
                     return; 
                 }
 
-                // Dst Logic
+                // Special: Dst Logic
                 if (id === 'dst') {
                     let dstVal = parseFloat(val);
                     let mainArrow, color, s;

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V119.0 (Ultimate Final)</title>
+    <title>IonosTek Monitor V118.0 (The True Final)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V119.0 --- */
+        /* --- CSS V118.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -78,7 +78,7 @@
         }
     </style>
 </head>
-<body onload="startClock(); updateAll();">
+<body onload="startClock(); updateAll(); initCounter();">
     <div class="header">
         <div>
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
@@ -101,6 +101,7 @@
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Density</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
+        <div class="box" id="b-proton"><div class="lbl">Proton</div><div class="val" id="v-proton">--</div><span class="unit">pfu</span></div>
     </div>
 
     <div class="hf-banner">
@@ -114,7 +115,7 @@
         <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" referrerpolicy="no-referrer" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
         <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>RADIO BLACKOUT (D-RAP)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>EME FORECAST (MMMonVHF)</span></div><div class="c-body"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" referrerpolicy="no-referrer" onclick="window.open('https://www.mmmonvhf.de/eme.php', '_blank')" style="cursor:pointer;" title="Click to open EME Chart"></div></div>
+        <div class="card"><div class="c-head"><span>EME FORECAST (MMMONVHF)</span></div><div class="c-body"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" referrerpolicy="no-referrer" onclick="window.open('https://www.mmmonvhf.de/eme.php', '_blank')" style="cursor:pointer;" title="Click to open EME Chart"></div></div>
     </div>
 
     <div id="guideModal" class="modal">
@@ -141,14 +142,14 @@
 
     <div class="footer">
         <div>
-            <span id="fetch-log">System Ready</span>
+            <span id="local-counter">Visits: --</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V114.0 • Final Baseline</span>
+        <span style="color:#666;">V117.0 • Local Data</span>
     </div>
 
     <script>
-        // --- 1. CLOCK (SAFE ISOLATION) ---
+        // --- 1. CLOCK & COUNTER ---
         function startClock() {
             function tick() {
                 const d = new Date();
@@ -162,6 +163,21 @@
             }
             setInterval(tick, 1000);
             tick();
+        }
+
+        function initCounter() {
+            if (typeof(Storage) !== "undefined") {
+                let count = localStorage.getItem('ionostek_visit_count');
+                if (count) {
+                    count = parseInt(count) + 1;
+                } else {
+                    count = 1; 
+                }
+                localStorage.setItem('ionostek_visit_count', count);
+                document.getElementById('local-counter').innerText = `Visits: ${count}`;
+            } else {
+                document.getElementById('local-counter').innerText = 'Visits: N/A';
+            }
         }
 
         // --- 2. UI HELPERS ---
@@ -223,7 +239,7 @@
                     let s = 'c-norm';
                     if (pfu >= 1000) s = 'c-alert';
                     else if (pfu >= 100) s = 'c-mod';
-                    else if (pfu >= 10) s = 'c-warn';
+                    else if (pffu >= 10) s = 'c-warn';
                     
                     let arrowHtml = '';
                     if(diff !== 0 && !isNaN(diff)) {
@@ -354,7 +370,7 @@
                 let pfuPrev = parseFloat(p[1]) || 0;
                 set('proton', pfuVal.toFixed(2), pfuVal - pfuPrev);
             } else {
-                set('proton', 0.00); // Fail-safe to 0.00 if fetch failed
+                set('proton', 0.00); // Fail-safe: Set to 0.00 if fetch failed
             }
 
             // 5. Kp & Dst
@@ -384,6 +400,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            initCounter(); // Start counter
             startClock();
             updateAll();
             setInterval(updateAll, 60000);

@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V117.0 (Final Blink Fix)</title>
+    <title>IonosTek Monitor V119.0 (Ultimate Stable Core)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V117.0 --- */
+        /* --- CSS V119.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -23,10 +23,10 @@
         .blink-colon { animation: blinker 1s infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
         
-        /* Status Dot Fix: AGGRESSIVE BLINK */
+        /* Fix: Aggressive Blinking Status Dot */
         .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; display: flex; align-items: center; }
         .dot-blink { animation: status-blinker 1s infinite; color: var(--green); }
-        @keyframes status-blinker { 50% { opacity: 0; } } /* Changed from 'fade' to hard blink */
+        @keyframes status-blinker { 50% { opacity: 0; } }
 
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
@@ -79,20 +79,6 @@
             .clock-box { text-align: center; }
         }
     </style>
-    <script>
-        function updateClock() {
-            try {
-                const d = new Date();
-                if(document.getElementById('u-h')) {
-                    document.getElementById('u-h').innerText = d.getUTCHours().toString().padStart(2,'0');
-                    document.getElementById('u-m').innerText = d.getUTCMinutes().toString().padStart(2,'0');
-                    const lH = d.getHours().toString().padStart(2,'0');
-                    const lM = d.getMinutes().toString().padStart(2,'0');
-                    document.getElementById('local-clock').innerText = `${lH}:${lM} Local`;
-                }
-            } catch(e){}
-        }
-    </script>
 </head>
 <body onload="startClock(); updateAll(); initCounter();">
     <div class="header">
@@ -100,7 +86,7 @@
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
             <div class="sys-active">
                 <span class="dot-blink">●</span> System Active
-                <span id="local-counter" class="local-counter">Visits: --</span> 
+                <span id="local-counter" class="local-counter">Visits: --</span>
             </div>
         </div>
         <div class="clock-box">
@@ -164,7 +150,7 @@
             <span id="local-counter">Visits: --</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V117.0 • Local Data</span>
+        <span style="color:#666;">V119.0 • Ultimate Stable Core</span>
     </div>
 
     <script>
@@ -184,6 +170,7 @@
             tick();
         }
 
+        // VISIT COUNTER: Standard logic - should be fully stable
         function initCounter() {
             if (typeof(Storage) !== "undefined") {
                 let count = localStorage.getItem('ionostek_visit_count');
@@ -296,6 +283,7 @@
         // --- 3. DATA ENGINE ---
         async function fetchJSON(url) {
             try {
+                // Use a stable, confirmed proxy
                 const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
                 if(r.ok) return await r.json();
             } catch(e){}
@@ -303,7 +291,8 @@
         }
 
         async function fetchText(url) {
-            let target = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url + '?t=' + Date.now());
+            // Use a stable, confirmed proxy
+            let target = 'https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now());
             try {
                 let r = await fetch(target);
                 if(r.ok) return await r.text();
@@ -311,118 +300,140 @@
             return null;
         }
 
+        // MAIN UPDATE FUNCTION: Surrounded by try/catch for anti-crash capability
         async function updateAll() {
-            log('Syncing Data...');
-            
-            // SFI
-            let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
-            if(sfiTxt) {
-                let lines = sfiTxt.trim().split('\n');
-                let curr = null, prev = null;
-                for(let i=lines.length-1; i>=0; i--) {
-                    if(lines[i].trim().startsWith('20')) {
-                        let cols = lines[i].trim().split(/\s+/);
-                        if(cols.length > 4) {
-                            if(!curr) curr = cols; else { prev = cols; break; }
+            try {
+                log('Syncing Data...');
+                
+                // 1. SFI/SSN
+                try {
+                    let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
+                    if(sfiTxt) {
+                        let lines = sfiTxt.trim().split('\n');
+                        let curr = null, prev = null;
+                        for(let i=lines.length-1; i>=0; i--) {
+                            if(lines[i].trim().startsWith('20')) {
+                                let cols = lines[i].trim().split(/\s+/);
+                                if(cols.length > 4) {
+                                    if(!curr) curr = cols; else { prev = cols; break; }
+                                }
+                            }
+                        }
+                        if(curr) {
+                            let vSfi = parseInt(curr[3]), pSfi = prev ? parseInt(prev[3]) : vSfi;
+                            let vSsn = parseInt(curr[4]), pSsn = prev ? parseInt(prev[4]) : vSsn;
+                            set('sfi', vSfi, vSfi - pSfi);
+                            set('ssn', vSsn, vSsn - pSsn);
                         }
                     }
-                }
-                if(curr) {
-                    let vSfi = parseInt(curr[3]), pSfi = prev ? parseInt(prev[3]) : vSfi;
-                    let vSsn = parseInt(curr[4]), pSsn = prev ? parseInt(prev[4]) : vSsn;
-                    set('sfi', vSfi, vSfi - pSfi);
-                    set('ssn', vSsn, vSsn - pSsn);
-                }
-            }
+                } catch(e) { console.error("SFI/SSN Fetch Error:", e); }
 
-            // Solar Wind (MAG + PLASMA)
-            let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
-            if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
-            let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
-            if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
 
-            // MAG Data processing
-            if(mag && mag.length > 2) {
-                let l = mag[mag.length-1], p = mag[mag.length-2];
-                set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
-                set('bt', Math.round(l[6]), parseFloat(l[6]) - parseFloat(p[6]));
-            } else {
-                 let magTxt = await fetchText('https://services.swpc.noaa.gov/text/rtsw/realtime-mag.txt');
-                 if(magTxt) {
-                    let lines = magTxt.trim().split('\n').filter(l => l.length > 10 && !l.startsWith('#') && !l.startsWith(':'));
-                    if(lines.length > 1) {
-                        let curr = lines[lines.length-1].trim().split(/\s+/);
-                        let prev = lines[lines.length-2].trim().split(/\s+/);
-                        if(curr.length >= 7) {
-                            set('bz', parseFloat(curr[2]), parseFloat(curr[2])-parseFloat(prev[2]));
-                            set('bt', Math.round(parseFloat(curr[1])), parseFloat(curr[1])-parseFloat(prev[1]));
+                // 2. Solar Wind (MAG + PLASMA) - JSON attempt first
+                try {
+                    let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
+                    if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
+                    let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
+                    if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
+        
+                    if(mag && mag.length > 2) {
+                        let l = mag[mag.length-1], p = mag[mag.length-2];
+                        set('bz', parseFloat(l[3]), parseFloat(l[3]) - parseFloat(p[3])); 
+                        set('bt', Math.round(l[6]), parseFloat(l[6]) - parseFloat(p[6]));
+                    }
+                    if(plas && plas.length > 2) {
+                        let l = plas[plas.length-1], p = plas[plas.length-2];
+                        set('den', Math.round(l[1]), parseFloat(l[1]) - parseFloat(p[1]));
+                        set('wind', Math.round(l[2]), parseFloat(l[2]) - parseFloat(p[2]));
+                    }
+
+                    // Fallback to text files only if JSON failed
+                    if ((!mag || mag.length <= 2) && (!plas || plas.length <= 2)) {
+                        let magTxt = await fetchText('https://services.swpc.noaa.gov/text/rtsw/realtime-mag.txt');
+                        let plasTxt = await fetchText('https://services.swpc.noaa.gov/text/rtsw/realtime-solar-wind.txt');
+                        
+                        if(magTxt) {
+                           let lines = magTxt.trim().split('\n').filter(l => l.length > 10 && !l.startsWith('#') && !l.startsWith(':'));
+                           if(lines.length > 1) {
+                               let curr = lines[lines.length-1].trim().split(/\s+/);
+                               let prev = lines[lines.length-2].trim().split(/\s+/);
+                               if(curr.length >= 7) {
+                                   set('bz', parseFloat(curr[2]), parseFloat(curr[2])-parseFloat(prev[2]));
+                                   set('bt', Math.round(parseFloat(curr[1])), parseFloat(curr[1])-parseFloat(prev[1]));
+                               }
+                           }
+                        }
+                        if(plasTxt) {
+                           let lines = plasTxt.trim().split('\n').filter(l => l.length > 10 && !l.startsWith('#') && !l.startsWith(':'));
+                           if(lines.length > 1) {
+                               let curr = lines[lines.length-1].trim().split(/\s+/);
+                               let prev = lines[lines.length-2].trim().split(/\s+/);
+                               if(curr.length >= 4) {
+                                   set('den', Math.round(parseFloat(curr[1])), parseFloat(curr[1])-parseFloat(prev[1]));
+                                   set('wind', Math.round(parseFloat(curr[2])), parseFloat(curr[2])-parseFloat(prev[2]));
+                               }
+                           }
                         }
                     }
-                 }
-            }
+                } catch(e) { console.error("MAG/Plasma Fetch Error (JSON/Text):", e); }
 
-            // PLASMA Data processing
-            if(plas && plas.length > 2) {
-                let l = plas[plas.length-1], p = plas[plas.length-2];
-                set('den', Math.round(l[1]), parseFloat(l[1]) - parseFloat(p[1]));
-                set('wind', Math.round(l[2]), parseFloat(l[2]) - parseFloat(p[2]));
-            } else {
-                 let plasTxt = await fetchText('https://services.swpc.noaa.gov/text/rtsw/realtime-solar-wind.txt');
-                 if(plasTxt) {
-                    let lines = plasTxt.trim().split('\n').filter(l => l.length > 10 && !l.startsWith('#') && !l.startsWith(':'));
-                    if(lines.length > 1) {
-                        let curr = lines[lines.length-1].trim().split(/\s+/);
-                        let prev = lines[lines.length-2].trim().split(/\s+/);
-                        if(curr.length >= 4) {
-                            set('den', Math.round(parseFloat(curr[1])), parseFloat(curr[1])-parseFloat(prev[1]));
-                            set('wind', Math.round(parseFloat(curr[2])), parseFloat(curr[2])-parseFloat(prev[2]));
-                        }
+
+                // 3. Proton Flux
+                try {
+                    let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
+                    if(proton && proton.length > 2) {
+                        let l = proton[proton.length-1], p = proton[proton.length-2];
+                        let pfuVal = parseFloat(l[1]) || 0;
+                        let pfuPrev = parseFloat(p[1]) || 0;
+                        set('proton', pfuVal.toFixed(2), pfuVal - pfuPrev);
+                    } else {
+                        set('proton', 0.00); // Fail-safe to 0.00 if fetch failed
                     }
-                 }
-            }
+                } catch(e) { console.error("Proton Fetch Error:", e); set('proton', 0.00); }
 
-            // 4. Proton Flux (Final Stable)
-            let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
-            if(proton && proton.length > 2) {
-                let l = proton[proton.length-1], p = proton[proton.length-2];
-                let pfuVal = parseFloat(l[1]) || 0;
-                let pfuPrev = parseFloat(p[1]) || 0;
-                set('proton', pfuVal.toFixed(2), pfuVal - pfuPrev);
-            } else {
-                set('proton', 0.00); // Fail-safe to 0.00 if fetch failed
-            }
 
-            // 5. Kp & Dst
-            let kp = await fetchJSON('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
-            if(kp && kp.length > 2) {
-                let l = kp[kp.length-1], p = kp[kp.length-2];
-                set('kp', l[1], parseFloat(l[1]) - parseFloat(p[1]));
-            }
-            
-            let dst = await fetchJSON('https://services.swpc.noaa.gov/products/kyoto-dst.json');
-            if(dst && dst.length > 2) {
-                let l = dst[dst.length-1], p = dst[dst.length-2];
-                set('dst', parseInt(l[1]), parseInt(l[1]) - parseInt(p[1]));
-            }
+                // 4. Kp & Dst
+                try {
+                    let kp = await fetchJSON('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
+                    if(kp && kp.length > 2) {
+                        let l = kp[kp.length-1], p = kp[kp.length-2];
+                        set('kp', l[1], parseFloat(l[1]) - parseFloat(p[1]));
+                    }
+                } catch(e) { console.error("Kp Fetch Error:", e); }
+                
+                try {
+                    let dst = await fetchJSON('https://services.swpc.noaa.gov/products/kyoto-dst.json');
+                    if(dst && dst.length > 2) {
+                        let l = dst[dst.length-1], p = dst[dst.length-2];
+                        set('dst', parseInt(l[1]), parseInt(l[1]) - parseInt(p[1]));
+                    }
+                } catch(e) { console.error("Dst Fetch Error:", e); }
 
-            // Forecast
-            let kpv = parseFloat(document.getElementById('v-kp').innerText)||0;
-            let sfiv = parseInt(document.getElementById('v-sfi').innerText)||0;
-            let cond = document.getElementById('hf-cond');
-            let txt = "NORMAL", c = "#ccc";
-            if(kpv >= 5) { txt = "STORM WARNING"; c = "var(--red)"; }
-            else if(sfiv > 120) { txt = "EXCELLENT"; c = "var(--green)"; }
-            else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
-            cond.innerText = txt; cond.style.color = c;
-            
-            log('Active');
+
+                // 5. Forecast
+                let kpv = parseFloat(document.getElementById('v-kp').innerText)||0;
+                let sfiv = parseInt(document.getElementById('v-sfi').innerText)||0;
+                let cond = document.getElementById('hf-cond');
+                let txt = "NORMAL", c = "#ccc";
+                if(kpv >= 5) { txt = "STORM WARNING"; c = "var(--red)"; }
+                else if(sfiv > 120) { txt = "EXCELLENT"; c = "var(--green)"; }
+                else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
+                cond.innerText = txt; cond.style.color = c;
+                
+                log('Active');
+            } catch(e) {
+                 // Global catch for updateAll: if anything goes wrong, log it but don't crash the script
+                 log('Error: Update Failed. Retry.');
+                 console.error("Global Update Error:", e);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             initCounter();
             startClock();
             updateAll();
-            setInterval(updateAll, 60000);
+            // Auto-refresh every 60 seconds. The try/catch blocks ensure this won't crash.
+            setInterval(updateAll, 60000); 
         });
     </script>
 </body>

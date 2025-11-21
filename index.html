@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V120.0 (Final UI Lock)</title>
+    <title>IonosTek Monitor V121.0 (Final Verification)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V120.0 --- */
+        /* --- CSS V121.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -118,7 +118,7 @@
         <div class="card"><div class="c-head"><span>SOLAR FLARES (X-RAY)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/x-rays/solar-flare-line-plot-3-day.png" referrerpolicy="no-referrer" onclick="view(this.src)" onerror="this.src='https://services.swpc.noaa.gov/images/swx-overview-small.gif'"></div></div>
         <div class="card"><div class="c-head"><span>AURORA FORECAST</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
         <div class="card"><div class="c-head"><span>RADIO BLACKOUT (D-RAP)</span></div><div class="c-body"><img src="https://services.swpc.noaa.gov/images/animations/d-rap/global/d-rap/latest.png" referrerpolicy="no-referrer" onclick="view(this.src)"></div></div>
-        <div class="card"><div class="c-head"><span>EME FORECAST (MMMONVHF)</span></div><div class="c-body"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" referrerpolicy="no-referrer" onclick="window.open('https://www.mmmonvhf.de/eme.php', '_blank')" style="cursor:pointer;" title="Click to open EME Chart"></div></div>
+        <div class="card"><div class="c-head"><span>EME FORECAST (MMMonVHF)</span></div><div class="c-body"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg" referrerpolicy="no-referrer" onclick="window.open('https://www.mmmonvhf.de/eme.php', '_blank')" style="cursor:pointer;" title="Click to open EME Chart"></div></div>
     </div>
 
     <div id="guideModal" class="modal">
@@ -148,7 +148,7 @@
             <span id="local-counter">Visits: --</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V117.0 • Local Data</span>
+        <span style="color:#666;">V120.0 • Final UI Lock</span>
     </div>
 
     <script>
@@ -296,10 +296,10 @@
         }
 
         async function updateAll() {
-            log('Syncing Data...');
-            
-            // SFI
             try {
+                log('Syncing Data...');
+                
+                // SFI
                 let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
                 if(sfiTxt) {
                     let lines = sfiTxt.trim().split('\n');
@@ -319,11 +319,8 @@
                         set('ssn', vSsn, vSsn - pSsn);
                     }
                 }
-            } catch(e) { console.error("SFI/SSN Fetch Error:", e); }
 
-
-            // Solar Wind (MAG + PLASMA)
-            try {
+                // Solar Wind (MAG + PLASMA)
                 let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
                 if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
                 let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
@@ -368,11 +365,8 @@
                         }
                     }
                 }
-            } catch(e) { console.error("Solar Wind/MAG Fetch Error:", e); }
 
-
-            // 4. Proton Flux (Final Stable)
-            try {
+                // 4. Proton Flux (Final Stable)
                 let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
                 if(proton && proton.length > 2) {
                     let l = proton[proton.length-1], p = proton[proton.length-2];
@@ -382,39 +376,36 @@
                 } else {
                     set('proton', 0.00); // Fail-safe to 0.00 if fetch failed
                 }
-            } catch(e) { console.error("Proton Fetch Error:", e); set('proton', 0.00); }
 
-
-            // 5. Kp & Dst
-            try {
+                // 5. Kp & Dst
                 let kp = await fetchJSON('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
                 if(kp && kp.length > 2) {
                     let l = kp[kp.length-1], p = kp[kp.length-2];
                     set('kp', l[1], parseFloat(l[1]) - parseFloat(p[1]));
                 }
-            } catch(e) { console.error("Kp Fetch Error:", e); }
-            
-            try {
+                
                 let dst = await fetchJSON('https://services.swpc.noaa.gov/products/kyoto-dst.json');
                 if(dst && dst.length > 2) {
                     let l = dst[dst.length-1], p = dst[dst.length-2];
                     set('dst', parseInt(l[1]), parseInt(l[1]) - parseInt(p[1]));
                 }
-            } catch(e) { console.error("Dst Fetch Error:", e); }
 
+                // Forecast
+                let kpv = parseFloat(document.getElementById('v-kp').innerText)||0;
+                let sfiv = parseInt(document.getElementById('v-sfi').innerText)||0;
+                let cond = document.getElementById('hf-cond');
+                let txt = "NORMAL", c = "#ccc";
+                if(kpv >= 5) { txt = "STORM WARNING"; c = "var(--red)"; }
+                else if(sfiv > 120) { txt = "EXCELLENT"; c = "var(--green)"; }
+                else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
+                cond.innerText = txt; cond.style.color = c;
+                
+                log('Active');
 
-            // 6. Forecast
-            let kpv = parseFloat(document.getElementById('v-kp').innerText)||0;
-            let sfiv = parseInt(document.getElementById('v-sfi').innerText)||0;
-            let cond = document.getElementById('hf-cond');
-            let txt = "NORMAL", c = "#ccc";
-            if(kpv >= 5) { txt = "STORM WARNING"; c = "var(--red)"; }
-            else if(sfiv > 120) { txt = "EXCELLENT"; c = "var(--green)"; }
-            else if(sfiv > 90) { txt = "GOOD"; c = "var(--green)"; }
-            cond.innerText = txt; cond.style.color = c;
-            
-            log('Active');
-
+            } catch(e) {
+                 log('Error: Update Failed. Retrying.');
+                 console.error("Global Update Error:", e);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {

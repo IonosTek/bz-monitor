@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V113.0 (Proton Protocol)</title>
+    <title>IonosTek Monitor V114.0 (Final Data Lock)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V113.0 --- */
+        /* --- CSS V114.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -53,6 +53,7 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
+        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 600px; border: 1px solid #444; position: relative; }
         .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
@@ -87,7 +88,7 @@
         <div class="clock-box">
             <div class="utc-time"><span id="u-h">00</span><span class="blink-colon">:</span><span id="u-m">00</span> UTC</div>
             <div class="local-time" id="local-clock">--:-- Local</div>
-            <button onclick="document.getElementById('guideModal').style.display='flex'" class="btn-guide">📘 OPERATOR GUIDE</button>
+            <button onclick="document.getElementById('guideModal').style.display='false'" class="btn-guide">📘 OPERATOR GUIDE</button>
         </div>
     </div>
 
@@ -175,6 +176,7 @@
                 let box = document.getElementById('b-'+id);
                 if(!el) return;
                 
+                // If value is NaN/null, reset the box and skip further logic for safety
                 if(val === undefined || val === null || isNaN(parseFloat(val))) {
                     el.innerText = "--";
                     if(box) box.className = 'box'; 
@@ -303,10 +305,11 @@
             // 2. Solar Wind (MAG + PLASMA)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
+            
             let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
             if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
 
-            // MAG Data processing (JSON/Text Fallback)
+            // MAG Data processing
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
@@ -346,7 +349,7 @@
                  }
             }
 
-            // 4. Proton Flux (NEW - Text Protocol)
+            // 4. Proton Flux (Text Protocol)
             let protonTxt = await fetchText('https://services.swpc.noaa.gov/text/goes-r-proton-flux-1-minute.txt');
             if(protonTxt) {
                 let lines = protonTxt.trim().split('\n').filter(l => l.length > 10 && !l.startsWith('#') && !l.startsWith(':'));
@@ -386,12 +389,3 @@
             
             log('Active');
         }
-
-        window.onload = function() {
-            startClock();
-            updateAll();
-            setInterval(updateAll, 60000);
-        };
-    </script>
-</body>
-</html>

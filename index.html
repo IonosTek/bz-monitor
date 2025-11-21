@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V120.0 (Final Global)</title>
+    <title>IonosTek Monitor V117.0 (Final Blink Fix)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V120.0 --- */
+        /* --- CSS V117.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -23,8 +23,10 @@
         .blink-colon { animation: blinker 1s infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
         
-        .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; }
-        .dot-blink { animation: fade 2s infinite; color: var(--green); }
+        /* Status Dot Fix: AGGRESSIVE BLINK */
+        .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; display: flex; align-items: center; }
+        .dot-blink { animation: status-blinker 1s infinite; color: var(--green); }
+        @keyframes status-blinker { 50% { opacity: 0; } } /* Changed from 'fade' to hard blink */
 
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
@@ -77,6 +79,20 @@
             .clock-box { text-align: center; }
         }
     </style>
+    <script>
+        function updateClock() {
+            try {
+                const d = new Date();
+                if(document.getElementById('u-h')) {
+                    document.getElementById('u-h').innerText = d.getUTCHours().toString().padStart(2,'0');
+                    document.getElementById('u-m').innerText = d.getUTCMinutes().toString().padStart(2,'0');
+                    const lH = d.getHours().toString().padStart(2,'0');
+                    const lM = d.getMinutes().toString().padStart(2,'0');
+                    document.getElementById('local-clock').innerText = `${lH}:${lM} Local`;
+                }
+            } catch(e){}
+        }
+    </script>
 </head>
 <body onload="startClock(); updateAll(); initCounter();">
     <div class="header">
@@ -84,6 +100,7 @@
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
             <div class="sys-active">
                 <span class="dot-blink">●</span> System Active
+                <span id="local-counter" class="local-counter">Visits: --</span> 
             </div>
         </div>
         <div class="clock-box">
@@ -402,7 +419,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            initCounter(); // Start counter
+            initCounter();
             startClock();
             updateAll();
             setInterval(updateAll, 60000);

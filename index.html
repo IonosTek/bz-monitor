@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V117.0 (Final Stable Master)</title>
+    <title>IonosTek Monitor V116.0 (Guide Restoration)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V117.0 --- */
+        /* --- CSS V116.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -64,7 +64,7 @@
         #fetch-log { color: var(--orange); font-family: monospace; }
         .btn-retry { background: #333; border: 1px solid #555; color: #ccc; padding: 2px 10px; cursor: pointer; border-radius: 4px; font-size: 0.9em; margin-left: 10px; }
 
-        /* Guide */
+        /* Guide CSS */
         .guide-sec { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333; }
         .guide-h { color: var(--blue); font-weight: 700; margin-bottom: 10px; font-size: 1.1em; }
         .guide-p { color: #ccc; font-size: 0.95em; line-height: 1.6; margin-bottom: 8px; }
@@ -88,7 +88,7 @@
         <div class="clock-box">
             <div class="utc-time"><span id="u-h">00</span><span class="blink-colon">:</span><span id="u-m">00</span> UTC</div>
             <div class="local-time" id="local-clock">--:-- Local</div>
-            <button onclick="document.getElementById('guideModal').style.display='false'" class="btn-guide">📘 OPERATOR GUIDE</button>
+            <button onclick="openGuideModal()" class="btn-guide">📘 OPERATOR GUIDE</button>
         </div>
     </div>
 
@@ -102,6 +102,7 @@
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Density</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
+        <div class="box" id="b-proton"><div class="lbl">Proton</div><div class="val" id="v-proton">--</div><span class="unit">pfu</span></div>
     </div>
 
     <div class="hf-banner">
@@ -120,7 +121,7 @@
 
     <div id="guideModal" class="modal">
         <div class="m-content">
-            <span class="close" onclick="document.getElementById('guideModal').style.display='none'">&times;</span>
+            <span class="close" onclick="closeModal('guideModal')">&times;</span>
             <h2 style="color:var(--green); border-bottom:1px solid #444; padding-bottom:10px; margin-top:0;">OPERATOR GUIDE</h2>
             
             <div class="guide-sec">
@@ -138,18 +139,24 @@
             </div>
         </div>
     </div>
-    <div id="lightbox" onclick="this.style.display='none'"><img id="lb-img"></div>
+    <div id="lightbox" onclick="closeModal('lightbox')"><img id="lb-img"></div>
 
     <div class="footer">
         <div>
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V114.0 • Final Baseline</span>
+        <span style="color:#666;">V116.0 • Stable Protocol</span>
     </div>
 
     <script>
-        // --- 1. CLOCK (SAFE ISOLATION) ---
+        // --- JS HELPER FUNCTIONS ---
+        function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
+        function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
+        function openGuideModal() { document.getElementById('guideModal').style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        
+        // Clock Function
         function startClock() {
             function tick() {
                 const d = new Date();
@@ -165,10 +172,6 @@
             tick();
         }
 
-        // --- 2. UI HELPERS ---
-        function view(src) { document.getElementById('lb-img').src=src; document.getElementById('lightbox').style.display='flex'; }
-        function log(msg) { try{document.getElementById('fetch-log').innerText=msg;}catch(e){} }
-
         function set(id, val, diff=0) {
             try {
                 let el = document.getElementById('v-'+id);
@@ -176,7 +179,7 @@
                 if(!el) return;
                 
                 // If value is NaN/null, reset the box and skip further logic for safety
-                if(val === undefined || val === null || isNaN(parseFloat(val))) {
+                if(val === undefined || val === null || (id !== 'flare' && isNaN(parseFloat(val)))) {
                     el.innerText = "--";
                     if(box) box.className = 'box'; 
                     return; 
@@ -280,7 +283,7 @@
         async function updateAll() {
             log('Syncing Data...');
             
-            // 1. SFI
+            // SFI
             let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -301,7 +304,7 @@
                 }
             }
 
-            // 2. Solar Wind (MAG + PLASMA)
+            // Solar Wind (MAG + PLASMA)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
             let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
@@ -347,7 +350,7 @@
                  }
             }
 
-            // 4. Proton Flux (NEW)
+            // 4. Proton Flux (Final Stable)
             let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
             if(proton && proton.length > 2) {
                 let l = proton[proton.length-1], p = proton[proton.length-2];
@@ -384,11 +387,12 @@
             log('Active');
         }
 
-        window.onload = function() {
+        // --- MAIN START ---
+        document.addEventListener('DOMContentLoaded', () => {
             startClock();
             updateAll();
             setInterval(updateAll, 60000);
-        };
+        });
     </script>
 </body>
 </html>

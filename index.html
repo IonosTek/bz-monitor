@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V116.0 (Flare Class)</title>
+    <title>IonosTek Monitor V117.0 (Final Stable Master)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V116.0 --- */
+        /* --- CSS V117.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -78,20 +78,6 @@
             .clock-box { text-align: center; }
         }
     </style>
-    <script>
-        function updateClock() {
-            try {
-                const d = new Date();
-                if(document.getElementById('u-h')) {
-                    document.getElementById('u-h').innerText = d.getUTCHours().toString().padStart(2,'0');
-                    document.getElementById('u-m').innerText = d.getUTCMinutes().toString().padStart(2,'0');
-                    const lH = d.getHours().toString().padStart(2,'0');
-                    const lM = d.getMinutes().toString().padStart(2,'0');
-                    document.getElementById('local-clock').innerText = `${lH}:${lM} Local`;
-                }
-            } catch(e){}
-        }
-    </script>
 </head>
 <body onload="startClock(); updateAll();">
     <div class="header">
@@ -116,7 +102,6 @@
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Density</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
-        <div class="box" id="b-flare"><div class="lbl">Flare</div><div class="val" id="v-flare">--</div><span class="unit">Class</span></div>
     </div>
 
     <div class="hf-banner">
@@ -160,7 +145,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V116.0 • Flare Class</span>
+        <span style="color:#666;">V114.0 • Final Baseline</span>
     </div>
 
     <script>
@@ -191,7 +176,7 @@
                 if(!el) return;
                 
                 // If value is NaN/null, reset the box and skip further logic for safety
-                if(val === undefined || val === null || (id !== 'flare' && isNaN(parseFloat(val)))) {
+                if(val === undefined || val === null || isNaN(parseFloat(val))) {
                     el.innerText = "--";
                     if(box) box.className = 'box'; 
                     return; 
@@ -233,7 +218,7 @@
                     return;
                 }
                 
-                // Proton Logic (Removed in V116.0, keeping logic as placeholder)
+                // Proton Logic
                 if (id === 'proton') {
                     let pfu = parseFloat(val);
                     let s = 'c-norm';
@@ -241,21 +226,13 @@
                     else if (pfu >= 100) s = 'c-mod';
                     else if (pfu >= 10) s = 'c-warn';
                     
-                    el.innerHTML = val;
-                    if (box) box.className = 'box ' + s;
-                    return;
-                }
-                
-                // Flare Logic (NEW)
-                if (id === 'flare') {
-                    let flareClass = val.toUpperCase();
-                    let s = 'c-norm'; // A/B class default
-                    if (flareClass.startsWith('X')) s = 'c-alert';
-                    else if (flareClass.startsWith('M')) s = 'c-mod';
-                    else if (flareClass.startsWith('C') && parseFloat(flareClass.substring(1)) >= 7) s = 'c-warn';
-                    else if (flareClass.startsWith('C')) s = 'c-norm'; // C-class is green/normal
-                    
-                    el.innerText = flareClass;
+                    let arrowHtml = '';
+                    if(diff !== 0 && !isNaN(diff)) {
+                        let tColor = diff > 0 ? 'var(--red)' : 'var(--green)';
+                        let symbol = diff > 0 ? '▲' : '▼';
+                        arrowHtml = `<span class="trend" style="color:${tColor}">${symbol}</span>`;
+                    }
+                    el.innerHTML = val + arrowHtml;
                     if (box) box.className = 'box ' + s;
                     return;
                 }
@@ -282,7 +259,7 @@
             } catch(e){}
         }
 
-        // --- 3. DATA ENGINE (V64 Logic + Fallback) ---
+        // --- 3. DATA ENGINE ---
         async function fetchJSON(url) {
             try {
                 const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
@@ -303,7 +280,7 @@
         async function updateAll() {
             log('Syncing Data...');
             
-            // SFI
+            // 1. SFI
             let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -324,7 +301,7 @@
                 }
             }
 
-            // Solar Wind (MAG + PLASMA)
+            // 2. Solar Wind (MAG + PLASMA)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
             let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
@@ -370,20 +347,15 @@
                  }
             }
 
-            // 4. X-Ray Flare Class (NEW)
-            let xRay = await fetchJSON('https://services.swpc.noaa.gov/products/goes-xray-flux-5-minute.json');
-            if (xRay && xRay.length > 2) {
-                let latestFlux = parseFloat(xRay[xRay.length-1][1]);
-                let classification = "A0.0";
-
-                // Standard NOAA flare classification (simplified based on latest flux)
-                if (latestFlux >= 1e-4) classification = 'X' + (latestFlux * 1e4).toFixed(1);
-                else if (latestFlux >= 1e-5) classification = 'M' + (latestFlux * 1e5).toFixed(1);
-                else if (latestFlux >= 1e-6) classification = 'C' + (latestFlux * 1e6).toFixed(1);
-                else if (latestFlux >= 1e-7) classification = 'B' + (latestFlux * 1e7).toFixed(1);
-                else classification = 'A' + (latestFlux * 1e8).toFixed(1);
-                
-                set('flare', classification);
+            // 4. Proton Flux (NEW)
+            let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
+            if(proton && proton.length > 2) {
+                let l = proton[proton.length-1], p = proton[proton.length-2];
+                let pfuVal = parseFloat(l[1]) || 0;
+                let pfuPrev = parseFloat(p[1]) || 0;
+                set('proton', pfuVal.toFixed(2), pfuVal - pfuPrev);
+            } else {
+                set('proton', 0.00); // Fail-safe to 0.00 if fetch failed
             }
 
             // 5. Kp & Dst
@@ -412,12 +384,11 @@
             log('Active');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            setInterval(updateClock, 1000);
-            updateClock();
+        window.onload = function() {
+            startClock();
             updateAll();
             setInterval(updateAll, 60000);
-        });
+        };
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V120.0 (Visible Counter)</title>
+    <title>IonosTek Monitor V120.0 (Final Global)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* --- CSS V120.0 --- */
@@ -23,10 +23,8 @@
         .blink-colon { animation: blinker 1s infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
         
-        /* Status & Counter Display */
-        .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; display: flex; align-items: center; }
+        .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; }
         .dot-blink { animation: fade 2s infinite; color: var(--green); }
-        .local-counter { color:#666; margin-left: 15px; font-size:0.9em; }
 
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
@@ -86,7 +84,6 @@
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
             <div class="sys-active">
                 <span class="dot-blink">●</span> System Active
-                <span id="local-counter" class="local-counter">Visits: --</span> 
             </div>
         </div>
         <div class="clock-box">
@@ -150,7 +147,7 @@
             <span id="local-counter">Visits: --</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V119.0 • Final Integration</span>
+        <span style="color:#666;">V117.0 • Local Data</span>
     </div>
 
     <script>

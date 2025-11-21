@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V112.0 (GOES-R Protocol)</title>
+    <title>IonosTek Monitor V113.0 (Proton Protocol)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V112.0 --- */
+        /* --- CSS V113.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -25,7 +25,6 @@
         
         .sys-active { color:#aaa; font-size:0.9em; margin-top:5px; }
         .dot-blink { animation: fade 2s infinite; color: var(--green); }
-        @keyframes fade { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
         .btn-guide { background: transparent; border: 1px solid var(--blue); color: var(--blue); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75em; margin-top: 5px; transition: 0.3s; }
         .btn-guide:hover { background: var(--blue); color: #fff; }
@@ -37,7 +36,6 @@
         .lbl { font-size: 0.8em; font-weight: 600; color: #888; text-transform: uppercase; }
         .unit { font-size: 0.7em; color: #666; display: block; margin-top: -5px; }
         
-        /* Arrows */
         .trend { font-size: 0.5em; font-weight: 900; display: inline-block; margin-left: 5px; animation: arrow-bounce 2s infinite; position: relative; top: -0.15em; }
         @keyframes arrow-bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         .status-arrow-main { font-size: 1.2em; font-weight: 900; margin-right: 8px; display: inline-block; position: relative; top: -0.05em; }
@@ -80,7 +78,7 @@
         }
     </style>
 </head>
-<body onload="startClock(); appStart();">
+<body onload="startClock(); updateAll();">
     <div class="header">
         <div>
             <h1>IONOSTEK <span style="color:#fff">MONITOR</span></h1>
@@ -147,7 +145,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V110.0 • Final Stability</span>
+        <span style="color:#666;">V113.0 • Proton Protocol</span>
     </div>
 
     <script>
@@ -177,7 +175,6 @@
                 let box = document.getElementById('b-'+id);
                 if(!el) return;
                 
-                // If value is NaN/null, reset the box and skip further logic for safety
                 if(val === undefined || val === null || isNaN(parseFloat(val))) {
                     el.innerText = "--";
                     if(box) box.className = 'box'; 
@@ -303,14 +300,13 @@
                 }
             }
 
-            // 2. Solar Wind (MAG + PLASMA) - Using text fallback logic
+            // 2. Solar Wind (MAG + PLASMA)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
-            
             let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
             if(!plas) plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-6-hour.json');
 
-            // MAG Data processing
+            // MAG Data processing (JSON/Text Fallback)
             if(mag && mag.length > 2) {
                 let l = mag[mag.length-1], p = mag[mag.length-2];
                 set('bz', l[3], parseFloat(l[3]) - parseFloat(p[3])); 
@@ -350,17 +346,22 @@
                  }
             }
 
-            // 3. Proton Flux
-            let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
-            if(proton && proton.length > 2) {
-                let l = proton[proton.length-1], p = proton[proton.length-2];
-                set('proton', l[1], parseFloat(l[1]) - parseFloat(p[1]));
-            } else {
-                // If JSON fails, the box remains '--'. This is the current issue.
-                console.log('Proton fetch failed via JSON/Proxy.');
+            // 4. Proton Flux (NEW - Text Protocol)
+            let protonTxt = await fetchText('https://services.swpc.noaa.gov/text/goes-r-proton-flux-1-minute.txt');
+            if(protonTxt) {
+                let lines = protonTxt.trim().split('\n').filter(l => l.length > 10 && !l.startsWith('#') && !l.startsWith(':'));
+                if(lines.length > 1) {
+                    let curr = lines[lines.length-1].trim().split(/\s+/);
+                    let prev = lines[lines.length-2].trim().split(/\s+/);
+                    if(curr.length >= 6) { // Index 5 is 10 MeV pfu
+                        let cPfu = parseFloat(curr[5]);
+                        let pPfu = parseFloat(prev[5]);
+                        set('proton', cPfu.toFixed(2), cPfu - pPfu);
+                    }
+                }
             }
-            
-            // 4. Kp & Dst
+
+            // 5. Kp & Dst
             let kp = await fetchJSON('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json');
             if(kp && kp.length > 2) {
                 let l = kp[kp.length-1], p = kp[kp.length-2];
@@ -386,7 +387,6 @@
             log('Active');
         }
 
-        // --- MAIN START ---
         window.onload = function() {
             startClock();
             updateAll();

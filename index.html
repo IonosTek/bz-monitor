@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V115.0 (Final Feature Set)</title>
+    <title>IonosTek Monitor V116.0 (Flare Class)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V115.0 --- */
+        /* --- CSS V116.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -53,6 +53,7 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
+        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 600px; border: 1px solid #444; position: relative; }
         .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
@@ -77,6 +78,20 @@
             .clock-box { text-align: center; }
         }
     </style>
+    <script>
+        function updateClock() {
+            try {
+                const d = new Date();
+                if(document.getElementById('u-h')) {
+                    document.getElementById('u-h').innerText = d.getUTCHours().toString().padStart(2,'0');
+                    document.getElementById('u-m').innerText = d.getUTCMinutes().toString().padStart(2,'0');
+                    const lH = d.getHours().toString().padStart(2,'0');
+                    const lM = d.getMinutes().toString().padStart(2,'0');
+                    document.getElementById('local-clock').innerText = `${lH}:${lM} Local`;
+                }
+            } catch(e){}
+        }
+    </script>
 </head>
 <body onload="startClock(); updateAll();">
     <div class="header">
@@ -87,7 +102,7 @@
         <div class="clock-box">
             <div class="utc-time"><span id="u-h">00</span><span class="blink-colon">:</span><span id="u-m">00</span> UTC</div>
             <div class="local-time" id="local-clock">--:-- Local</div>
-            <button onclick="document.getElementById('guideModal').style.display='flex'" class="btn-guide">📘 OPERATOR GUIDE</button>
+            <button onclick="document.getElementById('guideModal').style.display='false'" class="btn-guide">📘 OPERATOR GUIDE</button>
         </div>
     </div>
 
@@ -101,7 +116,7 @@
         <div class="box" id="b-bt"><div class="lbl">Bt</div><div class="val" id="v-bt">--</div><span class="unit">nT</span></div>
         <div class="box" id="b-wind"><div class="lbl">Wind</div><div class="val" id="v-wind">--</div><span class="unit">km/s</span></div>
         <div class="box" id="b-den"><div class="lbl">Density</div><div class="val" id="v-den">--</div><span class="unit">p/cm³</span></div>
-        <div class="box" id="b-proton"><div class="lbl">Proton</div><div class="val" id="v-proton">--</div><span class="unit">pfu</span></div>
+        <div class="box" id="b-flare"><div class="lbl">Flare</div><div class="val" id="v-flare">--</div><span class="unit">Class</span></div>
     </div>
 
     <div class="hf-banner">
@@ -145,7 +160,7 @@
             <span id="fetch-log">System Ready</span>
             <button class="btn-retry" onclick="updateAll()">REFRESH</button>
         </div>
-        <span style="color:#666;">V115.0 • Final Feature Set</span>
+        <span style="color:#666;">V116.0 • Flare Class</span>
     </div>
 
     <script>
@@ -176,7 +191,7 @@
                 if(!el) return;
                 
                 // If value is NaN/null, reset the box and skip further logic for safety
-                if(val === undefined || val === null || isNaN(parseFloat(val))) {
+                if(val === undefined || val === null || (id !== 'flare' && isNaN(parseFloat(val)))) {
                     el.innerText = "--";
                     if(box) box.className = 'box'; 
                     return; 
@@ -218,7 +233,7 @@
                     return;
                 }
                 
-                // Proton Logic (S-Scale)
+                // Proton Logic (Removed in V116.0, keeping logic as placeholder)
                 if (id === 'proton') {
                     let pfu = parseFloat(val);
                     let s = 'c-norm';
@@ -226,13 +241,21 @@
                     else if (pfu >= 100) s = 'c-mod';
                     else if (pfu >= 10) s = 'c-warn';
                     
-                    let arrowHtml = '';
-                    if(diff !== 0 && !isNaN(diff)) {
-                        let tColor = diff > 0 ? 'var(--red)' : 'var(--green)';
-                        let symbol = diff > 0 ? '▲' : '▼';
-                        arrowHtml = `<span class="trend" style="color:${tColor}">${symbol}</span>`;
-                    }
-                    el.innerHTML = val + arrowHtml;
+                    el.innerHTML = val;
+                    if (box) box.className = 'box ' + s;
+                    return;
+                }
+                
+                // Flare Logic (NEW)
+                if (id === 'flare') {
+                    let flareClass = val.toUpperCase();
+                    let s = 'c-norm'; // A/B class default
+                    if (flareClass.startsWith('X')) s = 'c-alert';
+                    else if (flareClass.startsWith('M')) s = 'c-mod';
+                    else if (flareClass.startsWith('C') && parseFloat(flareClass.substring(1)) >= 7) s = 'c-warn';
+                    else if (flareClass.startsWith('C')) s = 'c-norm'; // C-class is green/normal
+                    
+                    el.innerText = flareClass;
                     if (box) box.className = 'box ' + s;
                     return;
                 }
@@ -262,7 +285,6 @@
         // --- 3. DATA ENGINE (V64 Logic + Fallback) ---
         async function fetchJSON(url) {
             try {
-                // Using corsproxy for maximum compatibility
                 const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url + '?t=' + Date.now()));
                 if(r.ok) return await r.json();
             } catch(e){}
@@ -270,7 +292,6 @@
         }
 
         async function fetchText(url) {
-            // Using allorigins as fallback proxy for text data
             let target = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url + '?t=' + Date.now());
             try {
                 let r = await fetch(target);
@@ -282,7 +303,7 @@
         async function updateAll() {
             log('Syncing Data...');
             
-            // 1. SFI
+            // SFI
             let sfiTxt = await fetchText('https://services.swpc.noaa.gov/text/daily-solar-indices.txt');
             if(sfiTxt) {
                 let lines = sfiTxt.trim().split('\n');
@@ -303,7 +324,7 @@
                 }
             }
 
-            // 2. Solar Wind (MAG + PLASMA)
+            // Solar Wind (MAG + PLASMA)
             let mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-2-hour.json');
             if(!mag) mag = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/mag-6-hour.json');
             let plas = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/plasma-2-hour.json');
@@ -349,16 +370,20 @@
                  }
             }
 
-            // 4. Proton Flux 
-            let proton = await fetchJSON('https://services.swpc.noaa.gov/products/solar-wind/goes-proton-flux-5-minute.json');
-            if(proton && proton.length > 2) {
-                let l = proton[proton.length-1], p = proton[proton.length-2];
-                let pfuVal = parseFloat(l[1]) || 0;
-                let pfuPrev = parseFloat(p[1]) || 0;
-                set('proton', pfuVal.toFixed(2), pfuVal - pfuPrev);
-            } else {
-                set('proton', 0.00); // Fail-safe: Set to 0.00 if fetch failed
-                console.log('Proton fetch failed via JSON/Proxy. Set to 0.00.');
+            // 4. X-Ray Flare Class (NEW)
+            let xRay = await fetchJSON('https://services.swpc.noaa.gov/products/goes-xray-flux-5-minute.json');
+            if (xRay && xRay.length > 2) {
+                let latestFlux = parseFloat(xRay[xRay.length-1][1]);
+                let classification = "A0.0";
+
+                // Standard NOAA flare classification (simplified based on latest flux)
+                if (latestFlux >= 1e-4) classification = 'X' + (latestFlux * 1e4).toFixed(1);
+                else if (latestFlux >= 1e-5) classification = 'M' + (latestFlux * 1e5).toFixed(1);
+                else if (latestFlux >= 1e-6) classification = 'C' + (latestFlux * 1e6).toFixed(1);
+                else if (latestFlux >= 1e-7) classification = 'B' + (latestFlux * 1e7).toFixed(1);
+                else classification = 'A' + (latestFlux * 1e8).toFixed(1);
+                
+                set('flare', classification);
             }
 
             // 5. Kp & Dst
@@ -387,12 +412,12 @@
             log('Active');
         }
 
-        window.onload = function() {
-            startClock();
+        document.addEventListener('DOMContentLoaded', () => {
+            setInterval(updateClock, 1000);
+            updateClock();
             updateAll();
-            setInterval(updateAll, 60000); // Update data every 60 seconds
-            setInterval(() => { document.querySelectorAll('.c-body img').forEach(i => i.src=i.src.split('?')[0]+'?t='+Date.now())}, 300000); // Update images every 5 minutes
-        };
+            setInterval(updateAll, 60000);
+        });
     </script>
 </body>
 </html>

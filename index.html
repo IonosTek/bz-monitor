@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IonosTek Monitor V118.0 (Stable Functional Core)</title>
+    <title>IonosTek Monitor V119.0 (Ultimate Final)</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS V118.0 --- */
+        /* --- CSS V119.0 --- */
         :root { 
             --bg: #0b0b0b; --card: #161616; --text: #f0f0f0; 
             --green: #00e676; --yellow: #ffea00; --orange: #ff9100; 
@@ -53,7 +53,6 @@
         .c-body { background: #000; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .c-body img { width: 100%; height: 100%; object-fit: contain; cursor: pointer; transition: opacity 0.3s; }
 
-        /* Modal */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; align-items: center; justify-content: center; }
         .m-content { background: var(--card); padding: 30px; border-radius: 10px; max-width: 600px; border: 1px solid #444; position: relative; }
         .close { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #fff; }
@@ -88,7 +87,7 @@
         <div class="clock-box">
             <div class="utc-time"><span id="u-h">00</span><span class="blink-colon">:</span><span id="u-m">00</span> UTC</div>
             <div class="local-time" id="local-clock">--:-- Local</div>
-            <button onclick="document.getElementById('guideModal').style.display='false'" class="btn-guide">📘 OPERATOR GUIDE</button>
+            <button onclick="document.getElementById('guideModal').style.display='flex'" class="btn-guide">📘 OPERATOR GUIDE</button>
         </div>
     </div>
 
@@ -385,7 +384,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            setInterval(updateClock, 1000);
+            startClock();
             updateAll();
             setInterval(updateAll, 60000);
         });
